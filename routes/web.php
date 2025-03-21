@@ -20,3 +20,7 @@ Route::get('/', function () {
 Route::get('/registro-usuario', function () {
     return view('admin.usuarios.register');
 });
+
+Route::get('/registro-homo', function () {
+    return view('homologaciones.registro');
+});
