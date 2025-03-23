@@ -24,3 +24,15 @@ Route::get('/registro-usuario', function () {
 Route::get('/registro-homo', function () {
     return view('homologaciones.registro');
 });
+
+Route::get('/visuali', function () {
+    return view('homologaciones.visualizacion');
+});
+
+Route::get('/infor', function () {
+    return view('homologaciones.info');
+});
+
+Route::get('/princi', function () {
+    return view('homologaciones.principal');
+});
