@@ -750,8 +750,7 @@
     </button>
 </div>
 
-    <!-- Interactive Features Section -->
-    <div class="container">
+<div class="container">
         <div class="interactive-section">
             <div class="row w-100">
                 <div class="col-md-4">
@@ -763,7 +762,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card text-center" data-bs-toggle="modal" data-bs-target="#infoModal">
+                    <div class="feature-card text-center" data-bs-toggle="modal" data-bs-target="#miInformacionModal">
                         <i class="bi bi-person-vcard feature-icon"></i>
                         <h5>Mi información</h5>
                         <p>Revisa y actualiza tus datos personales y académicos</p>
@@ -793,87 +792,179 @@
             <span class="badge bg-info custom-badge">Proyección social</span>
         </div>
     </div>
-    
-    <!-- Homologation Process Modal (Expanded) -->
-    <div class="modal fade" id="infoModal">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-person-vcard me-2"></i>
-                    Información general
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="profile-info">
-                    <h3 class="profile-header">
-                        <i class="bi bi-person-fill me-2"></i>
-                        Información del estudiante
-                    </h3>
-                    <div class="row">
+
+    <!-- Homologación Modal -->
+    <div class="modal fade" id="homologacionModal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-clipboard-check me-2"></i>
+                        Proceso de homologación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="row mb-2">
-                                <div class="col-5 label">Nombres y apellidos:</div>
-                                <div class="col-7">Carlos Andrés Pérez Rodríguez</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Cédula:</div>
-                                <div class="col-7">1087654321</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Teléfono:</div>
-                                <div class="col-7">3201234567</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Correo:</div>
-                                <div class="col-7">caperez@uniautonoma.edu.co</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Dirección:</div>
-                                <div class="col-7">Calle 5 #15-45, Popayán</div>
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Información general</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="radicado-number">
+                                        <i class="bi bi-file-earmark-text me-2"></i>
+                                        No. Radicado: HOM-2025-7733
+                                    </div>
+                                    <p><strong>Estudiante:</strong> Carlos Andrés Pérez Rodríguez</p>
+                                    <p><strong>Programa:</strong> Ingeniería de Software</p>
+                                    <p><strong>Fecha de solicitud:</strong> 15/02/2025</p>
+                                    <p><strong>Última actualización:</strong> 28/02/2025</p>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="row mb-2">
-                                <div class="col-5 label">Programa:</div>
-                                <div class="col-7">Ingeniería de Software</div>
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Estado actual</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-success">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        Su solicitud de homologación ha sido aprobada. A continuación puede ver el detalle del proceso.
+                                    </div>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100% Completado</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Semestre:</div>
-                                <div class="col-7">3</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Estado:</div>
-                                <div class="col-7"><span class="badge bg-success">Activo</span></div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Promedio:</div>
-                                <div class="col-7">4.2</div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-5 label">Créditos aprobados:</div>
-                                <div class="col-7">52 de 160</div>
+                        </div>
+                    </div>
+                    
+                    <div class="step-progress mb-4">
+                        <div class="step accepted">
+                            <i class="bi bi-file-earmark-text me-1"></i>
+                            Radicación
+                        </div>
+                        <div class="step accepted">
+                            <i class="bi bi-search me-1"></i>
+                            Revisión
+                        </div>
+                        <div class="step accepted">
+                            <i class="bi bi-clipboard-check me-1"></i>
+                            Evaluación
+                        </div>
+                        <div class="step accepted">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Aprobación
+                        </div>
+                    </div>
+                    
+                    <ul class="nav nav-tabs" id="homologacionTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline" aria-selected="true">
+                                <i class="bi bi-clock-history me-1"></i>
+                                Historial del proceso
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab" aria-controls="subjects" aria-selected="false">
+                                <i class="bi bi-journal-check me-1"></i>
+                                Asignaturas homologadas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="false">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>
+                                Documentos
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-3" id="homologacionTabContent">
+                        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+                            <div class="timeline">
+                                <div class="timeline-container left">
+                                    <div class="timeline-content">
+                                        <h5>Radicación de solicitud</h5>
+                                        <p class="text-muted">15/02/2025 - 10:30 AM</p>
+                                        <p>Se ha registrado correctamente su solicitud de homologación para el programa de Ingeniería de Software.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-container right">
+                                    <div class="timeline-content">
+                                        <h5>Verificación de documentos</h5>
+                                        <p class="text-muted">18/02/2025 - 09:15 AM</p>
+                                        <p>Los documentos presentados han sido verificados y cumplen con los requisitos establecidos.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-container left">
+                                    <div class="timeline-content">
+                                        <h5>Evaluación académica</h5>
+                                        <p class="text-muted">22/02/2025 - 03:40 PM</p>
+                                        <p>El comité académico ha evaluado las asignaturas solicitadas para homologación.</p>
+                                    </div>
+                                </div>
+                                <div class="timeline-container right">
+                                    <div class="timeline-content">
+                                        <h5>Aprobación de homologación</h5>
+                                        <p class="text-muted">28/02/2025 - 11:20 AM</p>
+                                        <p>Su solicitud de homologación ha sido aprobada. En la sección de asignaturas homologadas puede ver el detalle.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                    Editar información
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-    <!-- Primera Homologación Modal -->
-    <div class="modal fade" id="primeraHomologacionModal">
+
+    <!-- Mi Información Modal -->
+    <div class="modal fade" id="miInformacionModal" tabindex="-1" aria-labelledby="miInformacionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
+                    <h5 class="modal-title" id="miInformacionModalLabel">
+                        <i class="bi bi-person-vcard me-2"></i>
+                        Mi información
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nombres y apellidos:</strong> Carlos Andrés Pérez Rodríguez</p>
+                            <p><strong>Cédula:</strong> 1087654321</p>
+                            <p><strong>Teléfono:</strong> 3201234567</p>
+                            <p><strong>Correo:</strong> caperez@uniautonoma.edu.co</p>
+                            <p><strong>Dirección:</strong> Calle 5 #15-45, Popayán</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Programa:</strong> Ingeniería de Software</p>
+                            <p><strong>Semestre:</strong> 3</p>
+                            <p><strong>Estado:</strong> <span class="badge bg-success">Activo</span></p>
+                            <p><strong>Promedio:</strong> 4.2</p>
+                            <p><strong>Créditos aprobados:</strong> 52 de 160</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Primera Homologación Modal -->
+    <div class="modal fade" id="primeraHomologacionModal" tabindex="-1" aria-labelledby="primeraHomologacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="primeraHomologacionModalLabel">
                         <i class="bi bi-eye me-2"></i>
                         Primera homologación
                     </h5>
@@ -884,12 +975,10 @@
                         <i class="bi bi-info-circle-fill me-2"></i>
                         La primera homologación fue realizada el 15/01/2024 para su ingreso al programa de Ingeniería de Software.
                     </div>
-                    
                     <div class="radicado-number mb-3">
                         <i class="bi bi-file-earmark-text me-2"></i>
                         No. Radicado: HOM-2024-3452
                     </div>
-                    
                     <div class="table-responsive">
                         <table class="table table-striped table-hover">
                             <thead class="table-primary">
@@ -939,13 +1028,13 @@
                         Total de créditos homologados: <strong>9</strong>
                     </div>
                 </div>
-                
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- JS Script -->
     <script>
         // Función para mostrar notificaciones
