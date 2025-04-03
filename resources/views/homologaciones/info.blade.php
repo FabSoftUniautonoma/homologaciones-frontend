@@ -504,34 +504,34 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <img src="quimerito.png" alt="Logo" />
+                <img src="{{ asset('imagenes/quimeritocuerpocompleto.png') }}" alt="Logo">
             </div>
         </div>
-        
+
         <div class="form-container">
             <h2 class="form-
 
         <div class="form-container">
             <h2 class="form-title">Homologaciones Uniautonoma</h2>
-            
+
             <!-- Mensaje de error (oculto por defecto) -->
             <div id="errorMessage" class="error-message">
                 <i class="fas fa-exclamation-circle"></i> Verifica los datos ingresados e intenta nuevamente.
             </div>
-            
+
             <form id="registroForm">
                 <div class="input-group">
                     <label for="email">Correo electrónico:</label>
                     <input type="email" id="email" placeholder="Ingrese su correo" required>
                     <i class="fas fa-envelope input-icon"></i>
                 </div>
-                
+
                 <div class="input-group">
                     <label for="confirmEmail">Confirmación de correo:</label>
                     <input type="email" id="confirmEmail" placeholder="Confirme su correo" required>
                     <i class="fas fa-envelope-open input-icon"></i>
                 </div>
-                
+
                 <div class="input-group">
                     <label for="tipoDocumento">Tipo de documento:</label>
                     <select id="tipoDocumento" required>
@@ -542,15 +542,15 @@
                     </select>
                     <i class="fas fa-id-card input-icon"></i>
                 </div>
-                
+
                 <div class="input-group">
                     <label for="numeroDocumento">Número de documento:</label>
-                    <input 
-                        type="text" 
-                        id="numeroDocumento" 
+                    <input
+                        type="text"
+                        id="numeroDocumento"
                         name="numeroDocumento"
-                        placeholder="Ingrese su número de documento" 
-                        pattern="[0-9]{5,}" 
+                        placeholder="Ingrese su número de documento"
+                        pattern="[0-9]{5,}"
                         title="Solo números, mínimo 5 dígitos"
                         inputmode="numeric"
                         required>
@@ -560,21 +560,21 @@
                 <div class="recaptcha-container mb-3">
                     <div class="g-recaptcha" data-sitekey="6Lcqj-cqAAAAAEwiItxDZJqnze8re8ej45zYdM_z"></div>
                 </div>
-                
+
                 <button type="submit" class="registro-btn">
                     <i class="fas fa-user-plus"></i> Guardar solicitud
                 </button>
             </form>
             <div class="help-links">
                 <a href="#" id="ayudaLink"><i class="fas fa-question-circle"></i>Información</a>
-            
+
         </div>
         <div class="help-links">
             <a href="#" id="ayudaLink">
                 <i class="fas fa-sign-in-alt"></i> Iniciar sesión
             </a>
         </div>
-        
+
         <script>
             document.getElementById("ayudaLink").addEventListener("click", function(event) {
                 event.preventDefault(); // Evita que el enlace se comporte como uno normal
@@ -582,8 +582,8 @@
               });
         </script>
 
-        
-        
+
+
         <div class="footer">
             © 2025 UNIAUTÓNOMA DEL CAUCA - Todos los derechos reservados
         </div>
@@ -597,18 +597,18 @@
             const errorMessage = document.getElementById('errorMessage');
             const ayudaLink = document.getElementById('ayudaLink');
             const contactoLink = document.getElementById('contactoLink');
-            
+
             // Validar el formulario antes de enviar
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 // Validar que los correos coincidan
                 if (email.value !== confirmEmail.value) {
                     errorMessage.style.display = 'block';
                     errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Los correos electrónicos no coinciden.';
                     return;
                 }
-                
+
                 // Validar el formato del correo
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email.value)) {
@@ -616,7 +616,7 @@
                     errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> El formato del correo electrónico no es válido.';
                     return;
                 }
-                
+
                 // Validar que se haya seleccionado un tipo de documento
                 const tipoDocumento = document.getElementById('tipoDocumento');
                 if (tipoDocumento.value === "") {
@@ -624,7 +624,7 @@
                     errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Debe seleccionar un tipo de documento.';
                     return;
                 }
-                
+
                 // Validar que el número de documento tenga al menos 5 caracteres
                 const numeroDocumento = document.getElementById('numeroDocumento');
                 if (numeroDocumento.value.length < 5) {
@@ -632,7 +632,7 @@
                     errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> El número de documento debe tener al menos 5 caracteres.';
                     return;
                 }
-                
+
                 // Validar reCAPTCHA
                 const recaptchaResponse = grecaptcha.getResponse();
                 if (recaptchaResponse.length === 0) {
@@ -640,7 +640,7 @@
                     errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Por favor, complete el reCAPTCHA.';
                     return;
                 }
-                
+
                 // Si todo está correcto, mostrar mensaje de éxito
                 Swal.fire({
                     title: 'Registro Exitoso',
@@ -655,7 +655,7 @@
                     errorMessage.style.display = 'none';
                 });
             });
-            
+
             // Ocultar mensaje de error cuando se modifica algún campo
             const inputs = form.querySelectorAll('input, select');
             inputs.forEach(input => {
@@ -663,7 +663,7 @@
                     errorMessage.style.display = 'none';
                 });
             });
-            
+
             // Enlaces de ayuda
             ayudaLink.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -675,7 +675,7 @@
                             <p>1. Complete este formulario con sus datos.</p>
                             <p>2. Recibirá un correo con instrucciones para subir sus documentos.</p>
                             <p>3. La universidad evaluará su solicitud y le notificará el resultado.</p>
-                      
+
                         </div>
                     `,
                     icon: 'info',
@@ -683,10 +683,10 @@
                     confirmButtonColor: '#0075bf'
                 });
             });
-            
-         
-                
-            
+
+
+
+
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

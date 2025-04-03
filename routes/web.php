@@ -1,7 +1,5 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,27 +10,29 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
 Route::get('/', function () {
     return view('welcome');
 });
-
 Route::get('/registro-usuario', function () {
     return view('admin.usuarios.register');
 });
-
-Route::get('/registro-homo', function () {
+Route::get('/homologaciones/registro', function () {
     return view('homologaciones.registro');
 });
-
-Route::get('/visuali', function () {
+Route::get('/homologaciones/visualizacion', function () {
     return view('homologaciones.visualizacion');
 });
-
-Route::get('/infor', function () {
+Route::get('/homologaciones/informacion', function () {
     return view('homologaciones.info');
 });
-
-Route::get('/princi', function () {
+Route::get('/homologaciones/principal', function () {
     return view('homologaciones.principal');
+});
+
+Route::get('/admin', function () {
+    return view('admin.usuarios.register');
+});
+
+Route::get('/nuevo', function () {
+    return view('admin.homologaciones.nuevo');
 });

@@ -69,7 +69,7 @@
 
                 <a href="" class="logo">
                     <div class="avatar-sm mr-4 ">
-                        <img src="{{ asset('img/banner.svg') }}" class="navbar-brand" height="40">
+                        <img src="{{ asset('img/quimecara.png') }}" class="navbar-brand" height="40">
                     </div>
                 </a>
                 <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse"
