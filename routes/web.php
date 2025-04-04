@@ -1,5 +1,8 @@
 <?php
 use Illuminate\Support\Facades\Route;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -33,6 +36,6 @@ Route::get('/admin', function () {
     return view('admin.usuarios.register');
 });
 
-Route::get('/nuevo', function () {
-    return view('admin.homologaciones.nuevo');
+Route::get('/coordinador', function (): Factory|View {
+    return view('admin.homologaciones.coordinador');
 });
