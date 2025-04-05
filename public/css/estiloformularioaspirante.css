@@ -1,0 +1,1825 @@
+
+:root {
+    --azul-oscuro: #19407b;
+    --azul-medio: #0075bf;
+    --azul-claro: #08dcff;
+    --blanco: #ffffff;
+    --gris-claro: #f4f4f4;
+    --gris-medio: #e0e0e0;
+    --borde: #dddddd;
+    --sombra: rgba(0, 0, 0, 0.1);
+    --negro-transparente:#0075bf;
+    --rojo-error: #ff4d4d;
+    --rojo-hover: #c0392b;
+    --verde-exito: #4CAF50;
+    --font-primary: 'Roboto', Arial, sans-serif;
+    --transition-default: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-primary);
+}
+
+body {
+    background-color: var(--gris-claro);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    min-width: 320px;
+    transition: background-color 0.5s ease;
+}
+
+/* Header y contenedor principal con animación al cargar */
+header,
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 2vh auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px var(--sombra);
+    padding: 20px;
+    text-align: center;
+    animation: slideDown 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+header {
+    animation-delay: 0s;
+}
+
+.container {
+    animation-delay: 0.2s;
+}
+
+@keyframes slideDown {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Títulos con espaciado optimizado */
+h1 {
+    font-size: 28px;
+    margin-bottom: 5px;  /* Reducido para acercar verticalmente */
+    transition: var(--transition-default);
+}
+
+h2 {
+    color: var(--azul-medio);
+    margin-bottom: 15px;  /* Reducido para acercar verticalmente */
+    font-size: 22px;
+    transition: var(--transition-default);
+}
+
+/* Hover en títulos */
+h1:hover, h2:hover {
+    transform: translateY(-2px);
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Barra de progreso mejorada */
+.progress-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    position: relative;
+}
+
+.step-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.step-progress::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: var(--gris-medio);
+    z-index: 1;
+    transform: translateY(-50%);
+    transition: height 0.3s ease;
+}
+
+.step-progress:hover::before {
+    height: 6px;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 4px;
+    background-color: var(--azul-medio);
+    z-index: 2;
+    transform: translateY(-50%);
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1), height 0.3s ease;
+    box-shadow: 0 0 10px rgba(8, 220, 255, 0.5);
+}
+
+.step-progress:hover .progress-bar {
+    height: 6px;
+}
+
+.step {
+    width: 18%;
+    text-align: center;
+    z-index: 3;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.step:hover {
+    transform: translateY(-5px);
+}
+
+/* Icono mejorado */
+.step-icon {
+    width: 50px;
+    height: 50px;
+    background-color: var(--blanco);
+    border: 3px solid var(--gris-medio);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--azul-medio);
+    margin: 0 auto 10px;
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+.step-icon::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(8, 220, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.step:hover .step-icon::before {
+    opacity: 1;
+    animation: pulse-light 2s infinite;
+}
+
+/* Estilos para el icono cuando el paso está activo */
+.step.active .step-icon {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    background-color: var(--azul-oscuro);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.5s ease;
+    color: var(--blanco);
+    animation: pulse 3s infinite;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0, 117, 191, 0.6);
+}
+
+/* Estilos para el icono cuando el paso está completado */
+.step.completed .step-icon {
+    border-color: var(--verde-exito);
+    background-color: var(--blanco);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.step.completed .step-icon::after {
+    content: '✓';
+    position: absolute;
+    color: var(--verde-exito);
+    font-size: 24px;
+    animation: fadeInCheck 0.5s forwards;
+}
+
+@keyframes fadeInCheck {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* TITULO DE STEP CUANDO ESTA INACTIVO */
+.step-title {
+    font-size: 14px;
+    color: var(--azul-oscuro);
+    font-weight: 500;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+/* TITULO DE CADA STEP CUANDO ESTA ACTIVO */
+.step.active .step-title {
+    color: var(--azul-medio);
+    font-weight: 700;
+    transform: scale(1.05);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.step-content {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.step-content.active {
+    display: block;
+    animation: slideUp 0.6s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tamaño del icono mejorado */
+.step-icon i {
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.step:hover .step-icon i {
+    transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 117, 191, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(0, 117, 191, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 117, 191, 0);
+    }
+}
+
+@keyframes pulse-light {
+    0% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 0.2;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+/* Formularios más interactivos */
+.form-group {
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.form-group:focus-within {
+    transform: translateY(-3px);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--azul-oscuro);
+    transition: all 0.3s ease;
+}
+
+.form-group:focus-within label {
+    color: var(--azul-medio);
+    transform: translateY(-3px);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--borde);
+    border-radius: 5px;
+    background-color: var(--blanco);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="tel"]:hover,
+input[type="date"]:hover,
+select:hover,
+textarea:hover {
+    border-color: var(--azul-claro);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--azul-medio);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 117, 191, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Carga de archivos mejorada */
+.file-upload {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    border: 2px dashed var(--borde);
+    border-radius: 5px;
+    background-color: var(--gris-claro);
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+.file-upload:hover {
+    background-color: rgba(8, 220, 255, 0.1);
+    border-color: var(--azul-claro);
+    transform: translateY(-5px);
+}
+
+.file-upload::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(8, 220, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: transform 0.8s ease, opacity 0.8s ease;
+}
+
+.file-upload:hover::before {
+    opacity: 1;
+    transform: scale(1);
+    animation: rotate 10s infinite linear;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.file-upload svg {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+    color: var(--azul-medio);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.file-upload:hover svg {
+    transform: scale(1.2) translateY(-5px);
+    color: var(--azul-oscuro);
+}
+
+.file-upload p {
+    margin-bottom: 10px;
+    color: var(--azul-oscuro);
+    transition: color 0.3s ease;
+}
+
+.file-upload:hover p {
+    color: var(--azul-medio);
+}
+
+.file-upload input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Lista de archivos mejorada */
+.file-list {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: var(--blanco);
+    border-radius: 5px;
+    border-left: 4px solid var(--azul-medio);
+    box-shadow: 0 2px 5px var(--sombra);
+    transition: all 0.3s ease;
+    transform-origin: center left;
+}
+
+.file-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-left-width: 8px;
+}
+
+.file-name {
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.file-name i {
+    margin-right: 10px;
+    color: var(--azul-medio);
+    transition: transform 0.3s ease;
+}
+
+.file-item:hover .file-name i {
+    transform: scale(1.3);
+}
+
+.remove-file {
+    color: var(--rojo-error);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-file:hover {
+    background-color: rgba(255, 77, 77, 0.1);
+    transform: rotate(90deg);
+}
+
+/* Filas y columnas
+.remove-file:hover {
+    background-color: rgba(255, 77, 77, 0.1);
+    transform: rotate(90deg);
+}
+
+/* Filas y columnas con animación */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+    transition: var(--transition-default);
+}
+
+.form-row:focus-within {
+    transform: translateY(-3px);
+}
+
+.form-col {
+    flex: 1;
+    padding: 0 10px;
+    min-width: 200px;
+    transition: var(--transition-default);
+}
+
+.form-col:focus-within {
+    transform: scale(1.02);
+}
+
+/* 🔹 Estilos base para todos los botones con animaciones mejoradas */
+.btn, .prev-button, .next-button, .btn-submit, .save-button, .add-button, .submit-button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: "Roboto", Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px var(--sombra);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efecto de onda al hacer clic */
+.btn::after, .prev-button::after, .next-button::after, .btn-submit::after,
+.save-button::after, .add-button::after, .submit-button::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform .5s, opacity 1s;
+}
+
+.btn:active::after, .prev-button:active::after, .next-button:active::after,
+.btn-submit:active::after, .save-button:active::after, .add-button:active::after,
+.submit-button:active::after {
+    transform: scale(0, 0);
+    opacity: .3;
+    transition: 0s;
+}
+
+/* 🔹 Botón de retroceso */
+.prev-button {
+    background-color: var(--gris-medio);
+    color: var(--azul-oscuro);
+    border-bottom: 3px solid #b8b8b8;
+}
+
+.prev-button:hover {
+    background-color: #b8b8b8;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15);
+}
+
+.prev-button:active {
+    transform: translateY(1px) scale(0.98);
+    border-bottom-width: 1px;
+}
+
+/* 🔹 Botón de avance */
+.next-button {
+    background-color: var(--azul-medio);
+    color: var(--blanco);
+    border-bottom: 3px solid var(--azul-oscuro);
+}
+
+.next-button:hover {
+    background-color: var(--azul-oscuro);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.next-button:active {
+    transform: translateY(1px) scale(0.98);
+    border-bottom-width: 1px;
+}
+
+/* 🔹 Botón de enviar */
+.btn-submit, .submit-button {
+    background-color: var(--verde-exito);
+    color: var(--blanco);
+    border-bottom: 3px solid #3d8b40;
+}
+
+.btn-submit:hover, .submit-button:hover {
+    background-color: #3d8b40;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.btn-submit:active, .submit-button:active {
+    transform: translateY(1px) scale(0.98);
+    border-bottom-width: 1px;
+}
+
+/* 🔹 Botón Guardar */
+.save-button {
+    background: var(--azul-medio);
+    color: var(--blanco);
+    border-bottom: 3px solid var(--azul-oscuro);
+}
+
+.save-button:hover {
+    background: var(--azul-oscuro);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.save-button:active {
+    transform: translateY(1px) scale(0.98);
+    border-bottom-width: 1px;
+}
+
+/* 🔹 Botón "Agregar Materia" */
+.add-button {
+    background: var(--azul-medio);
+    color: var(--blanco);
+    border-bottom: 3px solid var(--azul-oscuro);
+}
+
+.add-button:hover {
+    background: var(--azul-oscuro);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.add-button:active {
+    transform: translateY(1px) scale(0.98);
+    border-bottom-width: 1px;
+}
+
+/* Animación de botón para todos */
+.btn:hover, .prev-button:hover, .next-button:hover, .btn-submit:hover,
+.save-button:hover, .add-button:hover, .submit-button:hover {
+    letter-spacing: 2px;
+}
+
+/* 🔹 Botón deshabilitado */
+button:disabled {
+    background: var(--gris-medio);
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* 🔹 Contenedor de botones */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    transition: all 0.5s ease;
+}
+
+.btn-container:hover {
+    gap: 25px;
+}
+
+/* Elementos de confirmación con animación */
+.confirmation-item {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: var(--gris-claro);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transform-origin: center;
+}
+
+.confirmation-item:hover {
+    transform: scale(1.01);
+    background-color: rgba(8, 220, 255, 0.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-item h3 {
+    color: var(--azul-oscuro);
+    margin-bottom: 10px;
+    font-size: 18px;
+    border-bottom: 1px solid var(--borde);
+    padding-bottom: 5px;
+    transition: color 0.3s ease;
+}
+
+.confirmation-item:hover h3 {
+    color: var(--azul-medio);
+}
+
+.confirmation-item p {
+    margin-bottom: 5px;
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.confirmation-item p:hover {
+    transform: translateX(5px);
+}
+
+.confirmation-item strong {
+    min-width: 150px;
+    display: inline-block;
+    color: var(--azul-oscuro);
+    transition: color 0.3s ease;
+}
+
+.confirmation-item:hover strong {
+    color: var(--azul-medio);
+}
+
+/* Footer mejorado */
+footer {
+    background-color: var(--azul-oscuro);
+    color: var(--blanco);
+    text-align: center;
+    padding: 20px;
+    margin-top: auto;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+footer:hover {
+    background-color: #143567;
+}
+
+footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--azul-claro), transparent);
+    animation: lightBar 5s infinite linear;
+}
+
+@keyframes lightBar {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Mensajes de error con animación */
+.error-message {
+    color: var(--rojo-error);
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+    transition: all 0.3s ease;
+    animation: slideDown 0.3s ease forwards;
+    opacity: 0;
+}
+
+.error-message.visible {
+    display: block;
+    opacity: 1;
+}
+
+input.error,
+select.error {
+    border-color: var(--rojo-error);
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    background-color: rgba(255, 77, 77, 0.05);
+    box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+    30%, 50%, 70% {
+        transform: translate3d(-3px, 0, 0);
+    }
+    40%, 60% {
+        transform: translate3d(3px, 0, 0);
+    }
+}
+
+.required-field::after {
+    content: "*";
+    color: var(--rojo-error);
+    margin-left: 4px;
+    animation: pulse 2s infinite;
+}
+
+/* Estilos específicos del header */
+header {
+    width: 90%;
+    max-width: 1000px;
+    margin: 2vh auto 1.5vh auto; /* Más pegado verticalmente */
+    text-align: center;
+    background: linear-gradient(135deg, var(--azul-oscuro) 0%, #152f59 100%);
+    color: var(--blanco);
+    padding: 15px 20px; /* Reducido vertical */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(8, 220, 255, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+header:hover::before {
+    opacity: 1;
+    animation: pulse-radial 3s infinite;
+}
+
+@keyframes pulse-radial {
+    0% {
+        opacity: 0.1;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 0.1;
+        transform: scale(0.8);
+    }
+}
+
+/* Estilos del título y subtítulo */
+header h1 {
+    font-size: 2rem;
+    margin: 0;
+    color: var(--azul-claro);
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--azul-claro);
+    transition: all 0.5s ease;
+    transform: translateX(-50%);
+}
+
+header:hover h1::after {
+    width: 70%;
+}
+
+header p {
+    font-size: 1.2rem;
+    margin: 5px 0 0 0;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+header:hover p {
+    opacity: 1;
+    transform: scale(1.03);
+}
+
+/* Contenedor principal */
+.container {
+    background-color: var(--blanco);
+    border-radius: 10px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    padding: 1.8rem; /* Reducido */
+    flex: 1;
+    transition: all 0.5s ease;
+    margin-top: 1.5vh; /* Más pegado al header */
+    border: 1px solid transparent;
+}
+
+.container:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-color: rgba(8, 220, 255, 0.3);
+}
+
+/* 📱 Diseño Responsivo: Tablets y móviles (máx. 768px) */
+@media (max-width: 768px) {
+    .container {
+        max-width: 95%;
+        padding: 1.5rem;
+    }
+
+    header {
+        max-width: 98%;
+        padding: 1rem;
+        margin-bottom: 10px; /* Más pegado */
+    }
+
+    .step-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .step-title {
+        font-size: 12px;
+    }
+
+    .btn, .prev-button, .next-button, .btn-submit, .save-button, .add-button, .submit-button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    /* Ajustes para los pasos */
+    .steps-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .step {
+        width: 100%;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+    }
+    .step-icon i {
+        font-size: 20px;
+    }
+
+}
+/* 📱 Diseño Responsivo: Móviles pequeños (máx. 480px) */
+@media (max-width: 480px) {
+    .container {
+        max-width: 98%;
+        padding: 1rem;
+        margin-top: 1vh;
+    }
+
+    header {
+        width: 98%;
+        padding: 0.8rem;
+        margin-bottom: 8px;
+    }
+
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    header p {
+        font-size: 0.8rem;
+    }
+
+    .progress-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .step {
+        width: auto;
+        margin-bottom: 15px;
+    }
+
+    .step-progress::before {
+        display: none;
+    }
+
+    .progress-bar {
+        height: 0;
+        width: 0;
+    }
+
+    .btn-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn, .prev-button, .next-button, .btn-submit, .save-button, .add-button, .submit-button {
+        width: 100%;
+        text-align: center;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    h3 {
+        font-size: 16px;
+    }
+
+    /* Ajustes para el área de carga de archivos */
+    .file-upload {
+        padding: 20px;
+    }
+
+    .file-upload svg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+/* 📱 Ajustes en móviles pequeños */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    header p {
+        font-size: 0.9rem;
+        margin-top: 3px;
+    }
+
+    .step.active .step-icon {
+        width: 55px;
+        height: 55px;
+    }
+}
+
+/* 📱 Ajustes en móviles muy pequeños */
+@media (max-width: 360px) {
+    header h1 {
+        font-size: 1rem;
+    }
+
+    header p {
+        font-size: 0.8rem;
+    }
+
+    .container {
+        width: 98%;
+        padding: 0.8rem;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    label {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+}
+
+/* 📱 Ajustes en dispositivos extremadamente pequeños */
+@media (max-width: 320px) {
+    header h1 {
+        font-size: 0.9rem;
+    }
+
+    header p {
+        font-size: 0.7rem;
+    }
+
+    .step-icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .step-icon i {
+        font-size: 18px;
+    }
+}
+
+/* 📱 Diseño Responsivo */
+@media (max-width: 480px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .form-col {
+        padding: 0 5px;
+    }
+}
+
+/* Responsivo para modales */
+@media (max-width: 500px) {
+    #modalConfirmacion div {
+        width: 90%;
+        padding: 15px;
+    }
+
+    #modalConfirmacion button {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Estilos reajustados para formularios */
+.form-group {
+    margin-bottom: 15px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.form-group::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--azul-medio);
+    transition: width 0.3s ease;
+}
+
+.form-group:focus-within::after {
+    width: 100%;
+}
+
+.row {
+    display: flex;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.row:hover {
+    transform: translateY(-2px);
+}
+
+.row .form-group {
+    flex: 1;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+label::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 3px;
+    height: 0;
+    background: var(--azul-claro);
+    transform: translateY(-50%);
+    transition: height 0.3s ease;
+    opacity: 0;
+}
+
+.form-group:hover label::before {
+    height: 80%;
+    opacity: 1;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+input:hover,
+select:hover {
+    border-color: var(--azul-claro);
+}
+
+input:focus,
+select:focus {
+    border-color: var(--azul-medio);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(8, 220, 255, 0.2);
+}
+
+/* Campos obligatorios en rojo si están vacíos - Con animación */
+.error {
+    border-color: var(--rojo-error) !important;
+    background-color: rgba(255, 77, 77, 0.1);
+    animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.error-message {
+    color: var(--rojo-error);
+    font-size: 12px;
+    margin-top: 5px;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+/* notas con estilos mejorados */
+/* 🔹 Contenedor general de la materia */
+.materia-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--blanco);
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--borde);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    gap: 15px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.materia-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: var(--azul-claro);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s ease;
+}
+
+.materia-row:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--azul-claro);
+}
+
+.materia-row:hover::before {
+    transform: scaleY(1);
+}
+
+/* 🔹 Nombre de la materia con ancho fijo */
+.materia-label {
+    width: 200px;
+    font-weight: bold;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+    color: var(--azul-oscuro);
+}
+
+.materia-row:hover .materia-label {
+    color: var(--azul-medio);
+    transform: translateX(5px);
+}
+
+/* 🔹 Contenedor de la nota */
+.input-container {
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.materia-row:hover .input-container {
+    transform: scale(1.05);
+}
+
+/* 📥 Input de nota */
+.nota-input {
+    width: 100px;
+    padding: 6px;
+    text-align: center;
+    border: 1px solid var(--borde);
+    border-radius: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.nota-input:focus {
+    border-color: var(--azul-medio);
+    box-shadow: 0 0 0 3px rgba(8, 220, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* 🔹 Contenedor del switch */
+.switch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.materia-row:hover .switch-container {
+    transform: scale(1.05);
+}
+
+/* 🔹 Estilo del texto "Cursada" */
+.switch-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--azul-oscuro);
+    transition: color 0.3s ease;
+}
+
+.materia-row:hover .switch-label {
+    color: var(--azul-medio);
+}
+
+/*  Switch con animaciones */
+.switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    transition: all 0.3s ease;
+}
+
+.switch:hover {
+    transform: scale(1.1);
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gris-medio);
+    border-radius: 34px;
+    transition: all 0.4s ease;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--blanco);
+    border-radius: 50%;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Activación del switch */
+.switch input:checked + .slider {
+    background: var(--azul-claro);
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(18px);
+}
+
+.switch input:checked + .slider {
+    box-shadow: 0 0 8px rgba(8, 220, 255, 0.5);
+}
+
+.semestre-container {
+    display: flex;
+    flex-direction: column;
+    transition: all 0.5s ease;
+}
+
+.semestre-container:hover {
+    transform: translateY(-5px);
+}
+
+/* Ordenar los semestres alfabéticamente con animación */
+.semestre-A, .semestre-B, .semestre-C, .semestre-D {
+    transition: all 0.5s ease;
+}
+
+.semestre-A { order: 1; }
+.semestre-B { order: 2; }
+.semestre-C { order: 3; }
+.semestre-D { order: 4; }
+
+.semestre-A:hover, .semestre-B:hover, .semestre-C:hover, .semestre-D:hover {
+    transform: translateX(5px);
+    background-color: rgba(8, 220, 255, 0.05);
+    border-radius: 5px;
+}
+/* Estilos para ambos modales */
+.modal,
+#modalConfirmacion,
+#modalConfirmacionEnvio {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--negro-transparente);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.modal.active,
+#modalConfirmacion,
+#modalConfirmacionEnvio {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Contenedor del modal */
+.modal-content,
+#modalConfirmacion > div,
+#modalConfirmacionEnvio > div {
+    background-color: var(--blanco);
+    padding: 28px 24px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 400px;
+    width: 80%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                opacity 0.3s ease;
+    border-top: 5px solid var(--azul-medio);
+}
+
+.modal.active .modal-content,
+#modalConfirmacion > div,
+#modalConfirmacionEnvio > div {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    animation: scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Estilos de los títulos */
+.modal-content h3,
+#modalConfirmacion h3,
+#modalConfirmacionEnvio h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 16px;
+}
+
+/* Estilos de los párrafos */
+.modal-content p,
+#modalConfirmacion p,
+#modalConfirmacionEnvio p {
+    color: #666;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+/* Estilos de los botones */
+.modal-content button,
+#modalConfirmacion button,
+#modalConfirmacionEnvio button {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    background: var(--azul-medio);
+    color: var(--blanco);
+    box-shadow: 0 4px 8px var(--sombra);
+}
+
+.modal-content button:hover,
+#modalConfirmacion button:hover,
+#modalConfirmacionEnvio button:hover {
+    background: var(--azul-oscuro);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content button:active,
+#modalConfirmacion button:active,
+#modalConfirmacionEnvio button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Efecto de onda para botones */
+.modal-content button::after,
+#modalConfirmacion button::after,
+#modalConfirmacionEnvio button::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform .5s, opacity 1s;
+}
+
+.modal-content button:active::after,
+#modalConfirmacion button:active::after,
+#modalConfirmacionEnvio button:active::after {
+    transform: scale(0, 0);
+    opacity: .3;
+    transition: 0s;
+}
+
+/* Botón de Rechazar */
+#modalConfirmacion button:last-of-type {
+    background: var(--rojo-error);
+    color: var(--blanco);
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+}
+
+#modalConfirmacion button:last-of-type:hover {
+    background: var(--rojo-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+/* Animación para cerrar el modal */
+.modal.closing .modal-content,
+.modal.closing,
+#modalConfirmacionEnvio.closing {
+    transform: scale(0.95);
+    opacity: 0;
+}
+
+/* Icono para cerrar */
+.close-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #999;
+    transition: color 0.2s ease, transform 0.2s ease;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.close-icon:hover {
+    color: #333;
+    transform: rotate(90deg);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.materia-row {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+    background-color: #f0f7ff;
+    transition: all 0.3s ease;
+}
+
+.nota-guardada {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+}
+
+.materia-label {
+    flex: 2;
+    font-weight: bold;
+}
+
+.input-container {
+    flex: 1;
+}
+
+.nota-input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.save-button, .delete-button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.save-button {
+    background-color: #2196F3;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #0b7dda;
+}
+
+.save-button.saved {
+    background-color: #4CAF50;
+}
+
+.save-button.ready-to-save {
+    animation: pulse 1.5s infinite;
+}
+
+.delete-button {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #d32f2f;
+}
+
+.semestre-container {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+}
+
+.semestre-container h3 {
+    margin-top: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+
+
+.mensaje-flash {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 300px;
+    z-index: 1000;
+    animation: slideIn 0.5s;
+}
+
+.mensaje-flash.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.mensaje-flash.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.mensaje-flash button {
+    background: transparent;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: inherit;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+    }
+}
+
+.next-button {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.next-button.enabled {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.step-content input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.step-content input[type="file"]::file-selector-button {
+    margin-right: 15px;
+    padding: 10px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.step-content input[type="file"]::file-selector-button:hover {
+    background-color: #2980b9;
+}
+
+.step-content input[type="file"]:hover {
+    border-color: #2980b9;
+    background-color: #f0f8ff;
+}
+
+#extra-docs {
+    background-color: #f0f0f0;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+#extra-docs h3 {
+    color: #444;
+    margin-bottom: 15px;
+    text-align: center;
+}
+#step-4 .hidden {
+    display: none !important;
+    visibility: hidden;
+}
