@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\View\Factory;
 
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -38,3 +40,10 @@ Route::get('/admin', function () {
 Route::get('/coordinador', function (): Factory|View {
     return view('admin.homologacionescoordinador.coordinador');
 });
+
+Route::get('/homologaciones/administrador/nuevo', function () {
+    $usuarios = []; // Puedes reemplazar esto con una consulta real a la base de datos
+    return view('admin.homologacionesadministrador.nuevo', compact('usuarios'));
+});
+
+

@@ -18,12 +18,12 @@
             --light-color: #f8f9fa;
             --dark-color: #343a40;
         }
-        
+
         body {
             background-color: var(--secondary-color);
             font-family: 'Roboto', sans-serif;
         }
-        
+
         .navbar {
     background-color: var(--primary-color);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -31,22 +31,22 @@
         .navbar-brand, .nav-link, .nav-icon {
             color: white !important;
         }
-        
+
         .navbar-brand {
             font-weight: 700;
             font-size: 1.4rem;
         }
-        
+
         .nav-icon {
             font-size: 1.5rem;
             transition: transform 0.3s;
             margin: 0 10px;
         }
-        
+
         .nav-icon:hover {
             transform: scale(1.1);
         }
-        
+
         .nav-icon-text {
         font-size: 0.9rem;
         color:rgb(241, 237, 243);
@@ -54,11 +54,11 @@
         text-align: center;
         margin-top: -5px;
 }
-        
+
         .container {
             margin-top: 20px;
         }
-        
+
         .carousel {
             max-width: 1100px;
             margin: 30px auto;
@@ -66,12 +66,12 @@
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        
+
         .carousel-inner img {
             height: 350px;
             object-fit: cover;
         }
-        
+
         .info-section {
             text-align: center;
             padding: 30px;
@@ -81,28 +81,28 @@
             max-width: 900px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         .info-section h2 {
             color: var(--primary-color);
             font-weight: 700;
             margin-bottom: 20px;
         }
-        
+
         .offcanvas {
             background-color: white;
             padding: 20px;
             width: 300px;
         }
-        
+
         .offcanvas-header {
             border-bottom: 1px solid #eee;
         }
-        
+
         .offcanvas-title {
             color: var(--primary-color);
             font-weight: 600;
         }
-        
+
         .menu-buttons button {
             width: 100%;
             margin-bottom: 15px;
@@ -113,37 +113,37 @@
             transition: all 0.3s;
             border: none;
         }
-        
+
         .menu-buttons button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        
-        .menu-buttons .btn-primary { 
-            background-color: var(--primary-color); 
+
+        .menu-buttons .btn-primary {
+            background-color: var(--primary-color);
         }
-        
-        .menu-buttons .btn-info { 
-            background-color: var(--accent-color); 
+
+        .menu-buttons .btn-info {
+            background-color: var(--accent-color);
         }
-        
-        .menu-buttons .btn-danger { 
-            background-color: var(--danger-color); 
+
+        .menu-buttons .btn-danger {
+            background-color: var(--danger-color);
         }
-        
+
         .toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1050;
         }
-        
+
         .toast {
             opacity: 0;
             transition: opacity 0.3s;
             animation: slideIn 0.5s forwards;
         }
-        
+
         @keyframes slideIn {
             from {
                 transform: translateX(100%);
@@ -154,13 +154,13 @@
                 opacity: 1;
             }
         }
-        
+
         .step-progress {
             display: flex;
             justify-content: space-between;
             margin: 30px 0;
         }
-        
+
         .step {
             text-align: center;
             flex-grow: 1;
@@ -172,11 +172,11 @@
             position: relative;
             transition: all 0.3s;
         }
-        
+
         .step:hover {
             transform: translateY(-3px);
         }
-        
+
         .step:not(:last-child):after {
             content: "";
             position: absolute;
@@ -186,27 +186,27 @@
             height: 2px;
             background-color: #ccc;
         }
-        
-        .step.pending { 
+
+        .step.pending {
             background-color: #f0f0f0;
-            color: #777; 
+            color: #777;
         }
-        
-        .step.review { 
+
+        .step.review {
             background-color: var(--warning-color);
-            color: white; 
-        }
-        
-        .step.accepted { 
-            background-color: var(--success-color); 
             color: white;
         }
-        
-        .step.rejected { 
-            background-color: var(--danger-color); 
-            color: white; 
+
+        .step.accepted {
+            background-color: var(--success-color);
+            color: white;
         }
-        
+
+        .step.rejected {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
         .profile-info {
             background-color: white;
             border-radius: 10px;
@@ -214,22 +214,22 @@
             margin-top: 20px;
             box-shadow: 0 2px 4px rgba(252, 249, 249, 0.05);
         }
-        
+
         .profile-info h3 {
             color: var(--primary-color);
             margin-bottom: 20px;
             font-weight: 600;
         }
-        
+
         .profile-info .row {
             margin-bottom: 10px;
         }
-        
+
         .profile-info .label {
             font-weight: 600;
             color: var(--dark-color);
         }
-        
+
         .profile-header {
             background-color: var(--primary-color);
             color: white;
@@ -237,44 +237,44 @@
             border-radius: 10px 10px 0 0;
             margin-bottom: 0;
         }
-        
+
         .modal-content {
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        
+
         .modal-header {
             background-color: var(--primary-color);
             color: white;
         }
-        
+
         .modal-title {
             font-weight: 600;
         }
-        
+
         .btn-close {
             background-color: white;
         }
-        
+
         .custom-badge {
             font-size: 0.9rem;
             padding: 8px 12px;
             border-radius: 20px;
             font-weight: 600;
         }
-        
+
         /* Estilos para el icono de usuario */
         .user-icon {
             color: white;
             cursor: pointer;
             transition: transform 0.3s;
         }
-        
+
         .user-icon:hover {
             transform: scale(1.1);
         }
-        
+
         /* Estilos para el modal de perfil */
         .user-credentials {
             background-color: #f8f9fa;
@@ -282,14 +282,14 @@
             padding: 15px;
             margin-top: 15px;
         }
-        
+
         .credential-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
+
         .credential-value {
             font-family: monospace;
             background-color: white;
@@ -297,13 +297,13 @@
             border-radius: 5px;
             border: 1px solid #ddd;
         }
-        
+
         .timeline {
             position: relative;
             max-width: 1200px;
             margin: 20px auto;
         }
-        
+
         .timeline::after {
             content: '';
             position: absolute;
@@ -314,14 +314,14 @@
             left: 50%;
             margin-left: -3px;
         }
-        
+
         .timeline-container {
             padding: 10px 40px;
             position: relative;
             background-color: inherit;
             width: 50%;
         }
-        
+
         .timeline-container::after {
             content: '';
             position: absolute;
@@ -334,19 +334,19 @@
             border-radius: 50%;
             z-index: 1;
         }
-        
+
         .left {
             left: 0;
         }
-        
+
         .right {
             left: 50%;
         }
-        
+
         .right::after {
             left: -12px;
         }
-        
+
         .timeline-content {
             padding: 20px 30px;
             background-color: white;
@@ -354,7 +354,7 @@
             border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .radicado-number {
             background-color: var(--primary-color);
             color: white;
@@ -364,7 +364,7 @@
             margin-bottom: 15px;
             font-weight: bold;
         }
-        
+
         .feature-card {
             background-color: white;
             border-radius: 10px;
@@ -374,18 +374,18 @@
             transition: transform 0.3s;
             cursor: pointer;
         }
-        
+
         .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.15);
         }
-        
+
         .feature-icon {
             font-size: 2rem;
             margin-bottom: 15px;
             color: var(--primary-color);
         }
-        
+
         /* Nuevos estilos para elementos interactivos */
         .interactive-section {
             display: flex;
@@ -394,11 +394,11 @@
             gap: 20px;
             margin: 30px 0;
         }
-        
+
         .student-info-editable {
             position: relative;
         }
-        
+
         .edit-icon {
             cursor: pointer;
             color: var(--primary-color);
@@ -407,11 +407,11 @@
             top: 50%;
             transform: translateY(-50%);
         }
-        
+
         .edit-form-group {
             margin-bottom: 15px;
         }
-        
+
         .document-preview {
             border: 1px solid #ddd;
             padding: 15px;
@@ -419,17 +419,17 @@
             margin-top: 15px;
             background-color: #f9f9f9;
         }
-        
+
         .document-preview h6 {
             margin-bottom: 10px;
             color: var(--primary-color);
         }
-        
+
         .document-preview p {
             margin-bottom: 5px;
             font-size: 0.9rem;
         }
-        
+
         .document-actions {
             margin-top: 10px;
         }
@@ -442,7 +442,7 @@
         overflow: hidden;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-    
+
     .uac-header::before {
         content: "";
         position: absolute;
@@ -453,23 +453,23 @@
         background: linear-gradient(135deg, rgba(25, 64, 123, 0.9) 0%, rgba(23, 162, 184, 0.7) 100%);
         z-index: 1;
     }
-    
+
     .uac-header .container {
         position: relative;
         z-index: 2;
     }
-    
+
     .uac-slogan {
         font-style: italic;
         letter-spacing: 1px;
         margin-top: 0.5rem;
     }
-    
+
     .uac-header .accent-text {
         color: var(--accent-color);
         font-weight: bold;
     }
-    
+
     .carousel-overlay {
         position: absolute;
         top: 0;
@@ -479,12 +479,12 @@
         background: linear-gradient(to bottom, rgba(25, 64, 123, 0.3), rgba(25, 64, 123, 0.1));
         z-index: 1;
     }
-    
+
     .carousel-caption {
         z-index: 2;
         bottom: 20%;
     }
-    
+
     .caption-box {
         background-color: rgba(25, 64, 123, 0.8);
         border-left: 5px solid var(--accent-color);
@@ -494,18 +494,18 @@
         margin: 0 auto;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    
+
     .carousel-caption h3 {
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 0.5rem;
     }
-    
+
     .carousel-indicators {
         bottom: 30px;
     }
-    
+
     .carousel-indicators button {
         width: 12px;
         height: 12px;
@@ -514,21 +514,21 @@
         background-color: var(--secondary-color);
         opacity: 0.6;
     }
-    
+
     .carousel-indicators button.active {
         background-color: var(--accent-color);
         opacity: 1;
     }
-    
+
     .carousel-control-prev, .carousel-control-next {
         width: 5%;
         opacity: 0.8;
     }
-    
+
     .carousel-item {
         height: 500px;
     }
-    
+
     .carousel-item img {
         object-fit: cover;
         height: 100%;
@@ -567,7 +567,7 @@
             </div>
         </div>
     </nav>
-    
+
     <!-- User Profile Modal -->
     <div class="modal fade" id="userProfileModal">
         <div class="modal-dialog">
@@ -587,7 +587,7 @@
                             <p class="text-muted mb-0">Postulante</p>
                         </div>
                     </div>
-                    
+
                     <div class="user-credentials">
                         <h6 class="mb-3">Credenciales de acceso</h6>
                         <div class="credential-item">
@@ -610,7 +610,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal">
         <div class="modal-dialog">
@@ -656,7 +656,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Sidebar Menu (Ahora a la derecha) -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarMenu">
         <div class="offcanvas-header">
@@ -685,7 +685,7 @@
             </button>
         </div>
     </div>
-    
+
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
 <!-- Carousel -->
@@ -780,7 +780,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Info Section -->
     <div class="info-section">
         <h2>Corporación Universitaria Autónoma del Cauca</h2>
@@ -840,7 +840,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="step-progress mb-4">
                         <div class="step accepted">
                             <i class="bi bi-file-earmark-text me-1"></i>
@@ -859,7 +859,7 @@
                             Aprobación
                         </div>
                     </div>
-                    
+
                     <ul class="nav nav-tabs" id="homologacionTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline" aria-selected="true">
@@ -880,7 +880,7 @@
                             </button>
                         </li>
                     </ul>
-                    
+
                     <div class="tab-content mt-3" id="homologacionTabContent">
                         <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
                             <div class="timeline">
@@ -1053,15 +1053,15 @@
                     <p class="mb-0">Puede consultar los detalles en la sección de homologaciones.</p>
                 </div>
             `;
-            
+
             toastContainer.appendChild(toast);
-            
+
             // Eliminar el toast después de 5 segundos
             setTimeout(() => {
                 toast.remove();
             }, 5000);
         }
-        
+
         // Función para cerrar sesión
         function logout() {
             if (confirm('¿Está seguro que desea cerrar sesión?')) {
@@ -1071,12 +1071,12 @@
                  window.location.href = 'index.html';
             }
         }
-        
+
         // Función para guardar cambios en el perfil
         function saveProfileChanges() {
             // Aquí iría la lógica para guardar los cambios
             $('#editProfileModal').modal('hide');
-            
+
             // Mostrar notificación
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1091,15 +1091,15 @@
                     Los datos del perfil han sido actualizados correctamente.
                 </div>
             `;
-            
+
             toastContainer.appendChild(toast);
-            
+
             // Eliminar el toast después de 5 segundos
             setTimeout(() => {
                 toast.remove();
             }, 5000);
         }
-        
+
         // Inicializar tooltips
         document.addEventListener('DOMContentLoaded', function() {
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
