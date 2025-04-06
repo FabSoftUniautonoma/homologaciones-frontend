@@ -1,0 +1,76 @@
+:root {
+    --azul-oscuro: #19407b;
+    --azul-medio: #0075bf;
+    --azul-claro: #08dcff;
+    --blanco: #ffffff;
+    --gris-claro: #f4f4f4;
+    --borde: #dddddd;
+    --sombra: rgba(0, 0, 0, 0.1);
+    --rojo-error: #ff4d4d;
+}
+
+/* Contenedor de estadísticas */
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Tarjetas de estadísticas */
+.stat-card {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 2px 4px 8px var(--sombra);
+    border: 2px solid var(--borde);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Efecto hover */
+.stat-card:hover {
+    transform: scale(1.05);
+    box-shadow: 4px 8px 16px var(--sombra);
+}
+
+/* Iconos */
+.stat-card .icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+/* Texto */
+.stat-card .info p {
+    font-size: 1rem;
+    margin: 0;
+    font-weight: bold;
+    color: var(--azul-oscuro);
+}
+
+.stat-card .info h4 {
+    font-size: 2rem;
+    margin: 5px 0 0;
+}
+
+/* Colores aplicados */
+.total {
+    background-color: var(--azul-oscuro);
+    color: var(--blanco);
+}
+
+.pendiente {
+    background-color: var(--azul-medio);
+    color: var(--blanco);
+}
+
+.revision {
+    background-color: var(--azul-claro);
+    color: var(--azul-oscuro);
+}
+
+.aprobadas {
+    background-color: var(--gris-claro);
+    color: var(--azul-medio);
+}
+
