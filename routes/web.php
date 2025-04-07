@@ -41,3 +41,29 @@ Route::get('/homologaciones/home', function () {
 Route::get('/coordinador', function () {
     return view('admin.homologacionescoordinador.coordinador');
 });
+
+Route::get('/administrador', function () {
+    return view('admin.homologacionesadministrador.administradorr');
+});
+
+
+Route::get('/administrador/instituciones', function () {
+    return view('admin.homologacionesadministrador.instituciones');
+});
+
+Route::get('/programas_crear', function () {
+    return view('admin.homologacionesadministrador.programas_crear');
+});
+Route::get('/programas', function () {
+    return view('admin.homologacionesadministrador.programas');
+});
+Route::get('/roles', function () {
+    return view('admin.homologacionesadministrador.roles');
+});
+Route::get('/usuarios', function () {
+    return view('admin.homologacionesadministrador.usuarios');
+});
+
+Route::get('/usuarios_crear', function () {
+    return view('admin.homologacionesadministrador.usuarios_crear');
+});
