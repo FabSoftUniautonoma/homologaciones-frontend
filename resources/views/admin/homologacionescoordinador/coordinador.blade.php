@@ -41,7 +41,7 @@
                         <label for="carrera">Carrera</label>
                         <select id="carrera" class="form-control">
                             <option value="">Todas</option>
-                            <option value="ingeniería de software">Ingeniería Civil</option>
+                            <option value="ingeniería de software">Ingeniería de software</option>
                             ¿
                         </select>
                     </div>
@@ -74,17 +74,19 @@
                                 <th>ID</th>
                                 <th>Estudiante</th>
                                 <th>Instituto de Origen</th>
+                                <th>Carrera de Interés</th>
                                 <th>Fecha Solicitud</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ([['id' => 'HOM-2025-001', 'nombre' => 'María González', 'instituto' => 'FUP de Popayán', 'fecha' => '01/04/2025', 'estado' => 'Pendiente'], ['id' => 'HOM-2025-002', 'nombre' => 'Carlos Rodríguez', 'instituto' => 'SENA', 'fecha' => '31/03/2025', 'estado' => 'En revisión'], ['id' => 'HOM-2025-003', 'nombre' => 'Ana López', 'instituto' => 'Colegio Mayor', 'fecha' => '30/03/2025', 'estado' => 'Aprobada']] as $solicitud)
+                            @foreach ([['codigo' => 'HOM-2025-001', 'nombre' => 'María González', 'instituto' => 'FUP de Popayán', 'fecha' => '01/04/2025', 'estado' => 'Pendiente'], ['codigo' => 'HOM-2025-002', 'nombre' => 'Carlos Rodríguez', 'instituto' => 'SENA', 'fecha' => '31/03/2025', 'estado' => 'En revisión'], ['codigo' => 'HOM-2025-003', 'nombre' => 'Ana López', 'instituto' => 'Colegio Mayor', 'fecha' => '30/03/2025', 'estado' => 'Aprobada'], ['codigo' => 'HOM-2025-004', 'nombre' => 'Luis Martínez', 'instituto' => 'Universidad del Cauca', 'fecha' => '29/03/2025', 'estado' => 'Rechazada']] as $solicitud)
                                 <tr>
-                                    <td>{{ $solicitud['id'] }}</td>
+                                    <td>{{ $solicitud['codigo'] }}</td>
                                     <td>{{ $solicitud['nombre'] }}</td>
                                     <td>{{ $solicitud['instituto'] }}</td>
+                                    <td>Ingeniería de Software</td>
                                     <td>{{ $solicitud['fecha'] }}</td>
                                     <td>
                                         <span
@@ -92,28 +94,29 @@
                                                 'pendiente' => 'warning',
                                                 'en revisión' => 'info',
                                                 'aprobada' => 'success',
-                                                default => 'danger',
+                                                'rechazada' => 'danger',
+                                                default => 'secondary',
                                             } }}">
                                             {{ $solicitud['estado'] }}
                                         </span>
                                     </td>
                                     <td>
-                                        <button type="button" data-id="{{ $solicitud['id'] }}"
-                                            class="btn btn-primary btn-sm ver-detalles">
+                                        <a href="{{ url('/homologacion/' . $solicitud['codigo']) }}"
+                                            class="btn btn-primary btn-sm">
                                             <i class="fa fa-eye"></i> Ver Detalles
-                                        </button>
+                                        </a>
 
-                                        @if (strtolower($solicitud['estado']) === 'aprobada')
-                                            <button type="button" class="btn btn-success btn-sm descargar-pdf"
-                                                data-id="{{ $solicitud['id'] }}">
+                                        @if (in_array(strtolower($solicitud['estado']), ['aprobada', 'rechazada']))
+                                            <a href="{{ url('/homologacion/' . $solicitud['codigo'] . '/descargar') }}"
+                                                class="btn btn-success btn-sm">
                                                 <i class="fa fa-download"></i> Descargar PDF
-                                            </button>
+                                            </a>
                                         @endif
                                     </td>
-
                                 </tr>
                             @endforeach
                         </tbody>
+
                     </table>
                 </div>
             </div>

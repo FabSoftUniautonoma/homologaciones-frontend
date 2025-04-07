@@ -61,6 +61,8 @@ $(document).ready(function () {
     document.getElementById("buscarBtn").addEventListener("click", filtrarTabla);
 
     // Abrir detalle de solicitud al hacer clic en botón con clase .ver-detalles
+
+
     document.querySelectorAll(".ver-detalles").forEach(button => {
         button.addEventListener("click", function (e) {
             e.preventDefault();
@@ -71,15 +73,5 @@ $(document).ready(function () {
             }
         });
     });
-});
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".descargar-pdf").forEach(button => {
-        button.addEventListener("click", function () {
-            let solicitudID = this.getAttribute("data-id");
-            if (solicitudID) {
-                let url = `/homologacion/${solicitudID}/descargar`;
-                window.open(url, "_blank");
-            }
-        });
-    });
-});
+})
+

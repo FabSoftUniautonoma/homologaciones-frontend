@@ -1,0 +1,251 @@
+:root {
+    /* Color palette */
+    --azul-oscuro: #19407b;
+    --azul-medio: #0075bf;
+    --azul-claro: #08dcff;
+    --blanco: #ffffff;
+    --gris-claro: #f4f4f4;
+    --gris-medio: #e0e0e0;
+    --borde: #dddddd;
+    --sombra: rgba(0, 0, 0, 0.1);
+    --negro-transparente: rgba(0, 0, 0, 0.7);
+    --rojo-error: #ff4d4d;
+    --rojo-hover: #c0392b;
+    --verde-exito: #4CAF50;
+
+    /* Typography */
+    --font-primary: 'Roboto', Arial, sans-serif;
+
+    /* Transitions */
+    --transition-default: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Base styles */
+body {
+    font-family: var(--font-primary);
+    background-color: var(--gris-claro);
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Cards styling */
+.card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px var(--sombra);
+    margin-bottom: 20px;
+    border: 1px solid var(--borde);
+    transition: var(--transition-default);
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--borde);
+    background-color: var(--blanco);
+}
+
+.card-header.bg-primary {
+    background-color: var(--azul-medio) !important;
+    background-image: linear-gradient(135deg, var(--azul-medio), var(--azul-oscuro));
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 0;
+    color: var(--azul-oscuro);
+}
+
+.card-header.bg-primary .card-title {
+    color: var(--blanco);
+}
+
+.card-body {
+    padding: 1.5rem;
+    background-color: var(--blanco);
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--azul-oscuro);
+}
+
+.form-control-static {
+    background-color: var(--gris-claro);
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 0;
+    border: 1px solid var(--borde);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--transition-default);
+    position: relative;
+    overflow: hidden;
+    border: none;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::after {
+    width: 300%;
+    height: 300%;
+}
+
+.btn-primary {
+    background-color: var(--azul-medio);
+    color: var(--blanco);
+    box-shadow: 0 4px 8px rgba(0, 117, 191, 0.3);
+}
+
+.btn-primary:hover {
+    background-color: var(--azul-oscuro);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 117, 191, 0.4);
+}
+
+.btn-success {
+    background-color: var(--verde-exito);
+    color: var(--blanco);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-success:hover {
+    background-color: #388e3c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+}
+
+.btn-info {
+    background-color: var(--azul-claro);
+    color: var(--negro-transparente);
+    box-shadow: 0 4px 8px rgba(8, 220, 255, 0.3);
+}
+
+.btn-info:hover {
+    background-color: #00b8d4;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(8, 220, 255, 0.4);
+}
+
+/* Status badges */
+.badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    transition: var(--transition-default);
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+.badge-secondary {
+    background-color: var(--gris-medio);
+    color: var(--negro-transparente);
+}
+
+/* Table styling */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table-hover tbody tr {
+    transition: var(--transition-default);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 117, 191, 0.1);
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--borde);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-4,
+    .col-md-6,
+    .col-md-8,
+    .col-md-12 {
+        width: 100%;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+    }
+}
+
+/* Animation for card entry */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    animation-fill-mode: both;
+}
+
+.card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
