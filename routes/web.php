@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 
 // Página de bienvenida
 Route::get('/', function () {
-    return view('welcome');
+    return view('admin.layouts.welcome');
 });
 
 // Rutas para usuarios
@@ -40,11 +40,6 @@ Route::get('/homologaciones/registroestudiante', function () {
 Route::get('/homologaciones/home', function () {
     return view('admin.indexusuario.index');
 })->name('homologaciones.home');
-
-// Ruta para el dashboard del coordinador
-/* Route::get('/coordinador', function () {
-    return view('admin.homologacionescoordinador.coordinador');
-}); */
 
 // Ruta de notificaciones
 Route::get('/notificaciones', function () {
