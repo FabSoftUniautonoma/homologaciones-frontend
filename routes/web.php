@@ -41,11 +41,6 @@ Route::get('/homologaciones/home', function () {
     return view('admin.indexusuario.index');
 })->name('homologaciones.home');
 
-// Ruta para el dashboard del coordinador
-/* Route::get('/coordinador', function () {
-    return view('admin.homologacionescoordinador.coordinador');
-}); */
-
 // Ruta de notificaciones
 Route::get('/notificaciones', function () {
     return view('admin.homologacionescoordinador.componentes.notificaciones');
