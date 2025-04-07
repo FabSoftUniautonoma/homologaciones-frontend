@@ -16,6 +16,8 @@
             </ul>
         </div>
 
+        <!-- <pre>@json($data, JSON_PRETTY_PRINT)</pre> -->
+
         <!-- Panel de filtrado -->
         <div class="card">
             <div class="card-header">
@@ -81,7 +83,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ([['codigo' => 'HOM-2025-001', 'nombre' => 'María González', 'instituto' => 'FUP de Popayán', 'fecha' => '01/04/2025', 'estado' => 'Pendiente'], ['codigo' => 'HOM-2025-002', 'nombre' => 'Carlos Rodríguez', 'instituto' => 'SENA', 'fecha' => '31/03/2025', 'estado' => 'En revisión'], ['codigo' => 'HOM-2025-003', 'nombre' => 'Ana López', 'instituto' => 'Colegio Mayor', 'fecha' => '30/03/2025', 'estado' => 'Aprobada'], ['codigo' => 'HOM-2025-004', 'nombre' => 'Luis Martínez', 'instituto' => 'Universidad del Cauca', 'fecha' => '29/03/2025', 'estado' => 'Rechazada']] as $solicitud)
+                            <!-- @foreach ([['codigo' => 'HOM-2025-001', 'nombre' => 'María González', 'instituto' => 'FUP de Popayán', 'fecha' => '01/04/2025', 'estado' => 'Pendiente'], ['codigo' => 'HOM-2025-002', 'nombre' => 'Carlos Rodríguez', 'instituto' => 'SENA', 'fecha' => '31/03/2025', 'estado' => 'En revisión'], ['codigo' => 'HOM-2025-003', 'nombre' => 'Ana López', 'instituto' => 'Colegio Mayor', 'fecha' => '30/03/2025', 'estado' => 'Aprobada'], ['codigo' => 'HOM-2025-004', 'nombre' => 'Luis Martínez', 'instituto' => 'Universidad del Cauca', 'fecha' => '29/03/2025', 'estado' => 'Rechazada']] as $solicitud)
                                 <tr>
                                     <td>{{ $solicitud['codigo'] }}</td>
                                     <td>{{ $solicitud['nombre'] }}</td>
@@ -113,6 +115,13 @@
                                             </a>
                                         @endif
                                     </td>
+                                </tr>
+                            @endforeach -->
+                            @foreach ($data as $programa)
+                                <tr>
+                                    <td>{{ $programa['id_programa'] }}</td>
+                                    <td>{{ $programa['nombre'] }}</td>
+                                    <td>{{ $programa['tipo_formacion'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

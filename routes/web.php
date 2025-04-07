@@ -42,9 +42,9 @@ Route::get('/homologaciones/home', function () {
 })->name('homologaciones.home');
 
 // Ruta para el dashboard del coordinador
-Route::get('/coordinador', function () {
+/* Route::get('/coordinador', function () {
     return view('admin.homologacionescoordinador.coordinador');
-});
+}); */
 
 // Ruta de notificaciones
 Route::get('/notificaciones', function () {
@@ -199,9 +199,7 @@ Route::get('/homologaciones/home', function () {
 })->name('homologaciones.home');
 
 // Ruta para el dashboard del coordinador
-Route::get('/coordinador', function () {
-    return view('admin.homologacionescoordinador.coordinador');
-});
+Route::get('/coordinador', [HomologacionController::class, 'obtenerDatosBack']);
 
 Route::get('/administrador', function () {
     return view('admin.homologacionesadministrador.administradorr');

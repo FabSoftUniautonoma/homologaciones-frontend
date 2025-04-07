@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Solicitud;
+use GuzzleHttp\Client;
 
 class HomologacionController extends Controller
 {
@@ -75,6 +76,26 @@ class HomologacionController extends Controller
         $homologacion->save();
 
         return response()->json(['mensaje' => 'Proceso iniciado con éxito.']);
+    }
+
+    public function obtenerDatosBack()
+    {
+        $client = new Client([
+            // Base URI is used with relative requests
+            'base_uri' => env('BASE_URL_BACKEND'),
+            // You can set any number of default request options.
+            'timeout' => 2.0,
+        ]);
+        $response = $client->request('GET', 'programas', [
+            'headers' => [
+                'Accept' => 'application/json',
+                // Si tu API requiere token, descomenta esto:
+                // 'Authorization' => 'Bearer ' . $token,
+            ]
+        ]);
+        $data = json_decode($response->getBody()->getContents(), true);
+        
+        return view('admin.homologacionescoordinador.coordinador', compact('data'));
     }
 
 }
