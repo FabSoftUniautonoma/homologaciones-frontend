@@ -16,8 +16,6 @@
             </ul>
         </div>
 
-        <!-- <pre>@json($data, JSON_PRETTY_PRINT)</pre> -->
-
         <!-- Panel de filtrado -->
         <div class="card">
             <div class="card-header">
@@ -44,7 +42,6 @@
                         <select id="carrera" class="form-control">
                             <option value="">Todas</option>
                             <option value="ingeniería de software">Ingeniería de software</option>
-                            ¿
                         </select>
                     </div>
                     <div class="col-md-3 form-group">
@@ -75,55 +72,29 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Estudiante</th>
-                                <th>Instituto de Origen</th>
-                                <th>Carrera de Interés</th>
+                                <th>Correo</th>
                                 <th>Fecha Solicitud</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th>Institucion de origen </th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- @foreach ([['codigo' => 'HOM-2025-001', 'nombre' => 'María González', 'instituto' => 'FUP de Popayán', 'fecha' => '01/04/2025', 'estado' => 'Pendiente'], ['codigo' => 'HOM-2025-002', 'nombre' => 'Carlos Rodríguez', 'instituto' => 'SENA', 'fecha' => '31/03/2025', 'estado' => 'En revisión'], ['codigo' => 'HOM-2025-003', 'nombre' => 'Ana López', 'instituto' => 'Colegio Mayor', 'fecha' => '30/03/2025', 'estado' => 'Aprobada'], ['codigo' => 'HOM-2025-004', 'nombre' => 'Luis Martínez', 'instituto' => 'Universidad del Cauca', 'fecha' => '29/03/2025', 'estado' => 'Rechazada']] as $solicitud)
-                                <tr>
-                                    <td>{{ $solicitud['codigo'] }}</td>
-                                    <td>{{ $solicitud['nombre'] }}</td>
-                                    <td>{{ $solicitud['instituto'] }}</td>
-                                    <td>Ingeniería de Software</td>
-                                    <td>{{ $solicitud['fecha'] }}</td>
-                                    <td>
-                                        <span
-                                            class="badge badge-{{ match (strtolower($solicitud['estado'])) {
-                                                'pendiente' => 'warning',
-                                                'en revisión' => 'info',
-                                                'aprobada' => 'success',
-                                                'rechazada' => 'danger',
-                                                default => 'secondary',
-                                            } }}">
-                                            {{ $solicitud['estado'] }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="{{ url('/homologacion/' . $solicitud['codigo']) }}"
-                                            class="btn btn-primary btn-sm">
-                                            <i class="fa fa-eye"></i> Ver Detalles
-                                        </a>
-
-                                        @if (in_array(strtolower($solicitud['estado']), ['aprobada', 'rechazada']))
-                                            <a href="{{ url('/homologacion/' . $solicitud['codigo'] . '/descargar') }}"
-                                                class="btn btn-success btn-sm">
-                                                <i class="fa fa-download"></i> Descargar PDF
-                                            </a>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach -->
-                            @foreach ($data as $programa)
-                                <tr>
-                                    <td>{{ $programa['id_programa'] }}</td>
-                                    <td>{{ $programa['nombre'] }}</td>
-                                    <td>{{ $programa['tipo_formacion'] }}</td>
-                                </tr>
+                        <tbody>
+                            @foreach ($solicitudes as $solicitud)
+                            <tr>
+                                <td>{{ $solicitud['numero_radicado'] ?? 'N/A' }}</td>
+                                <td>{{ $solicitud['nombre_usuario'] ?? 'Nombre no disponible' }}</td>
+                                <td>{{ $solicitud['correo'] ?? 'Correo no disponible' }}</td>
+                                <td>
+                                    @if (!empty($solicitud['fecha_solicitud']))
+                                        {{ \Carbon\Carbon::parse($solicitud['fecha_solicitud'])->format('d/m/Y') }}
+                                    @else
+                                        Sin fecha
+                                    @endif
+                                </td>
+                                <td>{{ $solicitud['nombre_institucion'] ?? 'Sin nombre de institución' }}</td>
+                            </tr>
                             @endforeach
+
                         </tbody>
 
                     </table>
@@ -131,6 +102,6 @@
             </div>
         </div>
     </div>
-    <script src="{{ asset('js/gestionhomologacioncoordinacion.js') }}"></script>
 
+    <script src="{{ asset('js/gestionhomologacioncoordinacion.js') }}"></script>
 @endsection

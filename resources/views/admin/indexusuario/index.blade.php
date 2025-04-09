@@ -13,24 +13,25 @@
 
 <body>
     <!-- Header -->
-    <header>
+    <header class="full-width header">
         <div class="container header-container">
             <div class="logo">
                 <img src="https://buscacarrera.com.co/public/content/logos/estandar/corporacion-universitaria-autonoma-del-cauca_550x420.jpg"
                     alt="Logo Universidad Autónoma del Cauca">
                 <h1>Universidad Autónoma del Cauca</h1>
             </div>
-            <ul class="nav-links">
-                <li><a href="#inicio">Inicio</a></li>
-                <li><a href="#proceso">Proceso</a></li>
-                <li><a href="#requisitos">Requisitos</a></li>
-                <li><a href="#contacto">Contacto</a></li>
-                <li><a href="Login.html" id="login-btn">Iniciar Sesión</a></li>
-            </ul>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#proceso">Proceso</a></li>
+                    <li><a href="#requisitos">Requisitos</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                    <li><a href="Login.html" id="login-btn">Iniciar Sesión</a></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
-    <!-- Banner -->
     <!-- Banner -->
     <section class="banner" id="inicio">
         <div class="banner-content">
@@ -39,7 +40,6 @@
             <a href="homoformulario.html" class="btn">Comenzar Proceso</a>
         </div>
     </section>
-
 
     <!-- Main Content -->
     <main class="container">
@@ -248,7 +248,8 @@
                     <div class="social-media">
                         <h4>Síguenos en Redes Sociales</h4>
                         <div class="social-icons">
-                            <a href="https://www.facebook.com/UniAutonomaDelCauca" class="social-icon" target="_blank">
+                            <a href="https://www.facebook.com/UniAutonomaDelCauca" class="social-icon"
+                                target="_blank">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
                             <a href="https://twitter.com/UniautonomaC" class="social-icon" target="_blank">
@@ -309,116 +310,73 @@
                     allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
         </section>
+    </main>
+    <!-- Footer -->
+    <footer class="full-width footer">
+        <div class="container">
+            <p>&copy; 2025 Universidad Autónoma del Cauca - Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    <script>
+        // Script para animar elementos cuando aparecen en el viewport
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateElements = document.querySelectorAll('.animate-fade-in');
 
-        <!-- Footer -->
-        <footer>
-            <p>&copy; 2025 Universidad Autónoma del Cauca - Sistema de Homologación</p>
-        </footer>
+            function checkIfInView() {
+                animateElements.forEach(function(element) {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
 
-        <script>
-            // Script para animar elementos cuando aparecen en el viewport
-            document.addEventListener('DOMContentLoaded', function () {
-                const animateElements = document.querySelectorAll('.animate-fade-in');
-
-                function checkIfInView() {
-                    animateElements.forEach(function (element) {
-                        const elementTop = element.getBoundingClientRect().top;
-                        const windowHeight = window.innerHeight;
-
-                        if (elementTop < windowHeight - 100) {
-                            element.style.opacity = '1';
-                            element.style.transform = 'translateY(0)';
-                        }
-                    });
-                }
-
-                // Asignar animación con delay para que sea secuencial
-                animateElements.forEach(function (element, index) {
-                    element.style.animationDelay = (index * 0.2) + 's';
-                });
-
-                // Verificar posición inicial
-                checkIfInView();
-
-                // Verificar al hacer scroll
-                window.addEventListener('scroll', checkIfInView);
-
-                // Smooth scrolling para los enlaces internos
-                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                    anchor.addEventListener('click', function (e) {
-                        e.preventDefault();
-
-                        const targetId = this.getAttribute('href');
-                        if (targetId === '#') return;
-
-                        const targetElement = document.querySelector(targetId);
-                        if (targetElement) {
-                            window.scrollTo({
-                                top: targetElement.offsetTop - 80, // Ajuste para el header fijo
-                                behavior: 'smooth'
-                            });
-                        }
-                    });
-                });
-
-                // Validación básica de formularios
-                const contactForm = document.getElementById('contact-form');
-                if (contactForm) {
-                    contactForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        // Aquí se añadiría la lógica para enviar el formulario
-                        alert('¡Mensaje enviado con éxito! Nos pondremos en contacto con usted lo antes posible.');
-                        this.reset();
-                    });
-                }
-            });
-            document.addEventListener('DOMContentLoaded', function () {
-                // Seleccionar elementos del DOM
-                const menuToggle = document.createElement('button');
-                menuToggle.className = 'menu-toggle';
-                menuToggle.innerHTML = '☰';
-                menuToggle.setAttribute('aria-label', 'Abrir menú');
-
-                const headerContainer = document.querySelector('.header-container');
-                const navLinks = document.querySelector('.nav-links');
-
-                // Insertar el botón de menú en el encabezado
-                headerContainer.insertBefore(menuToggle, navLinks);
-
-                // Agregar evento click al botón de menú
-                menuToggle.addEventListener('click', function () {
-                    navLinks.classList.toggle('active');
-
-                    // Cambiar el ícono y el aria-label según el estado
-                    if (navLinks.classList.contains('active')) {
-                        menuToggle.innerHTML = '✕';
-                        menuToggle.setAttribute('aria-label', 'Cerrar menú');
-                    } else {
-                        menuToggle.innerHTML = '☰';
-                        menuToggle.setAttribute('aria-label', 'Abrir menú');
+                    if (elementTop < windowHeight - 100) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
                     }
                 });
+            }
 
-                // Cerrar el menú al hacer clic en un enlace
-                const links = navLinks.querySelectorAll('a');
-                links.forEach(link => {
-                    link.addEventListener('click', function () {
-                        navLinks.classList.remove('active');
-                        menuToggle.innerHTML = '☰';
-                        menuToggle.setAttribute('aria-label', 'Abrir menú');
-                    });
-                });
+            // Asignar animación con delay para que sea secuencial
+            animateElements.forEach(function(element, index) {
+                element.style.animationDelay = (index * 0.2) + 's';
+            });
 
-                // Cerrar el menú al redimensionar la ventana a un tamaño más grande
-                window.addEventListener('resize', function () {
-                    if (window.innerWidth > 480) {
-                        navLinks.classList.remove('active');
-                        menuToggle.innerHTML = '☰';
-                        menuToggle.setAttribute('aria-label', 'Abrir menú');
+            // Verificar posición inicial
+            checkIfInView();
+
+            // Verificar al hacer scroll
+            window.addEventListener('scroll', checkIfInView);
+
+            // Smooth scrolling para los enlaces internos
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, // Ajuste para el header fijo
+                            behavior: 'smooth'
+                        });
                     }
                 });
             });
-        </script>
+
+            // Validación básica de formularios
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    // Aquí se añadiría la lógica para enviar el formulario
+                    alert(
+                        '¡Mensaje enviado con éxito! Nos pondremos en contacto con usted lo antes posible.'
+                    );
+                    this.reset();
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
