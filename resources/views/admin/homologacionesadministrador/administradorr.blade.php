@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Panel de administración</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome para iconos -->
@@ -16,7 +16,7 @@
         <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <h3>Panel Admin</h3>
+                <h3>Panel de admin</h3>
             </div>
 
             <ul class="list-unstyled components">
@@ -26,10 +26,10 @@
                     </a>
                     <ul class="collapse list-unstyled" id="homeSubmenu">
                         <li>
-                            <a href="{{ url('/admin/usuarios') }}">Listar Usuarios</a>
+                            <a href="{{ url('/admin/usuarios') }}">Listar usuarios</a>
                         </li>
                         <li>
-                            <a href="{{ url('/admin/usuarios/crear') }}">Crear Usuario</a>
+                            <a href="{{ url('/admin/usuarios/crear') }}">Crear usuario</a>
                         </li>
                         <li>
                             <a href="{{ url('/admin/roles') }}">Roles y Permisos</a>
@@ -42,10 +42,10 @@
                     </a>
                     <ul class="collapse list-unstyled" id="institucionSubmenu">
                         <li>
-                            <a href="{{ url('/admin/instituciones') }}">Listar Instituciones</a>
+                            <a href="{{ url('/admin/instituciones') }}">Listar instituciones</a>
                         </li>
                         <li>
-                            <a href="{{ url('/admin/instituciones/crear') }}">Crear Institución</a>
+                            <a href="{{ url('/admin/instituciones/crear') }}">Crear institución</a>
                         </li>
                     </ul>
                 </li>
@@ -55,10 +55,10 @@
                     </a>
                     <ul class="collapse list-unstyled" id="programaSubmenu">
                         <li>
-                            <a href="{{ url('/admin/programas') }}">Listar Programas</a>
+                            <a href="{{ url('/admin/programas') }}">Listar programas</a>
                         </li>
                         <li>
-                            <a href="{{ url('/admin/programas/crear') }}">Crear Programa</a>
+                            <a href="{{ url('/admin/programas/crear') }}">Crear programa</a>
                         </li>
                     </ul>
                 </li>
@@ -71,12 +71,12 @@
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse" class="btn btn-info">
                         <i class="fas fa-align-left"></i>
-                        <span>Menu</span>
+                        <span>Menú</span>
                     </button>
                     <div class="ms-auto">
                         <div class="dropdown">
                             <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i> Admin
+                                <i class="fas fa-user"></i> Administrador
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
                                 <li><a class="dropdown-item" href="#">Perfil</a></li>

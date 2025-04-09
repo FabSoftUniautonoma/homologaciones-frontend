@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Crear Programa Académico</h1>
+        <h1>Crear programa académico</h1>
         <a href="{{ url('/admin/programas') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
@@ -14,7 +14,7 @@
             <form id="programaForm">
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="nombre_programa" class="form-label">Nombre del Programa <span class="text-danger">*</span></label>
+                        <label for="nombre_programa" class="form-label">Nombre del programa <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="nombre_programa" name="nombre_programa" required>
                         <div class="invalid-feedback">
                             Por favor ingrese el nombre del programa.
@@ -24,7 +24,7 @@
                         <label for="codigo_anis" class="form-label">Código ANIS <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="codigo_anis" name="codigo_anis" required>
                         <div class="invalid-feedback">
-                            Por favor ingrese el código ANIS.
+                            Por favor ingrese el código SNES.
                         </div>
                     </div>
                 </div>
