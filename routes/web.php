@@ -196,29 +196,29 @@ Route::get('/homologaciones/home', function () {
 // Ruta para el dashboard del coordinador
 Route::get('/coordinador', [HomologacionController::class, 'obtenerDatosBack']);
 
-Route::get('/administrador', function () {
+Route::get('/admin', function () {
     return view('admin.homologacionesadministrador.administradorr');
 });
 
 
-Route::get('/administrador/instituciones', function () {
+Route::get('/admin/instituciones', function () {
     return view('admin.homologacionesadministrador.instituciones');
 });
 
-Route::get('/programas_crear', function () {
+Route::get('/admin/programas', function () {
     return view('admin.homologacionesadministrador.programas_crear');
 });
 Route::get('/programas', function () {
     return view('admin.homologacionesadministrador.programas');
 });
-Route::get('/roles', function () {
+Route::get('/admin/roles', function () {
     return view('admin.homologacionesadministrador.roles');
 });
-Route::get('/usuarios', function () {
+Route::get('/admin/usuarios', function () {
     return view('admin.homologacionesadministrador.usuarios');
 });
 
-Route::get('/usuarios_crear', function () {
+Route::get('/admin/usuarios/crear', function () {
     return view('admin.homologacionesadministrador.usuarios_crear');
 });
 // Notificaciones
@@ -232,3 +232,4 @@ Route::put('/admin/homologaciones/{id}', [HomologacionController::class, 'actual
 
     Route::post('/admin/homologaciones/{id}/iniciar', [HomologacionController::class, 'iniciarProceso'])
     ->name('admin.homologacionescoordinador.iniciar');
+  
