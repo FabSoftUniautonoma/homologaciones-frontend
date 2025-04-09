@@ -38,8 +38,7 @@ Route::get('/homologaciones/registroestudiante', function () {
 });
 
 Route::get('/homologaciones/home', function () {
-    return view('admin.indexusuario.index');
-})->name('homologaciones.home');
+    return view('admin.indexusuario.index');});
 
 // Ruta de notificaciones
 Route::get('/notificaciones', function () {

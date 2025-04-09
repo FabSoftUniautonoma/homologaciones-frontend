@@ -5,24 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Solicitud;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use PDF;
 
 class HomologacionController extends Controller
 {
+    /**
+     * Actualiza el estado de una solicitud.
+     */
     public function actualizar(Request $request, $id)
     {
-        // Validación opcional
         $request->validate([
             'estado' => 'required|in:pendiente,en revisión,aprobada,rechazada',
         ]);
 
-        // Buscar la homologación
-        $homologacion = HomologacionController::findOrFail($id);
-
-        // Actualizar estado
+        $homologacion = Solicitud::findOrFail($id);
         $homologacion->estado = ucfirst($request->estado);
         $homologacion->save();
 
-        // Guardar en historial (opcional)
+        // Registrar historial
         $homologacion->historial()->create([
             'accion' => 'Estado actualizado a: ' . ucfirst($request->estado),
             'usuario' => auth()->user()->name ?? 'admin',
@@ -31,25 +32,32 @@ class HomologacionController extends Controller
         return redirect()->back()->with('success', 'Estado actualizado correctamente.');
     }
 
+    /**
+     * Muestra información detallada de una solicitud.
+     */
     public function verInformacion($id)
     {
         try {
-            // Buscar la solicitud por ID
             $solicitud = Solicitud::findOrFail($id);
             return view('admin.homologacionescoordinador.informacionhomologacionusuario', compact('solicitud'));
         } catch (\Exception $e) {
-            // Mostrar vista de error personalizada si no se encuentra
             return view('homologacionesaspirante.error_solicitud_no_encontrada');
         }
     }
+
+    /**
+     * Genera y descarga el PDF de una solicitud.
+     */
     public function descargarPDF($id)
     {
         $solicitud = Solicitud::findOrFail($id);
-
         $pdf = PDF::loadView('pdf.homologacion', compact('solicitud'));
-
         return $pdf->download("Homologacion_{$solicitud->id}.pdf");
     }
+
+    /**
+     * Verifica los documentos de una solicitud.
+     */
     public function verificarDocumentos($id)
     {
         $homologacion = Solicitud::findOrFail($id);
@@ -66,37 +74,48 @@ class HomologacionController extends Controller
         return view('admin.homologacionescoordinador.documentos', compact('documentos'));
     }
 
-
+    /**
+     * Cambia el estado de una solicitud a "En revisión".
+     */
     public function iniciarProceso($id)
     {
-        $homologacion = Homologacion::findOrFail($id);
-
-        // lógica para iniciar proceso
+        $homologacion = Solicitud::findOrFail($id);
         $homologacion->estado = 'En revisión';
         $homologacion->save();
 
         return response()->json(['mensaje' => 'Proceso iniciado con éxito.']);
     }
 
+    /**
+     * Obtiene datos del backend (solicitudes y usuarios).
+     */
     public function obtenerDatosBack()
     {
-        $client = new Client([
-            // Base URI is used with relative requests
-            'base_uri' => env('BASE_URL_BACKEND'),
-            // You can set any number of default request options.
-            'timeout' => 2.0,
-        ]);
-        $response = $client->request('GET', 'programas', [
-            'headers' => [
-                'Accept' => 'application/json',
-                // Si tu API requiere token, descomenta esto:
-                // 'Authorization' => 'Bearer ' . $token,
-            ]
-        ]);
-        $data = json_decode($response->getBody()->getContents(), true);
-        
-        return view('admin.homologacionescoordinador.coordinador', compact('data'));
+        try {
+            $client = new Client([
+                'base_uri' => env('BASE_URL_BACKEND'), // Debe terminar en /api/
+                'timeout' => 2.0,
+            ]);
+
+            $responseSolicitudes = $client->request('GET', 'solicitudes', [
+                'headers' => ['Accept' => 'application/json']
+            ]);
+            $solicitudes = json_decode($responseSolicitudes->getBody()->getContents(), true);
+            $responseUsuarios = $client->request('GET', 'usuarios', [
+                'headers' => ['Accept' => 'application/json']
+            ]);
+
+            return view('admin.homologacionescoordinador.coordinador', [
+                'solicitudes' => $solicitudes,
+            ]);
+
+        } catch (RequestException $e) {
+            \Log::error('Error al obtener datos del backend: ' . $e->getMessage());
+
+             return view('admin.homologacionescoordinador.coordinador')->withErrors([
+                 'error' => 'No se pudieron cargar los datos. Verifica que el backend esté corriendo y accesible.'
+             ]);
+        }
     }
 
 }
-

@@ -1241,7 +1241,6 @@
                                 <i class="fas fa-home"></i>
                                 <p>Tablero</p>
                             </a>
-                           
                         </li>
                     </ul>
                 </div>
