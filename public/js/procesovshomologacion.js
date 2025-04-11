@@ -697,7 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         saveMateria();
                     }
                 });
-                showAlert('Todas las materias han sido marcadas como "No Aplica"', 'success');
+                showAlert('Tods las materias han sido marcadas como "No Aplica"', 'success');
             }
         });
     }
