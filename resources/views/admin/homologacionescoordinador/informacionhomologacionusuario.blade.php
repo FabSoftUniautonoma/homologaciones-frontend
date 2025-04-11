@@ -1,201 +1,141 @@
-{{-- Vista: Detalle de Homologación --}}
-@extends('admin.layouts.app')
+@extends('admin.layouts.appcoordinacion')
 
-@section('title', ' Homologaciones')
+@section('title', 'Homologaciones')
 
 @section('content')
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 position-relative">
+        <!-- Número de Homologación y Estado -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div
+                        class="card-body d-flex justify-content-between align-items-center bg-gradient-primary text-white rounded">
+                        <h4 class="mb-0">
+                            <i class="fas fa-file-alt me-2"></i> Homologación #{{ $homologacion->codigo }}
+                        </h4>
 
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link href="{{ asset('css/informacionhomologacion.css') }}" rel="stylesheet">
+                        {{-- Botón de cerrar alineado a la derecha dentro del mismo contenedor --}}
+                        <a href="{{ route('admin.homologacionescoordinador.index') }}"
+                            class="btn btn-danger shadow position-absolute"
+                            style="top: 0; right: 0; margin: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;">
+                            <i class="fas fa-times"></i>
+                        </a>
 
-
-        </head>
-
-        <body>
-            <!-- Numero de Homologación -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header bg-primary text-white">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="card-title mb-0">
-                                    <i class="fas fa-file-alt mr-2"></i> Homologación #{{ $homologacion->codigo }}
-                                </h4>
-                                <span class="badge badge-{{ $homologacion->estado_class }}">
-                                    {{ $homologacion->estado }}
-                                </span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row mt-4">
+
+        <div class="row">
+            <!-- Información Personal y Académica -->
+            <div class="col-lg-8">
                 <!-- Información Personal -->
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title"><i class="fas fa-user mr-2"></i> Información Personal</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Tipo de identificación:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->tipo_identificacion }}
-                                        </p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Número de identificación:</label>
-                                        <p class="form-control-static">
-                                            {{ $homologacion->estudiante->numero_identificacion }}
-                                        </p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Nombres completos:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->nombre_completo }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Correo electrónico:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->correo }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Teléfono:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->telefono }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Nacionalidad:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->nacionalidad }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Departamento:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->departamento }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Municipio:</label>
-                                        <p class="form-control-static">{{ $homologacion->estudiante->municipio }}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0"><i class="fas fa-user me-2"></i> Información Personal</h5>
                     </div>
-
-                    <!-- Información Académica -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h4 class="card-title"><i class="fas fa-graduation-cap mr-2"></i> Información Académica</h4>
+                    <div class="card-body row">
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Tipo de identificación:</strong></label>
+                            <p>{{ $homologacion->estudiante->tipo_identificacion }}</p>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Instituto de origen:</label>
-                                        <p class="form-control-static">{{ $homologacion->instituto_origen }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Programa cursado:</label>
-                                        <p class="form-control-static">{{ $homologacion->programa_origen }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Carrera de interés:</label>
-                                        <p class="form-control-static">{{ $homologacion->carrera_interes }}</p>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Fecha de solicitud:</label>
-                                        <p class="form-control-static">
-                                            {{ $homologacion->fecha_solicitud->format('d/m/Y') }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Número de identificación:</strong></label>
+                            <p>{{ $homologacion->estudiante->numero_identificacion }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Nombres completos:</strong></label>
+                            <p>{{ $homologacion->estudiante->nombre_completo }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Correo electrónico:</strong></label>
+                            <p>{{ $homologacion->estudiante->correo }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Teléfono:</strong></label>
+                            <p>{{ $homologacion->estudiante->telefono }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Nacionalidad:</strong></label>
+                            <p>{{ $homologacion->estudiante->nacionalidad }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Departamento:</strong></label>
+                            <p>{{ $homologacion->estudiante->departamento }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Municipio:</strong></label>
+                            <p>{{ $homologacion->estudiante->municipio }}</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gestión del Proceso -->
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title"><i class="fas fa-tasks mr-2"></i> Gestión del Proceso</h4>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('admin.homologaciones.actualizar', $homologacion->id) }}"
-                                method="POST">
-                                @csrf
-                                @method('PUT')
-
-                                <div class="form-group">
-                                    <label for="estado">Estado de la homologación:</label>
-                                    <p class="form-control-plaintext">{{ ucfirst($homologacion->estado) }}</p>
-                                </div>
-
-                                <div class="form-group mt-4">
-                                    <button type="button" class="btn btn-primary btn-block" id="verificarDocumentos">
-                                        <i class="fas fa-check-circle mr-2"></i> Verificar Documentos
-                                    </button>
-                                </div>
-
-                                <div class="form-group mt-3">
-                                    <button type="button" class="btn btn-success btn-block" id="iniciarProceso">
-                                        <i class="fas fa-play-circle mr-2"></i> Iniciar Proceso
-                                    </button>
-                                </div>
-
-                                <div class="form-group mt-3">
-                                    <button type="submit" class="btn btn-info btn-block">
-                                        <i class="fas fa-save mr-2"></i> Guardar Cambios
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                <!-- Información Académica -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0"><i class="fas fa-graduation-cap me-2"></i> Información Académica</h5>
                     </div>
-
-                    <!-- Historial de Cambios -->
-                    <div class="card mt-4">
-                        <div class="card-header">
-                            <h4 class="card-title"><i class="fas fa-history mr-2"></i> Historial de Cambios</h4>
+                    <div class="card-body row">
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Instituto de origen:</strong></label>
+                            <p>{{ $homologacion->instituto_origen }}</p>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <tbody>
-                                        @forelse($homologacion->historial as $historia)
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex justify-content-between">
-                                                        <div>
-                                                            <p class="mb-0"><strong>{{ $historia->accion }}</strong></p>
-                                                            <small
-                                                                class="text-muted">{{ $historia->created_at->format('d/m/Y - h:i A') }}</small>
-                                                        </div>
-                                                        <span class="badge badge-secondary">{{ $historia->usuario }}</span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td class="text-center">No hay registros en el historial</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Programa cursado:</strong></label>
+                            <p>{{ $homologacion->programa_origen }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Carrera de interés:</strong></label>
+                            <p>{{ $homologacion->carrera_interes }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label><strong>Fecha de solicitud:</strong></label>
+                            <p>{{ $homologacion->fecha_solicitud->format('d/m/Y') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Gestión del Proceso -->
+            <div class="col-lg-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0"><i class="fas fa-tasks me-2"></i> Gestión del Proceso</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('admin.homologaciones.actualizar', $homologacion->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+
+                            <div class="form-group mb-4">
+                                <label class="fw-bold">Estado actual:</label>
+                                <div class="alert alert-{{ $homologacion->estado_class }} text-center">
+                                    {{ ucfirst($homologacion->estado) }}
+                                </div>
+                            </div>
+                            <a href="{{ route('homologacion.documentos', $homologacion->codigo) }}"
+                                class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-check-circle me-2"></i> Verificar Documentos
+                            </a>
+
+
+                            <a href="{{ route('admin.homologacionescoordinador.procesohomologacion', $homologacion->codigo) }}"
+                                class="btn btn-success w-100 mb-3">
+                                <i class="fas fa-play-circle me-2"></i> Iniciar Proceso
+                             </a>
+
+
+                            <button type="submit" class="btn btn-info w-100">
+                                <i class="fas fa-save me-2"></i> Guardar Cambios
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</body>
 
-</html>
-<script src="{{ asset('js/informacionhomologacion.js') }}"></script>
-
+    {{-- Scripts --}}
+    <script src="{{ asset('js/informacionhomologacion.js') }}"></script>
 @endsection

@@ -1,5 +1,5 @@
 {{-- resources/views/homologacionescoordinador/coordinador.blade.php --}}
-@extends('admin.layouts.app')
+@extends('admin.layouts.appcoordinacion')
 
 @section('title', 'Dashboard Coordinador')
 

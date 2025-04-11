@@ -1,0 +1,65 @@
+.btn-outline-primary {
+    position: relative;
+    overflow: hidden;
+    background-color: transparent;
+    color: var(--azul-medio);
+    border: 2px solid var(--azul-medio);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.btn-outline-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background-color: var(--azul-medio);
+    opacity: 0.2;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    z-index: -1;
+}
+
+.btn-outline-primary:hover {
+    color: white;
+    background-color: var(--azul-oscuro);
+    border-color: var(--azul-oscuro);
+    box-shadow: 0 6px 12px rgba(0, 117, 191, 0.4);
+}
+
+.btn-outline-primary:hover::after {
+    width: 300%;
+    height: 300%;
+}
+.badge-documento-no {
+    display: inline-block;
+    padding: 0.4rem 0.75rem;
+    background-color: rgba(191, 30, 46, 0.1); /* rojo suave */
+    color: #bf1e2e; /* rojo fuerte */
+    font-weight: 600;
+    border: 1px solid #bf1e2e;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 6px rgba(191, 30, 46, 0.15);
+    transition: all 0.3s ease;
+}
+.titulo-documento {
+    font-size: 1.1rem; /* Tamaño más grande */
+    color: var(--azul-oscuro); /* O un color más fuerte que combine con tu paleta */
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.titulo-documento::before {
+    content: "\f15c"; /* ícono de archivo */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--azul-claro); /* o el azul que uses en botones */
+}

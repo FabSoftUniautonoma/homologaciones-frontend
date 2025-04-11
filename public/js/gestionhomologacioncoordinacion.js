@@ -62,16 +62,18 @@ $(document).ready(function () {
 
     // Abrir detalle de solicitud al hacer clic en botón con clase .ver-detalles
 
-
-    document.querySelectorAll(".ver-detalles").forEach(button => {
-        button.addEventListener("click", function (e) {
-            e.preventDefault();
-            let solicitudID = this.getAttribute("data-id");
-            if (solicitudID) {
-                let url = `/homologacion/${solicitudID}`;
-                window.open(url, "_blank");
-            }
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".ver-detalles").forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+                let solicitudID = this.getAttribute("data-id");
+                if (solicitudID) {
+                    let url = `/homologacion/${solicitudID}`;
+                    window.open(url, "_blank");
+                }
+            });
         });
     });
+   
 })
 
