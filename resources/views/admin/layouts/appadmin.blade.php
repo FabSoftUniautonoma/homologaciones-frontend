@@ -1236,10 +1236,36 @@
                             <h4 class="text-section">Estadísticas</h4>
                         </li>
 
-                        <li class="nav-item {{-- {{ request()->is(['dashboard', '/']) ? 'active' : '' }} --}}" data-aos="fade-right" data-aos-delay="200">
-                            <a href="{{-- {{ route('dashboard') }} --}}">
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                            <a href="{{ url(path: '/admin') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-home"></i>
-                                <p>Tablero</p>
+                                <p>Home</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                            <a href="{{ url(path: '/instituciones') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-building"></i>
+                                <p>Instituciones</p>
+                            </a>
+                            <ul class="sub-menu">
+                                <li class="nav-item" data-aos="fade-right" data-aos-delay="250">
+                                    <a href="{{ url(path: '/programas') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <p>Programas</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
+                                    <a href="{{ url(path: '/materia') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-book"></i>
+                                        <p>Materias</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                            <a href="{{ url(path: '/admin/usuarios') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-users"></i>
+                                <p>Usuarios</p>
                             </a>
                         </li>
                     </ul>

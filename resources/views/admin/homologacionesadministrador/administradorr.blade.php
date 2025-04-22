@@ -1,139 +1,128 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de administración</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome para iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- CSS personalizado -->
-    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
-</head>
-<body>
-    <div class="wrapper">
+@extends('admin.layouts.appadmin')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center p-3 shadow-sm topbar">
+
+<div class="container-fluid p-0">
+    <div class="d-flex flex-column flex-md-row min-vh-100">
         <!-- Sidebar -->
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <h3>Panel de admin</h3>
+
+
+
+
+        <!-- Contenido -->
+        <div class="flex-fill">
+            <!-- Topbar -->
+            <div class="d-flex justify-content-between align-items-center bg-white p-3 shadow-sm">
+               
+                <h1 class="h5 mb-0 text-primary">Corporación Universitaria Autónoma del Cauca</h1>
+                <div class="dropdown">
+
+                </div>
             </div>
 
-            <ul class="list-unstyled components">
-                <li class="active">
-                    <a href="#homeSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                        <i class="fas fa-users"></i> Usuarios
-                    </a>
-                    <ul class="collapse list-unstyled" id="homeSubmenu">
-                        <li>
-                            <a href="{{ url('/admin/usuarios') }}">Listar usuarios</a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/admin/usuarios/crear') }}">Crear usuario</a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/admin/roles') }}">Roles y Permisos</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#institucionSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                        <i class="fas fa-university"></i> Instituciones
-                    </a>
-                    <ul class="collapse list-unstyled" id="institucionSubmenu">
-                        <li>
-                            <a href="{{ url('/admin/instituciones') }}">Listar instituciones</a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/admin/instituciones/crear') }}">Crear institución</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#programaSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                        <i class="fas fa-graduation-cap"></i> Programas
-                    </a>
-                    <ul class="collapse list-unstyled" id="programaSubmenu">
-                        <li>
-                            <a href="{{ url('/admin/programas') }}">Listar programas</a>
-                        </li>
-                        <li>
-                            <a href="{{ url('/admin/programas/crear') }}">Crear programa</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
+            <!-- Panel principal -->
+            <div class="p-4">
+                <div class="card shadow rounded-lg">
+                    <div class="card-header bg-white">
+                        <h4 class="text-primary">Panel de control</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Usuarios -->
+                            <div class="col-md-6 mb-4">
+                                <div class="quick-card text-center p-4 shadow rounded">
+                                    <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                                    <h5>Usuarios</h5>
+                                    <p>Gestión de usuarios del sistema</p>
+                                    <a href="{{ url('/admin/usuarios') }}" class="btn btn-primary">Acceder</a>
+                                </div>
+                            </div>
+                            <!-- Instituciones -->
+                            <div class="col-md-6 mb-4">
+                                <div class="quick-card text-center p-4 shadow rounded">
+                                    <i class="fas fa-university fa-2x text-primary mb-3"></i>
+                                    <h5>Instituciones</h5>
+                                    <p>Administración de instituciones</p>
+                                    <a href="{{ url('/admin/programas') }}" class="btn btn-primary">Acceder</a>
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- Page Content -->
-        <div id="content">
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="container-fluid">
-                    <button type="button" id="sidebarCollapse" class="btn btn-info">
-                        <i class="fas fa-align-left"></i>
-                        <span>Menú</span>
-                    </button>
-                    <div class="ms-auto">
-                        <div class="dropdown">
-                            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user"></i> Administrador
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                <li><a class="dropdown-item" href="#">Perfil</a></li>
-                                <li><a class="dropdown-item" href="#">Configuración</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
-                            </ul>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Bienvenido al Sistema. Seleccione una de las opciones del menú para comenzar a gestionar la información.
                         </div>
                     </div>
                 </div>
-            </nav>
-
-            <div class="container-fluid content-wrapper">
-                <!-- Flash Messages -->
-                @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                @endif
-
-                @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                @endif
-
-                <!-- Contenido principal -->
-                @yield('content')
             </div>
         </div>
     </div>
+</div>
+@endsection
+@push('styles')
+<style>
+  body, .container-fluid, .flex-fill {
+    background-color: #050570 !important;
+    color: #ffffff !important;
+}
 
-    <!-- Modal para mensajes de confirmación -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModalLabel">Confirmación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="confirmMessage">Datos guardados correctamente</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+.sidebar, .sidebar.bg-primary {
+    background-color: #031043 !important;
+    color: #ffffff !important;
+}
 
-    <!-- Scripts de Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Script personalizado -->
-    <script src="{{ asset('js/admin.js') }}"></script>
-</body>
-</html>
+.card, .quick-card {
+    background-color: #0a1a5a !important;
+    color: white !important;
+    border: none !important;
+}
+
+.card-header {
+    background-color: #10246d !important;
+    border-bottom: 1px solid #1b2f77 !important;
+}
+
+.btn-primary {
+    background-color: #3c5eff !important;
+    border-color: #3c5eff !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: #2f4dcc !important;
+    border-color: #2f4dcc !important;
+}
+
+.d-flex.justify-content-between.align-items-center.p-3.shadow-sm,
+.topbar {
+    background-color: #031043 !important;
+    color: white !important;
+}
+
+.alert-info {
+    background-color: #1e3d85 !important;
+    color: #e0eaff !important;
+    border-color: #173372 !important;
+}
+
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('openSidebar');
+    const closeBtn = document.getElementById('toggleSidebar');
+
+    if (openBtn && closeBtn && sidebar) {
+        openBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+    }
+</script>
+@endpush

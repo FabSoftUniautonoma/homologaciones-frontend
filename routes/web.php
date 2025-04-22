@@ -5,6 +5,11 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\View\Factory;
 
 use App\Http\Controllers\HomologacionController;
+use App\Http\Controllers\InstitucionesController;
+use App\Http\Controllers\ProgramasController;
+use App\Http\Controllers\AsignaturasController;
+use App\Http\Controllers\UsuarioControllerApi;
+
 use Illuminate\Support\Carbon;
 
 /*
@@ -205,7 +210,7 @@ Route::get('/admin/instituciones', function () {
 });
 
 Route::get('/admin/programas', function () {
-    return view('admin.homologacionesadministrador.programas_crear');
+    return view('admin.homologacionesadministrador.visualiinsti');
 });
 Route::get('/programas', function () {
     return view('admin.homologacionesadministrador.programas');
@@ -217,9 +222,54 @@ Route::get('/admin/usuarios', function () {
     return view('admin.homologacionesadministrador.usuarios');
 });
 
-Route::get('/admin/usuarios/crear', function () {
+Route::get('/usuarioscrear', function () {
     return view('admin.homologacionesadministrador.usuarios_crear');
 });
+Route::get('/admin/agregari', function () {
+    return view('admin.homologacionesadministrador.agregarinsti');
+});
+Route::get('/programas', function () {
+    return view('admin.homologacionesadministrador.programa');
+});
+
+Route::get('/materia', function () {
+    return view('admin.homologacionesadministrador.materia');
+});
+Route::get('/instituciones', function () {
+    return view('admin.homologacionesadministrador.instituciones');
+});
+Route::get('/editarusuario', function () {
+    return view('admin.homologacionesadministrador.editarusuario');
+});
+
+// Ruta para la página principal que muestra las instituciones
+
+// Rutas para instituciones
+Route::get('/institucioness', [InstitucionesController::class, 'index'])->name('instituciones.index');
+Route::get('/institucioness/{id}', [InstitucionesController::class, 'show'])->name('instituciones.show');
+
+// Rutas para programas
+Route::get('/programas/{id}', [ProgramasController::class, 'show'])->name('programas.show');
+
+// Rutas para asignaturas
+Route::get('/asignaturas/{id}', [AsignaturasController::class, 'show'])->name('asignaturas.show');
+
+
+// rutas/web.php
+
+Route::post('/admin/usuarios/crear', function () {
+    return redirect('/admin/usuarios')->with('success', 'Usuario creado con éxito');
+});
+
+
+
+use Illuminate\Support\Facades\Auth;
+
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/admin');
+})->name('logout');
+
 // Notificaciones
 Route::get('/notificaciones', function () {
     return view('admin.homologacionescoordinador.componentes.notificaciones');
@@ -231,4 +281,3 @@ Route::put('/admin/homologaciones/{id}', [HomologacionController::class, 'actual
 
     Route::post('/admin/homologaciones/{id}/iniciar', [HomologacionController::class, 'iniciarProceso'])
     ->name('admin.homologacionescoordinador.iniciar');
-  

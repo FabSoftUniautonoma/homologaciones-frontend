@@ -1,533 +1,1136 @@
-@extends('admin.layouts.app')
-@section('title', 'Crear Nueva Institución')
-
+@extends('admin.layouts.appadmin')
 @section('content')
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Crear Nueva Institución</h1>
-        <a href="{{ url('/admin/instituciones') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Volver
-        </a>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Gestión de Instituciones</h6>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addInstitutionModal">
+                        <i class="fas fa-plus me-2"></i>Agregar Institución
+                    </button>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <!-- Alerta de éxito -->
+                    <div class="alert alert-success alert-dismissible fade show mx-4 mt-3 d-none" id="successAlert" role="alert">
+                        <span class="alert-text" id="successMessage">Cambios guardados exitosamente</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <!-- Alerta de error -->
+                    <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3 d-none" id="errorAlert" role="alert">
+                        <span class="alert-text" id="errorMessage">Error al guardar cambios</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Listado de instituciones -->
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Institución</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Ubicación</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Programas</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Estado</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="institutionsTable">
+                                <!-- Datos de ejemplo, esto se llenaría dinámicamente -->
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-3 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">Universidad Nacional</h6>
+                                                <p class="text-xs text-secondary mb-0">unacional.edu</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">Bogotá</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">12 programas</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm bg-gradient-success">Activa</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="showPrograms(1)">
+                                            <i class="fas fa-list text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="editInstitution(1)">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger mb-0"
+                                                onclick="confirmDeleteInstitution(1)">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-3 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">Instituto Tecnológico</h6>
+                                                <p class="text-xs text-secondary mb-0">institutotec.edu</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">Medellín</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">8 programas</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm bg-gradient-success">Activa</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="showPrograms(2)">
+                                            <i class="fas fa-list text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="editInstitution(2)">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger mb-0"
+                                                onclick="confirmDeleteInstitution(2)">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Información de la Institución</h5>
-        </div>
-        <div class="card-body">
-            <form id="institucionForm" action="{{ url('/admin/instituciones/guardar') }}" method="POST">
-                @csrf
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="nombre" class="form-label">Nombre de la Institución *</label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" required
-                               pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
-                               title="El nombre no debe incluir caracteres numéricos">
-                        <div class="invalid-feedback">
-                            El nombre no debe incluir caracteres numéricos.
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="codigo_snies" class="form-label">Código SNIES *</label>
-                        <input type="text" class="form-control" id="codigo_snies" name="codigo_snies" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="ciudad" class="form-label">Ciudad *</label>
-                        <input type="text" class="form-control" id="ciudad" name="ciudad" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="pais" class="form-label">País *</label>
-                        <input type="text" class="form-control" id="pais" name="pais" value="Colombia" required>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 mb-3">
-                        <label for="direccion" class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="direccion" name="direccion">
-                    </div>
-                </div>
-
-                <hr class="my-4">
-                <h4>Programa Académico <span class="text-danger">*</span></h4>
-                <p class="text-muted">Se requiere crear al menos un programa para registrar la institución.</p>
-
-                <div id="programa-container">
-                    <div class="card mb-3 bg-light">
-                        <div class="card-body">
-                            <h5 class="card-title">Programa #1</h5>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="programa_nombre" class="form-label">Nombre del Programa *</label>
-                                    <input type="text" class="form-control" id="programa_nombre" name="programas[0][nombre]" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="programa_codigo" class="form-label">Código SNIES *</label>
-                                    <input type="text" class="form-control" id="programa_codigo" name="programas[0][codigo]" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="programa_facultad" class="form-label">Facultad *</label>
-                                    <select class="form-select" id="programa_facultad" name="programas[0][facultad]" required>
-                                        <option value="">Seleccionar facultad</option>
-                                        <option value="Ingeniería">Ingeniería</option>
-                                        <option value="Ciencias Sociales">Ciencias Sociales</option>
-                                        <option value="Ciencias de la Salud">Ciencias de la Salud</option>
-                                        <option value="Educación">Educación</option>
-                                        <option value="Ciencias Administrativas">Ciencias Administrativas</option>
-                                        <option value="Otros">Otros</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3" id="otra-facultad-container" style="display: none;">
-                                    <label for="otra_facultad" class="form-label">Especificar Facultad *</label>
-                                    <input type="text" class="form-control" id="otra_facultad" name="programas[0][otra_facultad]">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="programa_creditos" class="form-label">Total de Créditos *</label>
-                                    <input type="number" class="form-control" id="programa_creditos" name="programas[0][creditos]" min="1" required>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="programa_horas" class="form-label">Total de Horas *</label>
-                                    <input type="number" class="form-control" id="programa_horas" name="programas[0][horas]" min="1" required>
-                                </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="programa_duracion" class="form-label">Duración (semestres) *</label>
-                                    <input type="number" class="form-control" id="programa_duracion" name="programas[0][duracion]" min="1" required>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12 mb-3">
-                                    <label for="programa_metodologia" class="form-label">Metodología *</label>
-                                    <select class="form-select" id="programa_metodologia" name="programas[0][metodologia]" required>
-                                        <option value="">Seleccionar metodología</option>
-                                        <option value="Presencial">Presencial</option>
-                                        <option value="Virtual">Virtual</option>
-                                        <option value="Híbrida">Híbrida</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-12">
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarMateria(0)">
-                                        <i class="fas fa-plus-circle"></i> Agregar Materia
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div id="materias-container-0" class="mt-3">
-                                <h6>Materias del Programa</h6>
-                                <div class="materia-item mb-2">
-                                    <div class="row">
-                                        <div class="col-md-4 mb-2">
-                                            <input type="text" class="form-control" placeholder="Nombre de la materia"
-                                                name="programas[0][materias][0][nombre]" required>
-                                        </div>
-                                        <div class="col-md-2 mb-2">
-                                            <input type="number" class="form-control" placeholder="Créditos" min="1"
-                                                name="programas[0][materias][0][creditos]" required>
-                                        </div>
-                                        <div class="col-md-2 mb-2">
-                                            <input type="number" class="form-control" placeholder="Semestre" min="1"
-                                                name="programas[0][materias][0][semestre]" required>
-                                        </div>
-                                        <div class="col-md-3 mb-2">
-                                            <select class="form-select" name="programas[0][materias][0][tipo]" required>
-                                                <option value="">Tipo</option>
-                                                <option value="Obligatoria">Obligatoria</option>
-                                                <option value="Electiva">Electiva</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-1 mb-2">
-                                            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarMateria(this)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mt-3 mb-3">
-                    <div class="col-12">
-                        <button type="button" class="btn btn-success" onclick="agregarPrograma()">
-                            <i class="fas fa-plus"></i> Agregar Otro Programa
+    <!-- Panel de visualización de programas (inicialmente oculto) -->
+    <div class="row d-none" id="programsPanel">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Programas de <span id="institutionName">Universidad Nacional</span></h6>
+                        <button class="btn btn-link px-0" onclick="hidePrograms()">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a instituciones
                         </button>
                     </div>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProgramModal">
+                        <i class="fas fa-plus me-2"></i>Agregar Programa
+                    </button>
                 </div>
-
-                <div class="row mt-4">
-                    <div class="col-12 text-end">
-                        <button type="button" class="btn btn-secondary me-2" onclick="window.location.href='{{ url('/admin/instituciones') }}'">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Institución</button>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Programa</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Nivel</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Materias</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Estado</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programsTable">
+                                <!-- Datos de ejemplo, esto se llenaría dinámicamente -->
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-3 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">Ingeniería de Sistemas</h6>
+                                                <p class="text-xs text-secondary mb-0">Código: ING-SIS-2023</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">Pregrado</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">24 materias</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm bg-gradient-success">Activo</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="showSubjects(1)">
+                                            <i class="fas fa-list text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="editProgram(1)">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger mb-0"
+                                                onclick="confirmDeleteProgram(1)">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-3 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">Administración de Empresas</h6>
+                                                <p class="text-xs text-secondary mb-0">Código: ADM-EMP-2023</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">Pregrado</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">20 materias</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm bg-gradient-success">Activo</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="showSubjects(2)">
+                                            <i class="fas fa-list text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="editProgram(2)">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger mb-0"
+                                                onclick="confirmDeleteProgram(2)">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de visualización de materias (inicialmente oculto) -->
+    <div class="row d-none" id="subjectsPanel">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-0">Materias de <span id="programName">Ingeniería de Sistemas</span></h6>
+                        <button class="btn btn-link px-0" onclick="backToPrograms()">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a programas
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+                        <i class="fas fa-plus me-2"></i>Agregar Materia
+                    </button>
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Materia</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Semestre</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Créditos</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Estado</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjectsTable">
+                                <!-- Datos de ejemplo, esto se llenaría dinámicamente -->
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-3 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">Algoritmos y Programación</h6>
+                                                <p class="text-xs text-secondary mb-0">Código: ALG-001</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">1</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">4</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm bg-gradient-success">Activa</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="editSubject(1)">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger mb-0"
+                                                onclick="confirmDeleteSubject(1)">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-3 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">Cálculo Diferencial</h6>
+                                                <p class="text-xs text-secondary mb-0">Código: CAL-001</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">1</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0">4</p>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm bg-gradient-success">Activa</span>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <button class="btn btn-link text-secondary mb-0"
+                                                onclick="editSubject(2)">
+                                            <i class="fas fa-edit text-xs"></i>
+                                        </button>
+                                        <button class="btn btn-link text-danger mb-0"
+                                                onclick="confirmDeleteSubject(2)">
+                                            <i class="fas fa-trash text-xs"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de éxito -->
-<div class="modal fade" id="exitoModal" tabindex="-1" aria-labelledby="exitoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Modal para agregar una nueva institución -->
+<div class="modal fade" id="addInstitutionModal" tabindex="-1" role="dialog" aria-labelledby="addInstitutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="exitoModalLabel">Éxito</h5>
+            <div class="modal-header">
+                <h5 class="modal-title" id="addInstitutionModalLabel">Agregar Nueva Institución</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="text-center">
-                    <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
-                    <p>Datos guardados con éxito.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="window.location.href='{{ url('/admin/instituciones') }}'">Aceptar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de agregar programa -->
-<div class="modal fade" id="agregarProgramaModal" tabindex="-1" aria-labelledby="agregarProgramaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="agregarProgramaModalLabel">Agregar Programa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="programaModalForm">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="modal_programa_nombre" class="form-label">Nombre del Programa *</label>
-                            <input type="text" class="form-control" id="modal_programa_nombre" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="modal_programa_codigo" class="form-label">Código SNIES *</label>
-                            <input type="text" class="form-control" id="modal_programa_codigo" required>
-                        </div>
+                <form id="addInstitutionForm">
+                    <div class="form-group mb-3">
+                        <label for="institutionName" class="form-control-label">Nombre de la Institución</label>
+                        <input type="text" class="form-control" id="institutionNameInput" placeholder="Ingrese el nombre de la institución" required>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="modal_programa_facultad" class="form-label">Facultad *</label>
-                            <select class="form-select" id="modal_programa_facultad" required>
-                                <option value="">Seleccionar facultad</option>
-                                <option value="Ingeniería">Ingeniería</option>
-                                <option value="Ciencias Sociales">Ciencias Sociales</option>
-                                <option value="Ciencias de la Salud">Ciencias de la Salud</option>
-                                <option value="Educación">Educación</option>
-                                <option value="Ciencias Administrativas">Ciencias Administrativas</option>
-                                <option value="Otros">Otros</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3" id="modal-otra-facultad-container" style="display: none;">
-                            <label for="modal_otra_facultad" class="form-label">Especificar Facultad *</label>
-                            <input type="text" class="form-control" id="modal_otra_facultad">
-                        </div>
+                    <div class="form-group mb-3">
+                        <label for="institutionWeb" class="form-control-label">Sitio Web</label>
+                        <input type="url" class="form-control" id="institutionWeb" placeholder="Ingrese la URL del sitio web">
                     </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="modal_programa_creditos" class="form-label">Total de Créditos *</label>
-                            <input type="number" class="form-control" id="modal_programa_creditos" min="1" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="modal_programa_horas" class="form-label">Total de Horas *</label>
-                            <input type="number" class="form-control" id="modal_programa_horas" min="1" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="modal_programa_duracion" class="form-label">Duración (semestres) *</label>
-                            <input type="number" class="form-control" id="modal_programa_duracion" min="1" required>
-                        </div>
+                    <div class="form-group mb-3">
+                        <label for="institutionLocation" class="form-control-label">Ubicación</label>
+                        <input type="text" class="form-control" id="institutionLocation" placeholder="Ciudad, País">
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="modal_programa_metodologia" class="form-label">Metodología *</label>
-                            <select class="form-select" id="modal_programa_metodologia" required>
-                                <option value="">Seleccionar metodología</option>
-                                <option value="Presencial">Presencial</option>
-                                <option value="Virtual">Virtual</option>
-                                <option value="Híbrida">Híbrida</option>
-                            </select>
-                        </div>
+                    <div class="form-group mb-3">
+                        <label for="institutionStatus" class="form-control-label">Estado</label>
+                        <select class="form-control" id="institutionStatus">
+                            <option value="active">Activa</option>
+                            <option value="inactive">Inactiva</option>
+                        </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" id="guardarProgramaBtn">Guardar Programa</button>
+                <button type="button" class="btn btn-primary" onclick="saveInstitution()">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
-@endsection
+<!-- Modal para editar una institución existente -->
+<div class="modal fade" id="editInstitutionModal" tabindex="-1" role="dialog" aria-labelledby="editInstitutionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInstitutionModalLabel">Editar Institución</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInstitutionForm">
+                    <input type="hidden" id="editInstitutionId">
+                    <div class="form-group mb-3">
+                        <label for="editInstitutionName" class="form-control-label">Nombre de la Institución</label>
+                        <input type="text" class="form-control" id="editInstitutionName" placeholder="Ingrese el nombre de la institución" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editInstitutionWeb" class="form-control-label">Sitio Web</label>
+                        <input type="url" class="form-control" id="editInstitutionWeb" placeholder="Ingrese la URL del sitio web">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editInstitutionLocation" class="form-control-label">Ubicación</label>
+                        <input type="text" class="form-control" id="editInstitutionLocation" placeholder="Ciudad, País">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editInstitutionStatus" class="form-control-label">Estado</label>
+                        <select class="form-control" id="editInstitutionStatus">
+                            <option value="active">Activa</option>
+                            <option value="inactive">Inactiva</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="updateInstitution()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-@section('scripts')
+<!-- Modal para agregar un nuevo programa -->
+<div class="modal fade" id="addProgramModal" tabindex="-1" role="dialog" aria-labelledby="addProgramModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProgramModalLabel">Agregar Nuevo Programa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProgramForm">
+                    <input type="hidden" id="programInstitutionId">
+                    <div class="form-group mb-3">
+                        <label for="programName" class="form-control-label">Nombre del Programa</label>
+                        <input type="text" class="form-control" id="programNameInput" placeholder="Ingrese el nombre del programa" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="programCode" class="form-control-label">Código</label>
+                        <input type="text" class="form-control" id="programCode" placeholder="Ingrese el código del programa">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="programLevel" class="form-control-label">Nivel</label>
+                        <select class="form-control" id="programLevel">
+                            <option value="pregrado">Pregrado</option>
+                            <option value="posgrado">Posgrado</option>
+                            <option value="maestria">Maestría</option>
+                            <option value="doctorado">Doctorado</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="programStatus" class="form-control-label">Estado</label>
+                        <select class="form-control" id="programStatus">
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveProgram()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar un programa existente -->
+<div class="modal fade" id="editProgramModal" tabindex="-1" role="dialog" aria-labelledby="editProgramModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProgramModalLabel">Editar Programa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProgramForm">
+                    <input type="hidden" id="editProgramId">
+                    <div class="form-group mb-3">
+                        <label for="editProgramName" class="form-control-label">Nombre del Programa</label>
+                        <input type="text" class="form-control" id="editProgramName" placeholder="Ingrese el nombre del programa" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editProgramCode" class="form-control-label">Código</label>
+                        <input type="text" class="form-control" id="editProgramCode" placeholder="Ingrese el código del programa">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editProgramLevel" class="form-control-label">Nivel</label>
+                        <select class="form-control" id="editProgramLevel">
+                            <option value="pregrado">Pregrado</option>
+                            <option value="posgrado">Posgrado</option>
+                            <option value="maestria">Maestría</option>
+                            <option value="doctorado">Doctorado</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editProgramStatus" class="form-control-label">Estado</label>
+                        <select class="form-control" id="editProgramStatus">
+                            <option value="active">Activo</option>
+                            <option value="inactive">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="updateProgram()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar una nueva materia -->
+<div class="modal fade" id="addSubjectModal" tabindex="-1" role="dialog" aria-labelledby="addSubjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSubjectModalLabel">Agregar Nueva Materia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSubjectForm">
+                    <input type="hidden" id="subjectProgramId">
+                    <div class="form-group mb-3">
+                        <label for="subjectName" class="form-control-label">Nombre de la Materia</label>
+                        <input type="text" class="form-control" id="subjectNameInput" placeholder="Ingrese el nombre de la materia" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="subjectCode" class="form-control-label">Código</label>
+                        <input type="text" class="form-control" id="subjectCode" placeholder="Ingrese el código de la materia">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="subjectSemester" class="form-control-label">Semestre</label>
+                        <input type="number" class="form-control" id="subjectSemester" min="1" max="12" placeholder="Semestre">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="subjectCredits" class="form-control-label">Créditos</label>
+                        <input type="number" class="form-control" id="subjectCredits" min="1" max="10" placeholder="Créditos">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="subjectStatus" class="form-control-label">Estado</label>
+                        <select class="form-control" id="subjectStatus">
+                            <option value="active">Activa</option>
+                            <option value="inactive">Inactiva</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="saveSubject()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar una materia existente -->
+<div class="modal fade" id="editSubjectModal" tabindex="-1" role="dialog" aria-labelledby="editSubjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSubjectModalLabel">Editar Materia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editSubjectForm">
+                    <input type="hidden" id="editSubjectId">
+                    <div class="form-group mb-3">
+                        <label for="editSubjectName" class="form-control-label">Nombre de la Materia</label>
+                        <input type="text" class="form-control" id="editSubjectName" placeholder="Ingrese el nombre de la materia" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editSubjectCode" class="form-control-label">Código</label>
+                        <input type="text" class="form-control" id="editSubjectCode" placeholder="Ingrese el código de la materia">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editSubjectSemester" class="form-control-label">Semestre</label>
+                        <input type="number" class="form-control" id="editSubjectSemester" min="1" max="12" placeholder="Semestre">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editSubjectCredits" class="form-control-label">Créditos</label>
+                        <input type="number" class="form-control" id="editSubjectCredits" min="1" max="10" placeholder="Créditos">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="editSubjectStatus" class="form-control-label">Estado</label>
+                        <select class="form-control" id="editSubjectStatus">
+                            <option value="active">Activa</option>
+                            <option value="inactive">Inactiva</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="updateSubject()">Actualizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteConfirmText">¿Está seguro de que desea eliminar este elemento?</p>
+                <input type="hidden" id="deleteItemId">
+                <input type="hidden" id="deleteItemType">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="deleteConfirmed()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    let programaCounter = 1;
-    let materiaCounters = {'0': 1};
+    // Variables globales para almacenar referencias
+    let currentInstitutionId = null;
+    let currentProgramId = null;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Validación del formulario
-        const form = document.getElementById('institucionForm');
+    // Funciones para mostrar/ocultar paneles
+    function showPrograms(institutionId) {
+        // En una aplicación real, aquí se cargarían los programas desde el servidor
+        currentInstitutionId = institutionId;
 
-        form.addEventListener('submit', function(event) {
-            event.preventDefault();
+        // Actualizar el nombre de la institución en el panel de programas
+        const institutionName = document.querySelector(`#institutionsTable tr[data-id="${institutionId}"] h6`).textContent;
+        document.getElementById('institutionName').textContent = institutionName;
 
-            if (!validarFormulario()) {
-                return;
-            }
+        // Ocultar panel de instituciones y mostrar panel de programas
+        document.getElementById('programsPanel').classList.remove('d-none');
+        document.getElementById('subjectsPanel').classList.add('d-none');
 
-            // Simulación de envío (aquí iría la lógica de envío al backend)
-            setTimeout(function() {
-                const modal = new bootstrap.Modal(document.getElementById('exitoModal'));
-                modal.show();
-            }, 500);
-        });
+        // Asignar el ID de la institución para el formulario de agregar programa
+        document.getElementById('programInstitutionId').value = institutionId;
 
-        // Mostrar campo "otra facultad" si se selecciona "Otros"
-        document.getElementById('programa_facultad').addEventListener('change', function() {
-            const otraFacultadContainer = document.getElementById('otra-facultad-container');
-            otraFacultadContainer.style.display = this.value === 'Otros' ? 'block' : 'none';
-
-            const otraFacultadInput = document.getElementById('otra_facultad');
-            otraFacultadInput.required = this.value === 'Otros';
-        });
-
-        // Similar para el modal
-        document.getElementById('modal_programa_facultad').addEventListener('change', function() {
-            const otraFacultadContainer = document.getElementById('modal-otra-facultad-container');
-            otraFacultadContainer.style.display = this.value === 'Otros' ? 'block' : 'none';
-
-            const otraFacultadInput = document.getElementById('modal_otra_facultad');
-            otraFacultadInput.required = this.value === 'Otros';
-        });
-
-        // Configurar botón para guardar programa desde modal
-        document.getElementById('guardarProgramaBtn').addEventListener('click', function() {
-            const modalForm = document.getElementById('programaModalForm');
-
-            if (!modalForm.checkValidity()) {
-                modalForm.reportValidity();
-                return;
-            }
-
-            // Agregar programa desde modal
-            const nombre = document.getElementById('modal_programa_nombre').value;
-            const codigo = document.getElementById('modal_programa_codigo').value;
-            const facultad = document.getElementById('modal_programa_facultad').value;
-            const creditos = document.getElementById('modal_programa_creditos').value;
-            const horas = document.getElementById('modal_programa_horas').value;
-            const duracion = document.getElementById('modal_programa_duracion').value;
-            const metodologia = document.getElementById('modal_programa_metodologia').value;
-
-            let otraFacultad = '';
-            if (facultad === 'Otros') {
-                otraFacultad = document.getElementById('modal_otra_facultad').value;
-            }
-
-            // Añadir programa al formulario
-            agregarProgramaDesdeModal(nombre, codigo, facultad, otraFacultad, creditos, horas, duracion, metodologia);
-
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('agregarProgramaModal'));
-            modal.hide();
-
-            // Limpiar formulario del modal
-            modalForm.reset();
-        });
-    });
-
-    function validarFormulario() {
-        const form = document.getElementById('institucionForm');
-
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return false;
-        }
-
-        // Validar que haya al menos un programa
-        const programas = document.querySelectorAll('#programa-container .card');
-        if (programas.length === 0) {
-            alert('Debe crear al menos un programa para la institución.');
-            return false;
-        }
-
-        return true;
+        // Scroll hacia el panel de programas
+        document.getElementById('programsPanel').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function agregarPrograma() {
-        // Abrir modal para agregar programa
-        const modal = new bootstrap.Modal(document.getElementById('agregarProgramaModal'));
+    function hidePrograms() {
+        document.getElementById('programsPanel').classList.add('d-none');
+        document.getElementById('subjectsPanel').classList.add('d-none');
+    }
+
+    function showSubjects(programId) {
+        // En una aplicación real, aquí se cargarían las materias desde el servidor
+        currentProgramId = programId;
+
+        // Actualizar el nombre del programa en el panel de materias
+        const programName = document.querySelector(`#programsTable tr[data-id="${programId}"] h6`).textContent;
+        document.getElementById('programName').textContent = programName;
+
+        // Mostrar panel de materias
+        document.getElementById('subjectsPanel').classList.remove('d-none');
+
+        // Asignar el ID del programa para el formulario de agregar materia
+        document.getElementById('subjectProgramId').value = programId;
+
+        // Scroll hacia el panel de materias
+        document.getElementById('subjectsPanel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function backToPrograms() {
+        document.getElementById('subjectsPanel').classList.add('d-none');
+    }
+
+    // Funciones para el manejo de instituciones
+    function editInstitution(institutionId) {
+        // En una aplicación real, aquí se cargarían los datos de la institución desde el servidor
+        // Para la demostración, simularemos con los datos existentes en la tabla
+
+        // Buscar la fila de la institución
+        const row = document.querySelector(`#institutionsTable tr[data-id="${institutionId}"]`);
+        if (row) {
+            const name = row.querySelector('h6').textContent;
+            const web = row.querySelector('p').textContent;
+            const location = row.querySelector('td:nth-child(2) p').textContent;
+            const status = row.querySelector('td:nth-child(4) span').classList.contains('bg-gradient-success') ? 'active' : 'inactive';
+
+            // Llenar el formulario de edición
+            document.getElementById('editInstitutionId').value = institutionId;
+            document.getElementById('editInstitutionName').value = name;
+            document.getElementById('editInstitutionWeb').value = web;
+            document.getElementById('editInstitutionLocation').value = location;
+            document.getElementById('editInstitutionStatus').value = status;
+
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('editInstitutionModal'));
+            modal.show();
+        }
+    }
+
+    function saveInstitution() {
+        // Validar el formulario
+        const form = document.getElementById('addInstitutionForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // En una aplicación real, aquí se enviarían los datos al servidor
+        // Para la demostración, simularemos una operación exitosa
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addInstitutionModal'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showSuccessMessage('Institución agregada exitosamente');
+
+        // Actualizar la tabla (en una aplicación real, esto se haría con los datos devueltos por el servidor)
+        const newRow = `
+            <tr data-id="${Date.now()}">
+                <td>
+                    <div class="d-flex px-3 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">${document.getElementById('institutionNameInput').value}</h6>
+                            <p class="text-xs text-secondary mb-0">${document.getElementById('institutionWeb').value}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <p class="text-xs font-weight-bold mb-0">${document.getElementById('institutionLocation').value}</p>
+                </td>
+                <td>
+                    <p class="text-xs font-weight-bold mb-0">0 programas</p>
+                </td>
+                <td>
+                    <span class="badge badge-sm bg-gradient-${document.getElementById('institutionStatus').value === 'active' ? 'success' : 'secondary'}">${document.getElementById('institutionStatus').value === 'active' ? 'Activa' : 'Inactiva'}</span>
+                </td>
+                <td class="align-middle text-center">
+                    <button class="btn btn-link text-secondary mb-0"
+                            onclick="showPrograms(${Date.now()})">
+                        <i class="fas fa-list text-xs"></i>
+                    </button>
+                    <button class="btn btn-link text-secondary mb-0"
+                            onclick="editInstitution(${Date.now()})">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                    <button class="btn btn-link text-danger mb-0"
+                            onclick="confirmDeleteInstitution(${Date.now()})">
+                        <i class="fas fa-trash text-xs"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        document.getElementById('institutionsTable').insertAdjacentHTML('beforeend', newRow);
+
+        // Resetear el formulario
+        form.reset();
+    }
+
+    function updateInstitution() {
+        // Validar el formulario
+        const form = document.getElementById('editInstitutionForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // En una aplicación real, aquí se enviarían los datos al servidor
+        // Para la demostración, simularemos una operación exitosa
+        const institutionId = document.getElementById('editInstitutionId').value;
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editInstitutionModal'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showSuccessMessage('Institución actualizada exitosamente');
+
+        // Actualizar la tabla (en una aplicación real, esto se haría con los datos devueltos por el servidor)
+        const row = document.querySelector(`#institutionsTable tr[data-id="${institutionId}"]`);
+        if (row) {
+            row.querySelector('h6').textContent = document.getElementById('editInstitutionName').value;
+            row.querySelector('p').textContent = document.getElementById('editInstitutionWeb').value;
+            row.querySelector('td:nth-child(2) p').textContent = document.getElementById('editInstitutionLocation').value;
+            const statusSpan = row.querySelector('td:nth-child(4) span');
+            statusSpan.className = `badge badge-sm bg-gradient-${document.getElementById('editInstitutionStatus').value === 'active' ? 'success' : 'secondary'}`;
+            statusSpan.textContent = document.getElementById('editInstitutionStatus').value === 'active' ? 'Activa' : 'Inactiva';
+        }
+    }
+
+    function confirmDeleteInstitution(institutionId) {
+        document.getElementById('deleteItemId').value = institutionId;
+        document.getElementById('deleteItemType').value = 'institution';
+        document.getElementById('deleteConfirmText').textContent = '¿Está seguro de que desea eliminar esta institución? Esta acción eliminará todos los programas y materias asociados.';
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
         modal.show();
     }
 
-    function agregarProgramaDesdeModal(nombre, codigo, facultad, otraFacultad, creditos, horas, duracion, metodologia) {
-        const programaContainer = document.getElementById('programa-container');
+    // Funciones para el manejo de programas
+    function editProgram(programId) {
+        // En una aplicación real, aquí se cargarían los datos del programa desde el servidor
+        // Para la demostración, simularemos con los datos existentes en la tabla
 
-        // Inicializar contador de materias para este programa
-        materiaCounters[programaCounter] = 0;
+        // Buscar la fila del programa
+        const row = document.querySelector(`#programsTable tr[data-id="${programId}"]`);
+        if (row) {
+            const name = row.querySelector('h6').textContent;
+            const code = row.querySelector('p').textContent.replace('Código: ', '');
+            const level = row.querySelector('td:nth-child(2) p').textContent.toLowerCase();
+            const status = row.querySelector('td:nth-child(4) span').classList.contains('bg-gradient-success') ? 'active' : 'inactive';
 
-        const programaHTML = `
-            <div class="card mb-3 bg-light">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="card-title mb-0">Programa #${programaCounter + 1}</h5>
-                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarPrograma(this)">
-                            <i class="fas fa-times"></i> Eliminar
-                        </button>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nombre del Programa *</label>
-                            <input type="text" class="form-control" value="${nombre}" name="programas[${programaCounter}][nombre]" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Código SNIES *</label>
-                            <input type="text" class="form-control" value="${codigo}" name="programas[${programaCounter}][codigo]" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Facultad *</label>
-                            <input type="text" class="form-control" value="${facultad === 'Otros' ? otraFacultad : facultad}" name="programas[${programaCounter}][facultad]" readonly>
-                            <input type="hidden" value="${facultad}" name="programas[${programaCounter}][facultad_original]">
-                            ${facultad === 'Otros' ? `<input type="hidden" value="${otraFacultad}" name="programas[${programaCounter}][otra_facultad]">` : ''}
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label class="form-label">Créditos *</label>
-                                    <input type="number" class="form-control" value="${creditos}" name="programas[${programaCounter}][creditos]" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Horas *</label>
-                                    <input type="number" class="form-control" value="${horas}" name="programas[${programaCounter}][horas]" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Semestres *</label>
-                                    <input type="number" class="form-control" value="${duracion}" name="programas[${programaCounter}][duracion]" required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label">Metodología *</label>
-                            <input type="text" class="form-control" value="${metodologia}" name="programas[${programaCounter}][metodologia]" readonly>
-                        </div>
-                    </div>
+            // Llenar el formulario de edición
+            document.getElementById('editProgramId').value = programId;
+            document.getElementById('editProgramName').value = name;
+            document.getElementById('editProgramCode').value = code;
+            document.getElementById('editProgramLevel').value = level;
+            document.getElementById('editProgramStatus').value = status;
 
-                    <div class="row">
-                        <div class="col-12">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarMateria(${programaCounter})">
-                                <i class="fas fa-plus-circle"></i> Agregar Materia
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="materias-container-${programaCounter}" class="mt-3">
-                        <h6>Materias del Programa</h6>
-                        <div class="materia-item mb-2">
-                            <div class="row">
-                                <div class="col-md-4 mb-2">
-                                    <input type="text" class="form-control" placeholder="Nombre de la materia"
-                                        name="programas[${programaCounter}][materias][0][nombre]" required>
-                                </div>
-                                <div class="col-md-2 mb-2">
-                                    <input type="number" class="form-control" placeholder="Créditos" min="1"
-                                        name="programas[${programaCounter}][materias][0][creditos]" required>
-                                </div>
-                                <div class="col-md-2 mb-2">
-                                    <input type="number" class="form-control" placeholder="Semestre" min="1"
-                                        name="programas[${programaCounter}][materias][0][semestre]" required>
-                                </div>
-                                <div class="col-md-3 mb-2">
-                                    <select class="form-select" name="programas[${programaCounter}][materias][0][tipo]" required>
-                                        <option value="">Tipo</option>
-                                        <option value="Obligatoria">Obligatoria</option>
-                                        <option value="Electiva">Electiva</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-1 mb-2">
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarMateria(this)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        programaContainer.insertAdjacentHTML('beforeend', programaHTML);
-        materiaCounters[programaCounter] = 1;
-        programaCounter++;
-    }
-
-    function eliminarPrograma(button) {
-        const programaCard = button.closest('.card');
-        programaCard.remove();
-    }
-
-    function agregarMateria(programaIndex) {
-        const materiasContainer = document.getElementById(`materias-container-${programaIndex}`);
-        const materiaIndex = materiaCounters[programaIndex];
-
-        const materiaHTML = `
-            <div class="materia-item mb-2">
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <input type="text" class="form-control" placeholder="Nombre de la materia"
-                            name="programas[${programaIndex}][materias][${materiaIndex}][nombre]" required>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <input type="number" class="form-control" placeholder="Créditos" min="1"
-                            name="programas[${programaIndex}][materias][${materiaIndex}][creditos]" required>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <input type="number" class="form-control" placeholder="Semestre" min="1"
-                            name="programas[${programaIndex}][materias][${materiaIndex}][semestre]" required>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <select class="form-select" name="programas[${programaIndex}][materias][${materiaIndex}][tipo]" required>
-                            <option value="">Tipo</option>
-                            <option value="Obligatoria">Obligatoria</option>
-                            <option value="Electiva">Electiva</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1 mb-2">
-                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarMateria(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        materiasContainer.insertAdjacentHTML('beforeend', materiaHTML);
-        materiaCounters[programaIndex]++;
-    }
-
-    function eliminarMateria(button) {
-        const materiaItem = button.closest('.materia-item');
-        const programaCard = button.closest('.card');
-        const materiasContainer = materiaItem.parentElement;
-
-        // Verificar si es la última materia del programa
-        if (materiasContainer.querySelectorAll('.materia-item').length > 1) {
-            materiaItem.remove();
-        } else {
-            alert('Debe haber al menos una materia en el programa.');
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('editProgramModal'));
+            modal.show();
         }
     }
+
+    function saveProgram() {
+        // Validar el formulario
+        const form = document.getElementById('addProgramForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // En una aplicación real, aquí se enviarían los datos al servidor
+        // Para la demostración, simularemos una operación exitosa
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addProgramModal'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showSuccessMessage('Programa agregado exitosamente');
+
+        // Actualizar la tabla (en una aplicación real, esto se haría con los datos devueltos por el servidor)
+        const newRow = `
+            <tr data-id="${Date.now()}">
+                <td>
+                    <div class="d-flex px-3 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">${document.getElementById('programNameInput').value}</h6>
+                            <p class="text-xs text-secondary mb-0">Código: ${document.getElementById('programCode').value}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <p class="text-xs font-weight-bold mb-0">${document.getElementById('programLevel').options[document.getElementById('programLevel').selectedIndex].text}</p>
+                </td>
+                <td>
+                    <p class="text-xs font-weight-bold mb-0">0 materias</p>
+                </td>
+                <td>
+                    <span class="badge badge-sm bg-gradient-${document.getElementById('programStatus').value === 'active' ? 'success' : 'secondary'}">${document.getElementById('programStatus').value === 'active' ? 'Activo' : 'Inactivo'}</span>
+                </td>
+                <td class="align-middle text-center">
+                    <button class="btn btn-link text-secondary mb-0"
+                            onclick="showSubjects(${Date.now()})">
+                        <i class="fas fa-list text-xs"></i>
+                    </button>
+                    <button class="btn btn-link text-secondary mb-0"
+                            onclick="editProgram(${Date.now()})">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                    <button class="btn btn-link text-danger mb-0"
+                            onclick="confirmDeleteProgram(${Date.now()})">
+                        <i class="fas fa-trash text-xs"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        document.getElementById('programsTable').insertAdjacentHTML('beforeend', newRow);
+
+        // Actualizar el contador de programas en la tabla de instituciones
+        const institutionRow = document.querySelector(`#institutionsTable tr[data-id="${currentInstitutionId}"]`);
+        if (institutionRow) {
+            const programsCount = institutionRow.querySelector('td:nth-child(3) p');
+            const currentCount = parseInt(programsCount.textContent) || 0;
+            programsCount.textContent = `${currentCount + 1} programas`;
+        }
+
+        // Resetear el formulario
+        form.reset();
+    }
+
+    function updateProgram() {
+        // Validar el formulario
+        const form = document.getElementById('editProgramForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // En una aplicación real, aquí se enviarían los datos al servidor
+        // Para la demostración, simularemos una operación exitosa
+        const programId = document.getElementById('editProgramId').value;
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showSuccessMessage('Programa actualizado exitosamente');
+
+        // Actualizar la tabla (en una aplicación real, esto se haría con los datos devueltos por el servidor)
+        const row = document.querySelector(`#programsTable tr[data-id="${programId}"]`);
+        if (row) {
+            row.querySelector('h6').textContent = document.getElementById('editProgramName').value;
+            row.querySelector('p').textContent = 'Código: ' + document.getElementById('editProgramCode').value;
+            row.querySelector('td:nth-child(2) p').textContent = document.getElementById('editProgramLevel').options[document.getElementById('editProgramLevel').selectedIndex].text;
+            const statusSpan = row.querySelector('td:nth-child(4) span');
+            statusSpan.className = `badge badge-sm bg-gradient-${document.getElementById('editProgramStatus').value === 'active' ? 'success' : 'secondary'}`;
+            statusSpan.textContent = document.getElementById('editProgramStatus').value === 'active' ? 'Activo' : 'Inactivo';
+        }
+    }
+
+    function confirmDeleteProgram(programId) {
+        document.getElementById('deleteItemId').value = programId;
+        document.getElementById('deleteItemType').value = 'program';
+        document.getElementById('deleteConfirmText').textContent = '¿Está seguro de que desea eliminar este programa? Esta acción eliminará todas las materias asociadas.';
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+    }
+
+    // Funciones para el manejo de materias
+    function editSubject(subjectId) {
+        // En una aplicación real, aquí se cargarían los datos de la materia desde el servidor
+        // Para la demostración, simularemos con los datos existentes en la tabla
+
+        // Buscar la fila de la materia
+        const row = document.querySelector(`#subjectsTable tr[data-id="${subjectId}"]`);
+        if (row) {
+            const name = row.querySelector('h6').textContent;
+            const code = row.querySelector('p').textContent.replace('Código: ', '');
+            const semester = row.querySelector('td:nth-child(2) p').textContent;
+            const credits = row.querySelector('td:nth-child(3) p').textContent;
+            const status = row.querySelector('td:nth-child(4) span').classList.contains('bg-gradient-success') ? 'active' : 'inactive';
+
+            // Llenar el formulario de edición
+            document.getElementById('editSubjectId').value = subjectId;
+            document.getElementById('editSubjectName').value = name;
+            document.getElementById('editSubjectCode').value = code;
+            document.getElementById('editSubjectSemester').value = semester;
+            document.getElementById('editSubjectCredits').value = credits;
+            document.getElementById('editSubjectStatus').value = status;
+
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('editSubjectModal'));
+            modal.show();
+        }
+    }
+
+    function saveSubject() {
+        // Validar el formulario
+        const form = document.getElementById('addSubjectForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // En una aplicación real, aquí se enviarían los datos al servidor
+        // Para la demostración, simularemos una operación exitosa
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addSubjectModal'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showSuccessMessage('Materia agregada exitosamente');
+
+        // Actualizar la tabla (en una aplicación real, esto se haría con los datos devueltos por el servidor)
+        const newRow = `
+            <tr data-id="${Date.now()}">
+                <td>
+                    <div class="d-flex px-3 py-1">
+                        <div class="d-flex flex-column justify-content-center">
+                            <h6 class="mb-0 text-sm">${document.getElementById('subjectNameInput').value}</h6>
+                            <p class="text-xs text-secondary mb-0">Código: ${document.getElementById('subjectCode').value}</p>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <p class="text-xs font-weight-bold mb-0">${document.getElementById('subjectSemester').value}</p>
+                </td>
+                <td>
+                    <p class="text-xs font-weight-bold mb-0">${document.getElementById('subjectCredits').value}</p>
+                </td>
+                <td>
+                    <span class="badge badge-sm bg-gradient-${document.getElementById('subjectStatus').value === 'active' ? 'success' : 'secondary'}">${document.getElementById('subjectStatus').value === 'active' ? 'Activa' : 'Inactiva'}</span>
+                </td>
+                <td class="align-middle text-center">
+                    <button class="btn btn-link text-secondary mb-0"
+                            onclick="editSubject(${Date.now()})">
+                        <i class="fas fa-edit text-xs"></i>
+                    </button>
+                    <button class="btn btn-link text-danger mb-0"
+                            onclick="confirmDeleteSubject(${Date.now()})">
+                        <i class="fas fa-trash text-xs"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        document.getElementById('subjectsTable').insertAdjacentHTML('beforeend', newRow);
+
+        // Actualizar el contador de materias en la tabla de programas
+        const programRow = document.querySelector(`#programsTable tr[data-id="${currentProgramId}"]`);
+        if (programRow) {
+            const subjectsCount = programRow.querySelector('td:nth-child(3) p');
+            const currentCount = parseInt(subjectsCount.textContent) || 0;
+            subjectsCount.textContent = `${currentCount + 1} materias`;
+        }
+
+        // Resetear el formulario
+        form.reset();
+    }
+
+    function updateSubject() {
+        // Validar el formulario
+        const form = document.getElementById('editSubjectForm');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // En una aplicación real, aquí se enviarían los datos al servidor
+        // Para la demostración, simularemos una operación exitosa
+        const subjectId = document.getElementById('editSubjectId').value;
+
+        // Cerrar el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editSubjectModal'));
+        modal.hide();
+
+        // Mostrar mensaje de éxito
+        showSuccessMessage('Materia actualizada exitosamente');
+
+        // Actualizar la tabla (en una aplicación real, esto se haría con los datos devueltos por el servidor)
+        const row = document.querySelector(`#subjectsTable tr[data-id="${subjectId}"]`);
+        if (row) {
+            row.querySelector('h6').textContent = document.getElementById('editSubjectName').value;
+            row.querySelector('p').textContent = 'Código: ' + document.getElementById('editSubjectCode').value;
+            row.querySelector('td:nth-child(2) p').textContent = document.getElementById('editSubjectSemester').value;
+            row.querySelector('td:nth-child(3) p').textContent = document.getElementById('editSubjectCredits').value;
+            const statusSpan = row.querySelector('td:nth-child(4) span');
+            statusSpan.className = `badge badge-sm bg-gradient-${document.getElementById('editSubjectStatus').value === 'active' ? 'success' : 'secondary'}`;
+            statusSpan.textContent = document.getElementById('editSubjectStatus').value === 'active' ? 'Activa' : 'Inactiva';
+        }
+    }
+
+    function confirmDeleteSubject(subjectId) {
+        document.getElementById('deleteItemId').value = subjectId;
+        document.getElementById('deleteItemType').value = 'subject';
+        document.getElementById('deleteConfirmText').textContent = '¿Está seguro de que desea eliminar esta materia?';
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+    }
+
+    // Función para confirmar la eliminación de un elemento
+    function deleteConfirmed() {
+        const itemId = document.getElementById('deleteItemId').value;
+        const itemType = document.getElementById('deleteItemType').value;
+
+        // En una aplicación real, aquí se enviaría la solicitud de eliminación al servidor
+        // Para la demostración, simularemos una operación exitosa
+
+        // Cerrar el modal de confirmación
+        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+        modal.hide();
+
+        // Eliminar el elemento según su tipo
+        if (itemType === 'institution') {
+            const row = document.querySelector(`#institutionsTable tr[data-id="${itemId}"]`);
+            if (row) row.remove();
+
+            // Si la institución eliminada es la que se está mostrando, ocultar los paneles
+            if (currentInstitutionId === itemId) {
+                hidePrograms();
+            }
+
+            showSuccessMessage('Institución eliminada exitosamente');
+        } else if (itemType === 'program') {
+            const row = document.querySelector(`#programsTable tr[data-id="${itemId}"]`);
+            if (row) row.remove();
+
+            // Actualizar el contador de programas en la tabla de instituciones
+            const institutionRow = document.querySelector(`#institutionsTable tr[data-id="${currentInstitutionId}"]`);
+            if (institutionRow) {
+                const programsCount = institutionRow.querySelector('td:nth-child(3) p');
+                const currentCount = parseInt(programsCount.textContent) || 0;
+                if (currentCount > 0) {
+                    programsCount.textContent = `${currentCount - 1} programas`;
+                }
+            }
+
+            // Si el programa eliminado es el que se está mostrando, ocultar el panel de materias
+            if (currentProgramId === itemId) {
+                document.getElementById('subjectsPanel').classList.add('d-none');
+            }
+
+            showSuccessMessage('Programa eliminado exitosamente');
+        } else if (itemType === 'subject') {
+            const row = document.querySelector(`#subjectsTable tr[data-id="${itemId}"]`);
+            if (row) row.remove();
+
+            // Actualizar el contador de materias en la tabla de programas
+            const programRow = document.querySelector(`#programsTable tr[data-id="${currentProgramId}"]`);
+            if (programRow) {
+                const subjectsCount = programRow.querySelector('td:nth-child(3) p');
+                const currentCount = parseInt(subjectsCount.textContent) || 0;
+                if (currentCount > 0) {
+                    subjectsCount.textContent = `${currentCount - 1} materias`;
+                }
+            }
+
+            showSuccessMessage('Materia eliminada exitosamente');
+        }
+    }
+
+    // Función para mostrar mensajes de éxito
+    function showSuccessMessage(message) {
+        const alert = document.getElementById('successAlert');
+        document.getElementById('successMessage').textContent = message;
+        alert.classList.remove('d-none');
+
+        // Ocultar el mensaje después de unos segundos
+        setTimeout(() => {
+            alert.classList.add('d-none');
+        }, 3000);
+    }
+
+    // Función para mostrar mensajes de error
+    function showErrorMessage(message) {
+        const alert = document.getElementById('errorAlert');
+        document.getElementById('errorMessage').textContent = message;
+        alert.classList.remove('d-none');
+
+        // Ocultar el mensaje después de unos segundos
+        setTimeout(() => {
+            alert.classList.add('d-none');
+        }, 3000);
+    }
+
+    // Inicializar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Agregar atributos data-id a las filas existentes para simular IDs
+        document.querySelectorAll('#institutionsTable tr').forEach((row, index) => {
+            row.setAttribute('data-id', index + 1);
+        });
+
+        document.querySelectorAll('#programsTable tr').forEach((row, index) => {
+            row.setAttribute('data-id', index + 1);
+        });
+
+        document.querySelectorAll('#subjectsTable tr').forEach((row, index) => {
+            row.setAttribute('data-id', index + 1);
+        });
+    });
 </script>
 @endsection

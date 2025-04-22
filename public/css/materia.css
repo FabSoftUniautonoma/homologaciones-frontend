@@ -1,0 +1,262 @@
+/* Estilos personalizados para el formulario de creación de materias */
+
+/* Estilos generales */
+/* Fondo azul claro para el encabezado */
+
+/* Estilo para el encabezado */
+.header-title {
+    font-family: 'Poppins', sans-serif; /* Fuente estilizada */
+    font-size: 2rem; /* Tamaño de la fuente */
+    color: #ffffff; /* Color blanco */
+    letter-spacing: 1px; /* Espaciado entre letras */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Sombra para el texto */
+}
+.bg-light-blue {
+    background-color: #6cb3e6; /* Azul claro */
+}
+
+/* Color oscuro para el texto */
+.text-dark {
+    color: #1c3861; /* Azul oscuro */
+}
+
+/* Ajustes para el ícono */
+.card-header i {
+    font-size: 2rem; /* Tamaño del ícono */
+}
+body {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para la tarjeta */
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+.card-header {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+    padding: 1.0rem 1.0rem;
+}
+
+.card-header h3 {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+/* Estilos para los campos del formulario */
+.form-label {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    color: #495057;
+}
+
+.form-control, .form-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    transition: all 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #6492c4;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control.is-valid, .form-select.is-valid {
+    border-color: #198754;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    font-size: 80%;
+    margin-top: 0.25rem;
+}
+
+/* Estilos para los botones */
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #5e8acc;
+    border-color: #527ab8;
+}
+
+.btn-primary:hover {
+    background-color: #143669;
+    border-color: #2f64b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.25);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.25);
+}
+
+/* Estilos para los modales */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-footer {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: scale(0.9);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .form-control, .form-select {
+        padding: 0.6rem 0.8rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1.2rem;
+    }
+}
+
+/* Efecto hover para los inputs */
+.form-control:hover, .form-select:hover {
+    border-color: #adb5bd;
+}
+
+/* Efecto para el campo activo */
+.form-control:focus-within, .form-select:focus-within {
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 5px rgba(104, 138, 189, 0.2);
+    }
+    to {
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+    }
+}
+/* Estilos mejorados para el textarea de pensum */
+.pensum-textarea {
+    min-height: 150px;
+    resize: vertical;
+    line-height: 1.6;
+    padding: 15px;
+    font-size: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.075);
+}
+
+.pensum-textarea:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.25rem #5c91e040;
+}
+
+.pensum-textarea:hover:not(:focus) {
+    border-color: #adb5bd;
+}
+
+/* Ajuste para el icono del grupo de input cuando se usa con textarea */
+.input-group-text.align-self-start {
+    height: auto;
+    padding-top: 15px;
+}
+
+/* Contador de caracteres */
+.char-counter {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.char-counter.warning {
+    color: #ffc107;
+}
+
+.char-counter.danger {
+    color: #dc3545;
+}
+
+/* Efecto para la tarjeta del pensum */
+.materia-card {
+    transition: all 0.3s ease;
+}
+
+/* Animación para modales */
+.modal-content {
+    animation: modalFade 0.3s ease-out;
+}
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+form {
+    font-size: 0.8rem; /* Tamaño más pequeño para formularios */
+}
