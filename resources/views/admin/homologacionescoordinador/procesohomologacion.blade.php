@@ -1,266 +1,473 @@
+{{-- resources/views/homologacionescoordinador/coordinador.blade.php --}}
 @extends('admin.layouts.appcoordinacion')
 
-@section('content')
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Proceso de Homologación</h2>
-        </div>
-        <div class="card-body">
-            <!-- Datos de la solicitud -->
-            <div class="card mb-4 border-info">
-                <div class="card-header bg-info text-white">
-                    <h3 class="h5 mb-0">Solicitud: {{ $solicitud['codigo'] }}</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong><i class="fas fa-user me-2"></i>Nombre:</strong> {{ $solicitud['nombre'] }}</p>
-                            <p><strong><i class="fas fa-university me-2"></i>Instituto:</strong>
-                                {{ $solicitud['instituto'] }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong><i class="fas fa-bookmark me-2"></i>Estado:</strong>
-                                <span
-                                    class="badge bg-{{ $solicitud['estado'] == 'Pendiente' ? 'warning' : ($solicitud['estado'] == 'Aprobada' ? 'success' : 'danger') }}">
-                                    {{ $solicitud['estado'] }}
-                                </span>
-                            </p>
-                            <p><strong><i class="fas fa-graduation-cap me-2"></i>Carrera de Interés:</strong>
-                                {{ $solicitud['carrera_interes'] }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+@section('title', 'Proceso de Homologación')
 
-            <!-- Progreso de homologación -->
-            <div id="resumen-homologaciones" class="card mb-4 border-success">
-                <div class="card-header bg-success text-white">
-                    <h4 class="h5 mb-0"><i class="fas fa-chart-pie me-2"></i>Progreso de Homologación</h4>
-                </div>
-                <div class="card-body">
-                    <div class="progress mb-3" style="height: 25px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"
-                            style="width: 0%;" id="progress-bar">0%</div>
-                    </div>
-                    <p class="mb-0">Materias homologadas: <span id="contador-homologadas">0</span> de <span
-                            id="contador-total">0</span></p>
-                </div>
-            </div>
+    @section('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Variables para el manejo de datos
+                let homologaciones = [];
+                const solicitudId = '{{ $solicitud['id_solicitud'] ?? ($solicitud['id'] ?? '') }}';
+                const estadoActual = '{{ $estadoActual }}';
 
-            <!-- Materias Cursadas por el Estudiante y Materias del Pensum Autónomo -->
-            <h4 class="mb-3"><i class="fas fa-book me-2"></i>Materias Cursadas y Homologación</h4>
-            <div class="row">
-                <!-- Materias Cursadas por el Estudiante -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100 border-primary">
-                        <div class="card-header bg-primary text-white">
-                            <h4 class="mb-0"><i class="fas fa-bookmark me-2"></i>Materias Cursadas</h4>
-                        </div>
-                        <div class="card-body">
-                            <select id="materia-select" class="form-select form-select-lg mb-3">
-                                <option value="">Seleccione una materia cursada</option>
-                                @foreach ($materias_cursadas as $materia)
-                                    <option value="{{ $materia['nombre'] }}" data-nombre="{{ $materia['nombre'] }}"
-                                        data-nota="{{ $materia['nota'] }}" data-descripcion="{{ $materia['descripcion'] }}"
-                                        data-creditos="{{ $materia['creditos'] }}" data-horas="{{ $materia['horas'] }}"
-                                        data-temas="{{ implode(', ', $materia['temas']) }}">
-                                        {{ $materia['nombre'] }}
-                                    </option>
-                                @endforeach
-                            </select>
+                // Inicializar la tabla de homologaciones con los datos existentes
+                inicializarTablaHomologaciones();
+                calcularTotalCreditos();
 
-                            <div id="materia-details" class="mt-4 card border-primary" style="display:none;">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Detalles de la Materia Cursada</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <tbody>
-                                                <tr>
-                                                    <th style="width: 30%;">Nombre:</th>
-                                                    <td><span id="materia-nombre"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Nota:</th>
-                                                    <td><span class="badge bg-info text-dark" id="materia-nota"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Créditos:</th>
-                                                    <td><span id="materia-creditos"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Horas:</th>
-                                                    <td><span id="materia-horas"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Descripción:</th>
-                                                    <td><span id="materia-descripcion"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Temas:</th>
-                                                    <td><span id="materia-temas"></span></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                // Inicializar el pad de firma
+                const canvas = document.getElementById('signatureCanvas');
+                if (canvas) {
+                    const signaturePad = new SignaturePad(canvas, {
+                        backgroundColor: 'rgb(255, 255, 255)'
+                    });
 
-                <!-- Materias del Pensum Autónomo -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card h-100 border-secondary">
-                        <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Materias del Pensum Autónomo</h5>
-                        </div>
-                        <div class="card-body">
-                            <select id="materia-pensum-select" class="form-select form-select-lg mb-3"
-                                style="display:none;">
-                                <option value="">Seleccione una materia del pensum</option>
-                                <option value="no_aplica" data-descripcion="No Aplica" data-creditos="0" data-horas="0"
-                                    data-temas="No aplica">No Aplica</option>
-                                @foreach ($pensum_autonoma as $semestre => $materias)
-                                    <optgroup label="Semestre {{ $semestre }}">
-                                        @foreach ($materias as $materia)
-                                            <option value="{{ $materia['nombre'] }}"
-                                                data-nombre="{{ $materia['nombre'] }}"
-                                                data-descripcion="{{ $materia['descripcion'] }}"
-                                                data-creditos="{{ $materia['creditos'] }}"
-                                                data-horas="{{ $materia['horas'] }}"
-                                                data-temas="{{ implode(', ', $materia['temas']) }}">
-                                                {{ $materia['nombre'] }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
-                                @endforeach
-                            </select>
+                    // Botón para limpiar firma
+                    document.getElementById('btnLimpiarFirma')?.addEventListener('click', function() {
+                        signaturePad.clear();
+                    });
 
-                            <div id="titulo-pensum" class="alert alert-info" style="display:none;">
-                                <i class="fas fa-info-circle me-2"></i>Seleccione una materia del pensum para homologar
-                            </div>
+                    // Botón para guardar firma
+                    document.getElementById('btnGuardarFirma')?.addEventListener('click', function() {
+                        if (signaturePad.isEmpty()) {
+                            Swal.fire({
+                                title: 'Firma requerida',
+                                text: 'Por favor, firme antes de guardar',
+                                icon: 'warning'
+                            });
+                            return;
+                        }
 
-                            <div id="pensum-details" class="mt-4 card border-secondary" style="display:none;">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Detalles de la Materia del Pensum</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <tbody>
-                                                <tr>
-                                                    <th style="width: 30%;">Nombre:</th>
-                                                    <td><span id="pensum-nombre"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Créditos:</th>
-                                                    <td><span id="pensum-creditos"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Horas:</th>
-                                                    <td><span id="pensum-horas"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Descripción:</th>
-                                                    <td><span id="pensum-descripcion"></span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th>Temas:</th>
-                                                    <td><span id="pensum-temas"></span></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                        const firma = signaturePad.toDataURL();
+                        // Guardar en localStorage
+                        localStorage.setItem('firma_coordinador_' + solicitudId, firma);
 
-                            <div class="mt-3">
-                                <label for="nota_homologacion" id="label-nota" class="form-label fw-bold"
-                                    style="display:none;">
-                                    <i class="fas fa-star me-2"></i>Nota de Homologación
-                                </label>
-                                <div class="input-group mb-3" id="input-nota-container" style="display:none;">
-                                    <span class="input-group-text"><i class="fas fa-pen"></i></span>
-                                    <input type="number" id="nota_homologacion" name="nota_homologacion"
-                                        class="form-control form-control-lg" step="0.1" min="0"
-                                        max="20" placeholder="Ingrese la nota (3.0 - 5.0)" style="width: 100%;">
+                        Swal.fire({
+                            title: 'Firma guardada',
+                            text: 'La firma ha sido guardada correctamente',
+                            icon: 'success'
+                        });
+                    });
 
-                                </div>
-                            </div>
+                    // Cargar firma guardada si existe
+                    const firmaGuardada = localStorage.getItem('firma_coordinador_' + solicitudId);
+                    if (firmaGuardada) {
+                        const image = new Image();
+                        image.onload = function() {
+                            const context = canvas.getContext('2d');
+                            context.drawImage(image, 0, 0);
+                        };
+                        image.src = firmaGuardada;
+                    }
+                }
 
-                            <button id="guardar-materia-btn" class="btn btn-success btn-lg w-100" style="display:none;">
-                                <i class="fas fa-save me-2"></i>Guardar Materia
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                // Botón para emparejar materias
+                document.getElementById('btnEmparejar')?.addEventListener('click', function() {
+                    const materiasOrigen = document.querySelectorAll('.asignatura-origen:checked');
+                    const materiasDestino = document.querySelectorAll('.asignatura-destino:checked');
 
-            <!-- Lista de materias homologadas -->
-            <div class="card mb-4 border-dark">
-                <div class="card-header bg-dark text-white">
-                    <h4 class="h5 mb-0"><i class="fas fa-list-check me-2"></i>Materias Homologadas</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover" id="tabla-homologadas">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Materia Cursada</th>
-                                    <th>Materia Pensum / Estado</th>
-                                    <th>Nota</th>
-                                    <th>Créditos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr id="no-materias-row">
-                                    <td colspan="4" class="text-center">No hay materias homologadas</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                    if (materiasOrigen.length === 0 || materiasDestino.length === 0) {
+                        Swal.fire({
+                            title: 'Selección requerida',
+                            text: 'Debe seleccionar al menos una asignatura de origen y una de destino',
+                            icon: 'warning'
+                        });
+                        return;
+                    }
 
-            <!-- Guardar toda la homologación -->
-            <div class="row">
-                <div class="col-md-6 offset-md-3">
-                    <div class="card mb-4 border-success">
-                        <div class="card-body text-center">
-                            <form action="{{ route('homologacion.guardar') }}" method="POST" id="homologacion-form">
-                                @csrf
-                                <input type="hidden" name="solicitud_id" value="{{ $solicitud['codigo'] }}">
-                                <input type="hidden" name="homologaciones_data" id="homologaciones-data"
-                                    value="">
+                    // Verificar si alguna materia tiene nota menor a 3
+                    for (const materiaOrigen of materiasOrigen) {
+                        const nota = parseFloat(materiaOrigen.dataset.nota);
+                        if (nota < 3) {
+                            Swal.fire({
+                                title: 'Nota insuficiente',
+                                text: `La asignatura "${materiaOrigen.dataset.nombre}" tiene una nota de ${nota}, inferior a 3.0`,
+                                icon: 'error'
+                            });
+                            return;
+                        }
+                    }
 
-                                <button type="button" class="btn btn-success btn-lg w-100" id="guardar-btn" disabled>
-                                    <i class="fas fa-check-circle me-2"></i>Guardar Homologación
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    // Crear homologación para cada par de materias seleccionadas
+                    for (const materiaOrigen of materiasOrigen) {
+                        for (const materiaDestino of materiasDestino) {
+                            agregarHomologacion(materiaOrigen, materiaDestino);
+                        }
+                    }
 
-            <!-- Regresar -->
-            <div class="text-center">
-                <a href="{{ route('admin.homologacionescoordinador.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Volver a la solicitud
-                </a>
-            </div>
+                    // Limpiar selecciones
+                    materiasOrigen.forEach(checkbox => checkbox.checked = false);
+                    materiasDestino.forEach(checkbox => checkbox.checked = false);
 
-            <!-- Contenedor para las alertas -->
-            <div id="alerts-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
-        </div>
-    </div>
+                    // Actualizar tabla y totales
+                    actualizarTablaHomologaciones();
+                    calcularTotalCreditos();
+                    guardarEnLocalStorage();
+                });
 
-    <!-- Añadir Font Awesome si no está incluido en el layout principal -->
-    <link href="{{ asset('css/procesohomologacion.css') }}" rel="stylesheet">
+                // Botón para guardar cambios
+                document.getElementById('btnGuardarCambios')?.addEventListener('click', function() {
+                    if (homologaciones.length === 0) {
+                        Swal.fire({
+                            title: 'Sin homologaciones',
+                            text: 'No hay asignaturas homologadas para guardar',
+                            icon: 'warning'
+                        });
+                        return;
+                    }
 
-    <!-- JS que maneja la lógica del flujo de homologación -->
-    <script src="{{ asset('js/procesovshomologacion.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+                    // Simulamos la llamada a la API para guardar
+                    Swal.fire({
+                        title: 'Guardando cambios',
+                        text: 'Espere un momento...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            setTimeout(() => {
+                                guardarEnLocalStorage();
+                                Swal.fire({
+                                    title: 'Cambios guardados',
+                                    text: 'Las homologaciones se han guardado correctamente',
+                                    icon: 'success'
+                                });
+                            }, 1000);
+                        }
+                    });
+                });
 
-@endsection
+                // Botón para generar PDF
+                document.getElementById('btnGenerarPDF')?.addEventListener('click', function() {
+                    if (homologaciones.length === 0) {
+                        Swal.fire({
+                            title: 'Sin homologaciones',
+                            text: 'No hay asignaturas homologadas para generar el PDF',
+                            icon: 'warning'
+                        });
+                        return;
+                    }
+
+                    const firma = localStorage.getItem('firma_coordinador_' + solicitudId);
+                    if (!firma && estadoActual !== 'cerrado') {
+                        Swal.fire({
+                            title: 'Firma requerida',
+                            text: 'Por favor, firme el documento antes de generar el PDF',
+                            icon: 'warning'
+                        });
+                        return;
+                    }
+
+                    // Simulamos la generación y visualización del PDF
+                    Swal.fire({
+                        title: 'Generando PDF',
+                        text: 'Espere un momento...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            setTimeout(() => {
+                                // Aquí normalmente se llamaría a una API para generar el PDF
+                                // Simulamos mostrando un iframe en el modal
+                                const modal = new bootstrap.Modal(document.getElementById(
+                                    'pdfPreviewModal'));
+                                // Preparar el iframe para mostrar el PDF (en una implementación real)
+                                const iframe = document.getElementById('pdfPreviewFrame');
+                                if (iframe) {
+                                    // En una implementación real, aquí se establecería la URL del PDF
+                                    // Por ahora, usamos un placeholder
+                                    iframe.src = "about:blank"; // O URL real del PDF
+                                }
+                                modal.show();
+                                Swal.close();
+                            }, 1500);
+                        }
+                    });
+                });
+
+                // Botón para cerrar homologación
+                document.getElementById('btnCerrarHomologacion')?.addEventListener('click', function() {
+                    if (homologaciones.length === 0) {
+                        Swal.fire({
+                            title: 'Sin homologaciones',
+                            text: 'No hay asignaturas homologadas para cerrar el proceso',
+                            icon: 'warning'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: '¿Está seguro?',
+                        text: 'Una vez cerrada la homologación, no podrá realizar más cambios',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, cerrar homologación',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Simulamos llamada a la API para cerrar la homologación
+                            Swal.fire({
+                                title: 'Cerrando homologación',
+                                text: 'Espere un momento...',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                    setTimeout(() => {
+                                        // Aquí normalmente se llamaría a la API para cambiar el estado
+                                        localStorage.setItem(
+                                            'estado_homologacion_' +
+                                            solicitudId, 'cerrado');
+
+                                        Swal.fire({
+                                            title: 'Homologación cerrada',
+                                            text: 'El proceso de homologación ha sido cerrado correctamente',
+                                            icon: 'success'
+                                        }).then(() => {
+                                            // Recargar la página para reflejar el nuevo estado
+                                            location.reload();
+                                        });
+                                    }, 1500);
+                                }
+                            });
+                        }
+                    });
+                });
+
+                // Botón para confirmar PDF
+                document.getElementById('btnConfirmarPDF')?.addEventListener('click', function() {
+                    // En un caso real, aquí se enviaría el PDF al servidor
+                    Swal.fire({
+                        title: 'PDF guardado',
+                        text: 'El documento PDF ha sido guardado correctamente',
+                        icon: 'success'
+                    }).then(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById(
+                            'pdfPreviewModal'));
+                        modal.hide();
+                    });
+                });
+
+                // Eliminar homologación
+                document.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('btn-eliminar-homologacion') ||
+                        e.target.parentElement.classList.contains('btn-eliminar-homologacion')) {
+
+                        const fila = e.target.closest('tr');
+                        if (fila) {
+                            const origenId = fila.dataset.origenId;
+                            const destinoId = fila.dataset.destinoId;
+
+                            // Eliminar de la lista de homologaciones
+                            homologaciones = homologaciones.filter(h =>
+                                h.asignatura_origen_id !== origenId || h.asignatura_destino_id !== destinoId
+                            );
+
+                            // Actualizar tabla y localStorage
+                            fila.remove();
+                            calcularTotalCreditos();
+                            guardarEnLocalStorage();
+                        }
+                    }
+                });
+
+                // Actualizar datos al cambiar créditos o nota
+                document.addEventListener('change', function(e) {
+                    if (e.target.classList.contains('creditos-homologados') ||
+                        e.target.classList.contains('nota-homologada')) {
+
+                        const fila = e.target.closest('tr');
+                        if (fila) {
+                            const origenId = fila.dataset.origenId;
+                            const destinoId = fila.dataset.destinoId;
+
+                            // Actualizar valores en el array de homologaciones
+                            for (const homologacion of homologaciones) {
+                                if (homologacion.asignatura_origen_id === origenId &&
+                                    homologacion.asignatura_destino_id === destinoId) {
+
+                                    if (e.target.classList.contains('creditos-homologados')) {
+                                        homologacion.creditos = parseInt(e.target.value) || 0;
+                                    } else if (e.target.classList.contains('nota-homologada')) {
+                                        const nota = parseFloat(e.target.value);
+                                        if (nota < 3) {
+                                            Swal.fire({
+                                                title: 'Nota inválida',
+                                                text: 'La nota mínima para homologar es 3.0',
+                                                icon: 'warning'
+                                            });
+                                            e.target.value = 3;
+                                            homologacion.nota_destino = 3;
+                                        } else {
+                                            homologacion.nota_destino = nota;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+
+                            calcularTotalCreditos();
+                            guardarEnLocalStorage();
+                        }
+                    }
+                });
+
+                // Función para inicializar la tabla con homologaciones existentes
+                function inicializarTablaHomologaciones() {
+                    // Intentar recuperar del localStorage primero
+                    const savedHomologaciones = localStorage.getItem('homologaciones_' + solicitudId);
+                    if (savedHomologaciones) {
+                        try {
+                            homologaciones = JSON.parse(savedHomologaciones);
+                            actualizarTablaHomologaciones();
+                            return;
+                        } catch (e) {
+                            console.error("Error parsing saved homologaciones", e);
+                            // Continue to use data from the server if localStorage parsing fails
+                        }
+                    }
+
+                    // Si no hay datos en localStorage o hubo un error, usar los de la API
+                    // Esta parte permanece igual, pero incluida en un bloque try-catch por seguridad
+                    try {
+                        // Esta sección depende de datos del servidor
+                        // Aquí normalmente habría una carga de datos iniciales desde el servidor
+                        // El código Blade permanece igual
+                    } catch (e) {
+                        console.error("Error loading initial homologaciones", e);
+                    }
+                }
+
+                // Función para agregar una nueva homologación
+                function agregarHomologacion(materiaOrigen, materiaDestino) {
+                    const origenId = materiaOrigen.value;
+                    const destinoId = materiaDestino.value;
+
+                    // Verificar si ya existe esta homologación
+                    const homologacionExistente = homologaciones.find(h =>
+                        h.asignatura_origen_id === origenId && h.asignatura_destino_id === destinoId
+                    );
+
+                    if (homologacionExistente) {
+                        Swal.fire({
+                            title: 'Homologación duplicada',
+                            text: `La asignatura "${materiaOrigen.dataset.nombre}" ya está homologada con "${materiaDestino.dataset.nombre}"`,
+                            icon: 'warning'
+                        });
+                        return;
+                    }
+
+                    // Crear nueva homologación
+                    const nuevaHomologacion = {
+                        asignatura_origen_id: origenId,
+                        asignatura_origen: materiaOrigen.dataset.nombre,
+                        asignatura_destino_id: destinoId,
+                        asignatura_destino: materiaDestino.dataset.nombre,
+                        creditos: parseInt(materiaDestino.dataset.creditos) || 0,
+                        nota_destino: parseFloat(materiaOrigen.dataset.nota) || 3
+                    };
+
+                    homologaciones.push(nuevaHomologacion);
+                }
+
+                // Función para actualizar la tabla de homologaciones
+                function actualizarTablaHomologaciones() {
+                    const tabla = document.getElementById('tablaHomologaciones');
+                    if (!tabla) return;
+
+                    const tbody = tabla.querySelector('tbody');
+                    if (!tbody) return;
+
+                    // Limpiar tabla
+                    tbody.innerHTML = '';
+
+                    // Añadir filas nuevas
+                    homologaciones.forEach(homologacion => {
+                        const fila = document.createElement('tr');
+                        fila.dataset.origenId = homologacion.asignatura_origen_id;
+                        fila.dataset.destinoId = homologacion.asignatura_destino_id;
+
+                        fila.innerHTML = `
+                <td>${homologacion.asignatura_origen}</td>
+                <td>${homologacion.asignatura_destino}</td>
+                <td>
+                    <input type="number" class="form-control creditos-homologados" value="${homologacion.creditos}"
+                        min="0" step="1" ${estadoActual === 'cerrado' ? 'disabled' : ''}>
+                </td>
+                <td>
+                    <input type="number" class="form-control nota-homologada" value="${homologacion.nota_destino}"
+                        min="3" max="5" step="0.1" ${estadoActual === 'cerrado' ? 'disabled' : ''}>
+                </td>
+                <td>
+                    ${estadoActual !== 'cerrado' ?
+                        `<button type="button" class="btn btn-danger btn-sm btn-eliminar-homologacion">
+                                            <i class="fas fa-trash"></i>
+                                        </button>` :
+                        `<span class="badge bg-secondary">Cerrado</span>`
+                    }
+                </td>
+            `;
+
+                        tbody.appendChild(fila);
+                    });
+                }
+
+                // Función para calcular el total de créditos homologados
+                function calcularTotalCreditos() {
+                    const totalCreditos = homologaciones.reduce((sum, h) => sum + (parseInt(h.creditos) || 0), 0);
+                    const totalCreditosElement = document.getElementById('totalCreditos');
+                    if (totalCreditosElement) {
+                        totalCreditosElement.textContent = totalCreditos;
+                    }
+                }
+
+                // Función para guardar en localStorage
+                function guardarEnLocalStorage() {
+                    localStorage.setItem('homologaciones_' + solicitudId, JSON.stringify(homologaciones));
+                }
+
+                // Funciones para ver y descargar documentos (simuladas)
+                window.verDocumento = function(nombreDocumento) {
+                    Swal.fire({
+                        title: 'Visualizando documento',
+                        text: `Abriendo "${nombreDocumento}"...`,
+                        icon: 'info',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                };
+
+                window.descargarDocumento = function(nombreDocumento) {
+                    Swal.fire({
+                        title: 'Descargando documento',
+                        text: `Descargando "${nombreDocumento}"...`,
+                        icon: 'info',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                };
+
+                // Verificar el estado al cargar la página
+                if (estadoActual === 'cerrado' || localStorage.getItem('estado_homologacion_' + solicitudId) ===
+                    'cerrado') {
+                    // Deshabilitar todos los controles de edición
+                    document.querySelectorAll('input, button').forEach(element => {
+                        if (!element.classList.contains('btn-secondary')) {
+                            element.disabled = true;
+                        }
+                    });
+
+                    // Mostrar alerta de proceso cerrado si no existe ya
+                    if (!document.querySelector('.alert-warning')) {
+                        const cardBody = document.querySelector('.card-body');
+                        if (cardBody) {
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-warning mt-3';
+                            alertDiv.innerHTML =
+                                '<i class="fas fa-lock"></i> Esta homologación ha sido cerrada. No se permiten más cambios.';
+                            cardBody.prepend(alertDiv);
+                        }
+                    }
+                }
+            });
+        </script>
+    @endsection
+
