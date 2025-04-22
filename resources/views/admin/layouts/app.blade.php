@@ -357,7 +357,7 @@
 
         .card:hover {
             box-shadow: 0 8px 16px rgba(0, 117, 191, 0.2);
-            transform: translateY(-5px);
+           /* transform: translateY(-5px);*/
         }
 
         /* Botones con animación y mejor contraste */
@@ -1241,7 +1241,7 @@
                                 <i class="fas fa-home"></i>
                                 <p>Tablero</p>
                             </a>
-                           
+
                         </li>
                     </ul>
                 </div>

@@ -307,7 +307,7 @@
         h4,
         h5,
         h6 {
-            color: var(--azul-oscuro);
+            color: var(--azul-contenedor);
         }
 
         p,
@@ -357,7 +357,7 @@
 
         .card:hover {
             box-shadow: 0 8px 16px rgba(0, 117, 191, 0.2);
-            transform: translateY(-5px);
+            /* transform: translateY(-5px);*/
         }
 
         /* Botones con animación y mejor contraste */
@@ -1233,19 +1233,50 @@
                             <span class="sidebar-mini-icon">
                                 <i class="fa fa-ellipsis-h"></i>
                             </span>
-                            <h4 class="text-section">Estadísticas</h4>
+                            <h4 class="text-section">Menú</h4>
                         </li>
 
-                        <li class="nav-item {{-- {{ request()->is(['dashboard', '/']) ? 'active' : '' }} --}}" data-aos="fade-right" data-aos-delay="200">
-                            <a href="{{-- {{ route('dashboard') }} --}}">
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                            <a href="{{ route('admin.homologacionescoordinador.pantallaprincipal') }}">
+
                                 <i class="fas fa-home"></i>
-                                <p>Tablero</p>
+                                <p>Inicio</p>
                             </a>
+                        </li>
+
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
+                            <a href="{{ route('admin.homologacionescoordinador.index') }}">
+
+                                <i class="fas fa-university"></i>
+                                <p>Gestión de Homologaciones</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="400">
+                            <a href="{{ route('admin.homologacionescoordinador/reportes') }}">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>Reportes</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="500">
+                            <a href="#">
+                                <i class="fas fa-cogs"></i>
+                                <p>Configuración</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="600">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <p>Cerrar sesión</p>
+                            </a>
+
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
+
         <div class="main-panel">
             <div class="content">
                 {{-- @include('sweetalert::alert') --}}
@@ -1274,6 +1305,8 @@
             }, 300);
         });
     </script>
+    @yield('scripts')
+
 </body>
 
 </html>

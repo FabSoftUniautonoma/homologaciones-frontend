@@ -23,171 +23,66 @@ Route::get('/', function () {
     return view('admin.layouts.welcome');
 });
 
-// Rutas para usuarios
-Route::get('/registro-usuario', function () {
-    return view('admin.usuarios.register');
-});
-
-// Rutas de homologaciones para aspirantes
-Route::get('/homologaciones/solicitudhomologacion', function () {
-    return view('homologacionesaspirante.solicitudhomologacion');
-});
-
-Route::get('/homologaciones/aspirante', function () {
-    return view('homologacionesaspirante.dashboardAspirante');
-});
-
-// Rutas de index de usuario
-Route::get('/homologaciones/registroestudiante', function () {
-    return view('admin.indexusuario.registroestudiante');
-});
-
+// Home del usuario autenticado (index general)
 Route::get('/homologaciones/home', function () {
-    return view('admin.indexusuario.index');});
-
-// Ruta de notificaciones
-Route::get('/notificaciones', function () {
-    return view('admin.homologacionescoordinador.componentes.notificaciones');
-});
-
-// Ruta para ver información de homologación (simulada)
-Route::get('/homologacion/{id}', function ($id) {
-    $solicitudes = [
-        'HOM-2025-001' => [
-            'id' => 1,
-            'codigo' => 'HOM-2025-001',
-            'nombre' => 'María González',
-            'instituto' => 'FUP de Popayán',
-            'fecha' => '01/04/2025',
-            'estado' => 'Pendiente',
-            'estado_class' => 'warning',
-            'instituto_origen' => 'FUP de Popayán',
-            'programa_origen' => 'Tecnología en Sistemas',
-            'carrera_interes' => 'Ingeniería de Software',
-            'fecha_solicitud' => Carbon::createFromFormat('d/m/Y', '01/04/2025'),
-            'estudiante' => (object)[
-                'tipo_identificacion' => 'Cédula de Ciudadanía',
-                'numero_identificacion' => '1234567890',
-                'nombre_completo' => 'María González',
-                'correo' => 'maria@example.com',
-                'telefono' => '3201234567',
-                'nacionalidad' => 'Colombiana',
-                'departamento' => 'Cauca',
-                'municipio' => 'Popayán',
-            ],
-            'historial' => collect([
-                (object)[
-                    'accion' => 'Solicitud registrada',
-                    'usuario' => 'admin',
-                    'created_at' => now()->subDays(3)
-                ],
-                (object)[
-                    'accion' => 'Documentos revisados',
-                    'usuario' => 'coordinador',
-                    'created_at' => now()->subDays(1)
-                ]
-            ])
-        ],
-        'HOM-2025-002' => [
-            'id' => 2,
-            'codigo' => 'HOM-2025-002',
-            'nombre' => 'Carlos Rodríguez',
-            'instituto' => 'SENA',
-            'fecha' => '31/03/2025',
-            'estado' => 'En revisión',
-            'estado_class' => 'info',
-            'instituto_origen' => 'SENA',
-            'programa_origen' => 'Análisis y Desarrollo de Software',
-            'carrera_interes' => 'Ingeniería de Software',
-            'fecha_solicitud' => Carbon::createFromFormat('d/m/Y', '31/03/2025'),
-            'estudiante' => (object)[
-                'tipo_identificacion' => 'Tarjeta de Identidad',
-                'numero_identificacion' => '987654321',
-                'nombre_completo' => 'Carlos Rodríguez',
-                'correo' => 'carlos@example.com',
-                'telefono' => '3124567890',
-                'nacionalidad' => 'Colombiano',
-                'departamento' => 'Valle del Cauca',
-                'municipio' => 'Cali',
-            ],
-            'historial' => collect([
-                (object)[
-                    'accion' => 'Solicitud registrada',
-                    'usuario' => 'admin',
-                    'created_at' => now()->subDays(4)
-                ]
-            ])
-        ],
-        'HOM-2025-003' => [
-            'id' => 3,
-            'codigo' => 'HOM-2025-003',
-            'nombre' => 'Ana López',
-            'instituto' => 'Colegio Mayor',
-            'fecha' => '30/03/2025',
-            'estado' => 'Aprobada',
-            'estado_class' => 'success',
-            'instituto_origen' => 'Colegio Mayor',
-            'programa_origen' => 'Gestión Empresarial',
-            'carrera_interes' => 'Administración de Empresas',
-            'fecha_solicitud' => Carbon::createFromFormat('d/m/Y', '30/03/2025'),
-            'estudiante' => (object)[
-                'tipo_identificacion' => 'Cédula de Ciudadanía',
-                'numero_identificacion' => '1122334455',
-                'nombre_completo' => 'Ana López',
-                'correo' => 'ana@example.com',
-                'telefono' => '3112233445',
-                'nacionalidad' => 'Colombiana',
-                'departamento' => 'Antioquia',
-                'municipio' => 'Medellín',
-            ],
-            'historial' => collect([])
-        ],
-        'HOM-2025-004' => [
-            'id' => 4,
-            'codigo' => 'HOM-2025-004',
-            'nombre' => 'Luis Martínez',
-            'instituto' => 'Universidad del Cauca',
-            'fecha' => '29/03/2025',
-            'estado' => 'Rechazada',
-            'estado_class' => 'danger',
-            'instituto_origen' => 'Universidad del Cauca',
-            'programa_origen' => 'Derecho',
-            'carrera_interes' => 'Ciencias Políticas',
-            'fecha_solicitud' => Carbon::createFromFormat('d/m/Y', '29/03/2025'),
-            'estudiante' => (object)[
-                'tipo_identificacion' => 'Cédula de Extranjería',
-                'numero_identificacion' => '77889900',
-                'nombre_completo' => 'Luis Martínez',
-                'correo' => 'luis@example.com',
-                'telefono' => '3134455667',
-                'nacionalidad' => 'Ecuatoriano',
-                'departamento' => 'Nariño',
-                'municipio' => 'Pasto',
-            ],
-            'historial' => collect([
-                (object)[
-                    'accion' => 'Solicitud rechazada',
-                    'usuario' => 'admin',
-                    'created_at' => now()->subDays(2)
-                ]
-            ])
-        ],
-    ];
-
-    if (!array_key_exists($id, $solicitudes)) {
-        abort(404);
-    }
-    $homologacion = (object) $solicitudes[$id];
-    return view('admin.homologacionescoordinador.informacionhomologacionusuario', compact('homologacion'));
-
-})->name('homologacion.index');
+    return view('admin.indexusuario.index');
+})->name('homologaciones.home');
 
 
-// Ruta para descargar PDF (usando controlador)
-// Ruta para ver el formulario de registro de estudiante
+
+/*
+|--------------------------------------------------------------------------
+| RUTAS PARA ASPIRANTES / ESTUDIANTES
+|--------------------------------------------------------------------------
+*/
+
+// Registro del estudiante
 Route::get('/homologaciones/registroestudiante', function () {
     return view('admin.indexusuario.registroestudiante');
 });
+
+// Dashboard del aspirante
+Route::get('/homologaciones/aspirante', function () {
+    return view('admin.homologacionesaspirante.dashboardAspirante');
+});
+
+// Solicitud de homologación
+Route::get('/homologaciones/solicitudhomologacion', function () {
+    return view('admin.homologacionesaspirante.solicitudhomologacion');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| RUTAS PARA COORDINADOR
+|--------------------------------------------------------------------------
+*/
+
+// Vista principal del coordinador (dashboard)
+Route::get('/coordinador', [HomologacionController::class, 'obtenerDatosBack'])
+    ->name('admin.homologacionescoordinador.index');
+
+// Pantalla principal de coordinación
+Route::get('/inicio/coordinacion', function () {
+    return view('admin.homologacionescoordinador.pantallaprincipal');
+})->name('admin.homologacionescoordinador.pantallaprincipal');
+
+// Ver documentos de una solicitud
+Route::get('/admin/homologacionescoordinador/{id}/documentos', [HomologacionController::class, 'verDocumentos'])
+    ->name('admin.homologacionescoordinador.documentos');
+
+// Procesar la homologación - ROUTE CORRECTED HERE
+Route::get('/admin/homologaciones/{id}/proceso', [HomologacionController::class, 'procesarHomologacion'])
+    ->name('admin.homologacionescoordinador.procesohomologacion');
+
+// Guardar homologación procesada
+Route::post('/homologaciones/guardar', [HomologacionController::class, 'guardarHomologacion'])
+    ->name('admin.homologaciones.guardar');
+
+// Reportes del coordinador
+Route::get('/reportes', function () {
+    return view('admin.homologacionescoordinador.reportes');
+})->name('admin.homologacionescoordinador/reportes');
 
 // Ruta para descargar PDF (usando controlador)
 Route::get('/homologacion/{id}/descargar', [HomologacionController::class, 'descargarPDF'])->name('homologacion.pdf');
@@ -200,84 +95,34 @@ Route::get('/homologaciones/home', function () {
 // Ruta para el dashboard del coordinador
 Route::get('/coordinador', [HomologacionController::class, 'obtenerDatosBack']);
 
-Route::get('/admin', function () {
+Route::get('/administrador', function () {
     return view('admin.homologacionesadministrador.administradorr');
 });
 
 
-Route::get('/admin/instituciones', function () {
+Route::get('/administrador/instituciones', function () {
     return view('admin.homologacionesadministrador.instituciones');
 });
 
-Route::get('/admin/programas', function () {
-    return view('admin.homologacionesadministrador.visualiinsti');
+Route::get('/programas_crear', function () {
+    return view('admin.homologacionesadministrador.programas_crear');
 });
 Route::get('/programas', function () {
     return view('admin.homologacionesadministrador.programas');
 });
-Route::get('/admin/roles', function () {
+Route::get('/roles', function () {
     return view('admin.homologacionesadministrador.roles');
 });
-Route::get('/admin/usuarios', function () {
+Route::get('/usuarios', function () {
     return view('admin.homologacionesadministrador.usuarios');
 });
 
-Route::get('/usuarioscrear', function () {
+Route::get('/usuarios_crear', function () {
     return view('admin.homologacionesadministrador.usuarios_crear');
 });
-Route::get('/admin/agregari', function () {
-    return view('admin.homologacionesadministrador.agregarinsti');
-});
-Route::get('/programas', function () {
-    return view('admin.homologacionesadministrador.programa');
-});
-
-Route::get('/materia', function () {
-    return view('admin.homologacionesadministrador.materia');
-});
-Route::get('/instituciones', function () {
-    return view('admin.homologacionesadministrador.instituciones');
-});
-Route::get('/editarusuario', function () {
-    return view('admin.homologacionesadministrador.editarusuario');
-});
-
-// Ruta para la página principal que muestra las instituciones
-
-// Rutas para instituciones
-Route::get('/institucioness', [InstitucionesController::class, 'index'])->name('instituciones.index');
-Route::get('/institucioness/{id}', [InstitucionesController::class, 'show'])->name('instituciones.show');
-
-// Rutas para programas
-Route::get('/programas/{id}', [ProgramasController::class, 'show'])->name('programas.show');
-
-// Rutas para asignaturas
-Route::get('/asignaturas/{id}', [AsignaturasController::class, 'show'])->name('asignaturas.show');
-
-
-// rutas/web.php
-
-Route::post('/admin/usuarios/crear', function () {
-    return redirect('/admin/usuarios')->with('success', 'Usuario creado con éxito');
-});
-
-
-
-use Illuminate\Support\Facades\Auth;
-
-Route::post('/logout', function () {
-    Auth::logout();
-    return redirect('/admin');
-})->name('logout');
-
 // Notificaciones
 Route::get('/notificaciones', function () {
     return view('admin.homologacionescoordinador.componentes.notificaciones');
 });
 Route::put('/admin/homologaciones/{id}', [HomologacionController::class, 'actualizar'])
     ->name('admin.homologaciones.actualizar');
-    Route::get('/admin/homologaciones/{id}/documentos', [HomologacionController::class, 'verificarDocumentos'])
-    ->name('admin.homologacionescoordinador.documentos');
-
-    Route::post('/admin/homologaciones/{id}/iniciar', [HomologacionController::class, 'iniciarProceso'])
-    ->name('admin.homologacionescoordinador.iniciar');

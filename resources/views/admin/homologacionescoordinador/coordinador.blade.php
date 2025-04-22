@@ -1,5 +1,5 @@
 {{-- resources/views/homologacionescoordinador/coordinador.blade.php --}}
-@extends('admin.layouts.app')
+@extends('admin.layouts.appcoordinacion')
 
 @section('title', 'Dashboard Coordinador')
 
@@ -68,34 +68,80 @@
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="solicitudes-table" class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Estudiante</th>
-                                <th>Correo</th>
-                                <th>Fecha Solicitud</th>
-                                <th>Institucion de origen </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <tbody>
-                            @foreach ($solicitudes as $solicitud)
-                            <tr>
-                                <td>{{ $solicitud['numero_radicado'] ?? 'N/A' }}</td>
-                                <td>{{ $solicitud['nombre_usuario'] ?? 'Nombre no disponible' }}</td>
-                                <td>{{ $solicitud['correo'] ?? 'Correo no disponible' }}</td>
-                                <td>
-                                    @if (!empty($solicitud['fecha_solicitud']))
-                                        {{ \Carbon\Carbon::parse($solicitud['fecha_solicitud'])->format('d/m/Y') }}
-                                    @else
-                                        Sin fecha
-                                    @endif
-                                </td>
-                                <td>{{ $solicitud['nombre_institucion'] ?? 'Sin nombre de institución' }}</td>
-                            </tr>
-                            @endforeach
 
-                        </tbody>
+                        <tbody>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Estudiante</th>
+                                    <th>Programa de Interés</th>
+                                    <th>Correo</th>
+                                    <th>Fecha de Solicitud</th>
+                                    <th>Institución de Origen</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($solicitudes as $solicitud)
+                                    @php
+                                        $estado = strtolower($solicitud['estado'] ?? '');
+                                        $numero_radicado = $solicitud['numero_radicado'] ?? '';
+
+                                        // Construir nombre completo del usuario
+                                        $nombre_usuario = trim(
+                                            ($solicitud['primer_nombre'] ?? '') . ' ' .
+                                            ($solicitud['segundo_nombre'] ?? '') . ' ' .
+                                            ($solicitud['primer_apellido'] ?? '') . ' ' .
+                                            ($solicitud['segundo_apellido'] ?? '')
+                                        );
+                                    @endphp
+                                    <tr>
+                                        <td>{{ $numero_radicado ?: 'N/A' }}</td>
+                                        <td>{{ $nombre_usuario ?: 'Nombre no disponible' }}</td>
+                                        <td>{{ $solicitud['programa_destino_nombre'] ?? 'Carrera no encontrada' }}</td>
+                                        <td>{{ $solicitud['email'] ?? 'Correo no disponible' }}</td>
+                                        <td>
+                                            @if (!empty($solicitud['fecha_solicitud']))
+                                                {{ \Carbon\Carbon::parse($solicitud['fecha_solicitud'])->format('d/m/Y') }}
+                                            @else
+                                                Sin fecha
+                                            @endif
+                                        </td>
+                                        <td>{{ $solicitud['institucion_origen_nombre'] ?? 'Sin nombre de institución' }}</td>
+                                        <td>{{ $solicitud['estado'] ?? 'Estado no disponible' }}</td>
+                                        <td>
+                                            {{-- Botón Editar: solo activo si no está cerrado --}}
+                                            @if ($estado === 'cerrado')
+                                                <button class="btn btn-sm btn-primary me-1" disabled
+                                                    title="No se puede editar una solicitud cerrada">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            @else
+                                                <a href="{{ route('admin.homologacionescoordinador.procesohomologacion', $numero_radicado) }}"
+                                                    class="btn btn-sm btn-primary me-1" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            @endif
+
+                                            {{-- Botón Ver Información Homologación --}}
+                                            <a href="{{ route('homologacion.Informacion', $numero_radicado) }}"
+                                                class="btn btn-sm btn-info me-1" title="Ver información de homologación">
+                                                <i class="fas fa-info-circle"></i>
+                                            </a>
+
+                                            {{-- Botón Descargar PDF (solo si aprobado, rechazado o cerrado) --}}
+                                            @if (in_array($estado, ['aprobado', 'rechazado', 'cerrado']))
+                                                <a href="{{ route('admin.homologacionescoordinador.descargar', $numero_radicado) }}"
+                                                    class="btn btn-sm btn-success me-1" title="Descargar PDF">
+                                                    <i class="fas fa-file-download"></i>
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+
 
                     </table>
                 </div>
