@@ -29,13 +29,13 @@ function handleLogin() {
     // Simulación de autenticación con diferentes roles
     if (email === 'aspirante@gmail.com' && password === 'Aspirante123') {
         console.log('Login exitoso como Aspirante');
-        simulateLogin('/admin/homologacionesaspirante/');
+        simulateLogin('/homologaciones/aspirante');
     } else if (email === 'coordinador@gmail.com' && password === 'Coordinador123') {
         console.log('Login exitoso como Coordinador');
-        simulateLogin('/coordinador/dashboard.html');
+        simulateLogin('/coordinador/inicio');
     } else if (email === 'admin@gmail.com' && password === 'Admin123') {
         console.log('Login exitoso como Administrador');
-        simulateLogin('/admin/dashboard.html');
+        simulateLogin('/administrador');
     } else {
         console.log('Error: Usuario o contraseña incorrectos');
         errorMessage.textContent = 'Correo o contraseña incorrectos. Intente nuevamente.';
@@ -69,8 +69,9 @@ function simulateLogin(redirectUrl) {
 // Función para redirigir a la página de registro
 function redirectToRegister() {
     console.log("Redirigiendo a formulario de homologación...");
-    window.location.href = '/Homologaciones/formularioHomologacion.html';
+    window.location.href = '/homologaciones/registroestudiante';
 }
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log("Script cargado correctamente");
 

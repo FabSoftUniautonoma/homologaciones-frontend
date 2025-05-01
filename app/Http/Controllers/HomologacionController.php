@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
-use App\Models\Solicitud;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use PDF;
+use App\Models\Solicitud;
 
 class HomologacionController extends Controller
 {
@@ -18,7 +15,7 @@ class HomologacionController extends Controller
      */
     private function getBaseUrl()
     {
-        return rtrim(env('BASE_URL_BACKEND', 'https://homologacionesback.educarenemociones.com/api/'), '/') . '/';
+        return rtrim(env('BASE_URL_BACKEND', 'http://127.0.0.1:8000'), '/') . '/api/';
     }
 
     /**
@@ -27,29 +24,35 @@ class HomologacionController extends Controller
     private function safeApiCall($method, $endpoint, $data = [], $timeout = 30)
     {
         $baseUrl = $this->getBaseUrl();
-        $url = $baseUrl . $endpoint;
+        $url = $baseUrl . ltrim($endpoint, '/');
 
         Log::info("Realizando solicitud $method a: $url");
 
         try {
             $httpClient = Http::timeout($timeout)
                 ->withOptions([
-                    'verify' => false, // Desactivar verificación SSL para debug
+                    'verify' => false,
                     'connect_timeout' => 10,
                     'http_errors' => false
                 ]);
 
-            if ($method === 'GET') {
-                $response = $httpClient->get($url, $data);
-            } elseif ($method === 'POST') {
-                $response = $httpClient->post($url, $data);
-            } elseif ($method === 'PUT') {
-                $response = $httpClient->put($url, $data);
-            } else {
-                $response = $httpClient->delete($url);
+            switch ($method) {
+                case 'GET':
+                    $response = $httpClient->get($url, $data);
+                    break;
+                case 'POST':
+                    $response = $httpClient->post($url, $data);
+                    break;
+                case 'PUT':
+                    $response = $httpClient->put($url, $data);
+                    break;
+                case 'DELETE':
+                    $response = $httpClient->delete($url);
+                    break;
+                default:
+                    throw new \Exception("Método HTTP no soportado: $method");
             }
 
-            // Log detalles adicionales si la respuesta no es exitosa
             if (!$response->successful()) {
                 Log::error("Error en la solicitud $method a $url: " .
                     "Status code: " . $response->status() .
@@ -63,9 +66,6 @@ class HomologacionController extends Controller
         }
     }
 
-    /**
-     * Actualiza el estado de una solicitud.
-     */
     public function actualizar(Request $request, $id)
     {
         try {
@@ -77,273 +77,183 @@ class HomologacionController extends Controller
                 return redirect()->back()->with('error', 'Error al actualizar la solicitud: ' . $response->body());
             }
         } catch (\Exception $e) {
-            Log::error("Excepción al actualizar solicitud: " . $e->getMessage());
             return redirect()->back()->with('error', 'Error al comunicarse con el servidor: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Muestra la información detallada de una solicitud.
-     */
-    public function verInformacion($radicado)
+    public function buscarSolicitudPorUsuario($idUsuario)
     {
         try {
-            // Obtener todas las solicitudes
-            $responseSolicitud = $this->safeApiCall('GET', 'solicitudes');
+            $response = $this->safeApiCall('GET', 'solicitudes');
 
-            if (!$responseSolicitud->successful()) {
-                abort(500, 'Error al obtener datos de solicitudes: ' . $responseSolicitud->body());
-            }
-
-            $solicitudes = $responseSolicitud->json();
-
-            // Buscar la solicitud con el número de radicado recibido
-            $solicitud = collect($solicitudes)->firstWhere('numero_radicado', $radicado);
-
-            if (!$solicitud) {
-                Log::warning("Solicitud no encontrada con radicado: " . $radicado);
-                abort(404, 'Solicitud no encontrada.');
-            }
-
-            // Obtener todos los usuarios
-            $responseUsuario = $this->safeApiCall('GET', 'usuarios');
-
-            if (!$responseUsuario->successful()) {
-                abort(500, 'Error al obtener datos de usuarios: ' . $responseUsuario->body());
-            }
-
-            $usuarios = $responseUsuario->json();
-
-            // Buscar el usuario asociado a la solicitud
-            $usuario = collect($usuarios)->firstWhere('id', $solicitud['id_usuario'] ?? null);
-
-            return view('admin.homologacionescoordinador.informacionhomologacionusuario', compact('solicitud', 'usuario'));
-
-        } catch (\Exception $e) {
-            Log::error("Error al obtener información de la solicitud o usuario: " . $e->getMessage());
-            abort(500, 'Error al conectarse con el servidor de datos: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Obtiene datos del backend (solicitudes y usuarios) para la vista principal
-     */
-    public function obtenerDatosBack()
-    {
-        try {
-            // Obtener todas las solicitudes
-            $responseSolicitudes = $this->safeApiCall('GET', 'solicitudes');
-
-            if (!$responseSolicitudes->successful()) {
-                return view('admin.homologacionescoordinador.coordinador')->withErrors([
-                    'error' => 'No se pudieron cargar los datos de solicitudes. Error: ' . $responseSolicitudes->body()
-                ]);
-            }
-
-            $solicitudes = $responseSolicitudes->json();
-
-            return view('admin.homologacionescoordinador.coordinador', [
-                'solicitudes' => $solicitudes,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Error al obtener datos del backend: ' . $e->getMessage());
-
-            return view('admin.homologacionescoordinador.coordinador')->withErrors([
-                'error' => 'No se pudieron cargar los datos. Error: ' . $e->getMessage()
-            ]);
-        }
-    }
-
-    /**
-     * Obtiene el pensum de la universidad autónoma.
-     */
-    public function obtenerPensumAutonoma()
-    {
-        try {
-            $response = $this->safeApiCall('GET', 'contenidos-programaticos');
-
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                Log::error("Error al obtener el pensum autónomo: " . $response->body());
-                return [];
-            }
-        } catch (\Exception $e) {
-            Log::error("Excepción al obtener pensum autónomo: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Obtiene las materias cursadas para una solicitud específica.
-     */
-    public function obtenerMateriasCursadas($solicitud_id)
-    {
-        try {
-            $response = $this->safeApiCall('GET', 'homologacion-asignaturas/' . $solicitud_id);
-
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                Log::error("Error al obtener las materias cursadas para solicitud: $solicitud_id - " . $response->body());
-                return [];
-            }
-        } catch (\Exception $e) {
-            Log::error("Excepción al obtener materias cursadas para solicitud $solicitud_id: " . $e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Obtiene una solicitud específica por su ID.
-     */
-    public function obtenerSolicitud($solicitud_id)
-    {
-        try {
-            $response = $this->safeApiCall('GET', 'solicitudes/' . $solicitud_id);
-
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                Log::error("Error al obtener la solicitud con ID: $solicitud_id - " . $response->body());
+            if (!$response->successful())
                 return null;
+
+            foreach ($response->json() as $solicitud) {
+                if ($solicitud['id_usuario'] == $idUsuario) {
+                    return $solicitud;
+                }
             }
+
+            return null;
         } catch (\Exception $e) {
-            Log::error("Excepción al obtener solicitud con ID $solicitud_id: " . $e->getMessage());
             return null;
         }
     }
 
-    /**
-     * Alias para mantener compatibilidad
-     */
-    public function obtenerPensum()
+    public function obtenerUsuario($idUsuario)
     {
-        return $this->obtenerPensumAutonoma();
+        try {
+            $response = $this->safeApiCall('GET', 'usuarios/' . $idUsuario);
+
+            return $response->successful() ? $response->json() : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
-    /**
-     * Procesa la homologación de una solicitud.
-     */
-    /**
- * Procesa la homologación de una solicitud.
- */
-public function procesarHomologacion($solicitud_id)
-{
-    try {
-        // Registrar inicio del proceso
-        Log::info("Iniciando procesamiento de homologación para solicitud: " . $solicitud_id);
-
-        // Configurar cliente HTTP con opciones avanzadas para evitar problemas de conexión
-        $client = new Client([
-            'timeout' => 30,
-            'connect_timeout' => 15,
-            'verify' => false, // Desactiva verificación SSL para desarrollo
-            'http_errors' => false
-        ]);
-
-        // Obtener URL base del API
-        $baseUrl = $this->getBaseUrl();
-        Log::info("Base URL de API: " . $baseUrl);
-
-        // 1. Obtener datos de la solicitud específica
+    public function verInformacion($radicado)
+    {
         try {
-            $solicitudResponse = $client->get($baseUrl . 'solicitudes/' . $solicitud_id);
-            $solicitud = json_decode($solicitudResponse->getBody(), true);
-            Log::info("Solicitud obtenida correctamente para ID: " . $solicitud_id);
-        } catch (\Exception $e) {
-            Log::error("Error al obtener solicitud: " . $e->getMessage());
-            return redirect()->back()->with('error', 'No se pudo obtener la información de la solicitud');
-        }
+            $respSolicitudes = $this->safeApiCall('GET', 'solicitudes');
+            if (!$respSolicitudes->successful())
+                abort(500, 'Error al obtener solicitudes');
 
-        // 2. Obtener materias cursadas
+            $solicitud = collect($respSolicitudes->json())->firstWhere('numero_radicado', $radicado);
+            if (!$solicitud)
+                abort(404, 'Solicitud no encontrada');
+
+            $respUsuarios = $this->safeApiCall('GET', 'usuarios');
+            if (!$respUsuarios->successful())
+                abort(500, 'Error al obtener usuarios');
+
+            $usuario = collect($respUsuarios->json())->firstWhere('numero_identificacion', $solicitud['numero_identificacion']);
+            if (!$usuario)
+                abort(404, 'Usuario no encontrado');
+
+            return view('admin.homologacionescoordinador.informacionhomologacionusuario', compact('solicitud', 'usuario'));
+        } catch (\Exception $e) {
+            abort(500, 'Error: ' . $e->getMessage());
+        }
+    }
+
+    public function obtenerDatosBack()
+    {
         try {
-            $materiasResponse = $client->get($baseUrl . 'homologacion-asignaturas/' . $solicitud_id);
-            $materias_cursadas = json_decode($materiasResponse->getBody(), true);
-            Log::info("Materias cursadas obtenidas: " . count($materias_cursadas ?? []));
-        } catch (\Exception $e) {
-            Log::error("Error al obtener materias cursadas: " . $e->getMessage());
-            $materias_cursadas = [];
-        }
+            $response = $this->safeApiCall('GET', 'solicitudes');
 
-        // 3. Obtener pensum
-        try {
-            $pensumResponse = $client->get($baseUrl . 'contenidos-programaticos');
-            $pensum = json_decode($pensumResponse->getBody(), true);
-            Log::info("Pensum obtenido: " . count($pensum ?? []));
-        } catch (\Exception $e) {
-            Log::error("Error al obtener pensum: " . $e->getMessage());
-            $pensum = [];
-        }
-
-        // 4. Preparar datos para la vista
-        $allData = [
-            'solicitud' => $solicitud ?? null,
-            'materias_cursadas' => $materias_cursadas ?? [],
-            'pensum' => $pensum ?? []
-        ];
-
-        // 5. Obtener datos adicionales necesarios
-        $endpoints = [
-            'instituciones',
-            'programas',
-            'asignaturas',
-            'usuarios',
-            'facultades',
-            'solicitud-asignaturas',
-            'solicitudes'
-        ];
-
-        foreach ($endpoints as $endpoint) {
-            try {
-                $response = $client->get($baseUrl . $endpoint);
-                $data = json_decode($response->getBody(), true);
-                $allData[$endpoint] = $data ?? [];
-                Log::info("Datos de $endpoint obtenidos: " . count($data ?? []));
-            } catch (\Exception $e) {
-                Log::error("Error al obtener datos de $endpoint: " . $e->getMessage());
-                $allData[$endpoint] = [];
+            if (!$response->successful()) {
+                return view('admin.homologacionescoordinador.coordinador')->withErrors([
+                    'error' => 'No se pudieron cargar los datos de solicitudes. Error: ' . $response->body()
+                ]);
             }
-        }
 
-        // Verificar que tenemos los datos mínimos necesarios
-        if (!isset($solicitud) || !is_array($solicitud)) {
-            Log::error("Datos de solicitud inválidos o no disponibles");
-            return redirect()->back()->with('error', 'No se pudo cargar la información de la solicitud');
+            return view('admin.homologacionescoordinador.coordinador', [
+                'solicitudes' => $response->json(),
+            ]);
+        } catch (\Exception $e) {
+            return view('admin.homologacionescoordinador.coordinador')->withErrors([
+                'error' => 'Error al obtener datos del backend: ' . $e->getMessage()
+            ]);
         }
-
-        // Mostrar mensaje informativo si faltan algunos datos secundarios
-        $warnings = [];
-        if (empty($materias_cursadas)) {
-            $warnings[] = 'No se pudieron cargar las materias cursadas.';
-        }
-        if (empty($pensum)) {
-            $warnings[] = 'No se pudo cargar el pensum.';
-        }
-        //dd($warnings);
-        dd($allData);
-        dd(
-            $allData['solicitud'],
-            $allData['materias_cursadas'],
-            $allData['pensum'],
-            $allData['instituciones'],
-            $allData['programas'],
-            $allData['asignaturas'],
-            $allData['usuarios'],
-            $allData['facultades'],
-            $allData['solicitud-asignaturas'],
-            $allData['solicitudes']
-        );
-        // Redirigir a la vista con los datos obtenidos
-        return view('admin.homologacionescoordinador.procesohomologacion', $allData)
-            ->with('warnings', $warnings);
-
-    } catch (\Exception $e) {
-        // Capturar cualquier excepción no manejada
-        Log::error("Error general en procesarHomologacion: " . $e->getMessage());
-        Log::error("Stack trace: " . $e->getTraceAsString());
-        return redirect()->back()->with('error', 'Ocurrió un error inesperado: ' . $e->getMessage());
     }
-}
+
+    public function descargarDocumento($documento)
+    {
+        $ruta = storage_path("app/documentos/{$documento}");
+
+        if (!file_exists($ruta))
+            abort(404, 'Documento no encontrado.');
+
+        return response()->download($ruta);
+    }
+
+    public function verReportes()
+    {
+        return view('admin.homologacionescoordinador.reportes');
+    }
+
+    public function verDocumentos($solicitud_id)
+    {
+        try {
+            $solicitud = Solicitud::findOrFail($solicitud_id);
+            $documentos = $solicitud->documentos;
+            return view('admin.homologacionescoordinador.documentos', compact('solicitud', 'documentos'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'No se pudo obtener la información de los documentos.');
+        }
+    }
+
+    public function obtenerSolicitud($solicitud_id)
+    {
+        try {
+            $response = $this->safeApiCall('GET', 'solicitudes/' . $solicitud_id);
+            return $response->successful() ? $response->json() : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+
+
+
+    public function procesarHomologacion($id)
+    {
+        try {
+            // Normalizar el ID (eliminar prefijo si existe)
+            $idNumerico = $id;
+            if (strpos($id, 'HOM-') === 0) {
+                $idNumerico = substr($id, 9); // Obtener los últimos dígitos (ej. 0001)
+            }
+
+            // Inicializar las variables por defecto
+            $solicitud = null;
+            $asignaturasOrigen = [];
+            $asignaturasDestino = [];
+
+            // Usar HTTP Client para llamar al API endpoint en lugar del procedimiento almacenado
+            $response = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
+
+            if ($response->successful() && isset($response['datos'])) {
+                // Obtenemos los datos completos de la respuesta API
+                $homologacion = $response['datos'];
+                $solicitud = $homologacion;
+
+                // Extraer asignaturas_origen y asignaturas_destino del JSON devuelto por el API
+                if (isset($homologacion['asignaturas_origen'])) {
+                    $asignaturasOrigen = $homologacion['asignaturas_origen'];
+                }
+
+                if (isset($homologacion['asignaturas_destino'])) {
+                    $asignaturasDestino = $homologacion['asignaturas_destino'];
+                }
+
+                // Para debugging (opcional)
+                // \Log::info('Datos homologación: ', (array)$homologacion);
+                // \Log::info('Asignaturas origen: ', $asignaturasOrigen);
+                // \Log::info('Asignaturas destino: ', $asignaturasDestino);
+
+                return view('admin.homologacionescoordinador.procesohomologacion', [
+                    'solicitud' => $solicitud,
+                    'asignaturasOrigen' => $asignaturasOrigen,
+                    'asignaturasDestino' => $asignaturasDestino
+                ]);
+            } else {
+                return view('admin.homologacionescoordinador.procesohomologacion', [
+                    'solicitud' => null,
+                    'asignaturasOrigen' => [],
+                    'asignaturasDestino' => [],
+                    'errors' => ['No se encontró la homologación con ID: ' . $id]
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error al procesar homologación: ' . $e->getMessage());
+            return view('admin.homologacionescoordinador.procesohomologacion', [
+                'solicitud' => null,
+                'asignaturasOrigen' => [],
+                'asignaturasDestino' => [],
+                'errors' => ['Error al procesar homologación: ' . $e->getMessage()]
+            ]);
+        }
+    }
 }

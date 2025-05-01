@@ -123,10 +123,11 @@
                                 </div>
                             </div>
 
-                            <a href="{{ route('homologacion.documentos', $solicitud['numero_radicado']) }}"
+                            <a href="{{ route('admin.homologacionescoordinador.documentos', $solicitud['id_solicitud']) }}"
                                 class="btn btn-primary w-100 mb-3">
                                 <i class="fas fa-check-circle me-2"></i> Verificar Documentos
                             </a>
+
 
                             <a href="{{ route('admin.homologacionescoordinador.procesohomologacion', $solicitud['numero_radicado']) }}"
                                 class="btn btn-success w-100 mb-3">

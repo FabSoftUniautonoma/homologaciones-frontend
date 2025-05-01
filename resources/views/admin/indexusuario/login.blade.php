@@ -35,7 +35,7 @@
                 <div id="error-message" class="error-message">{{ session('error') }}</div>
             @endif
 
-            <form id="login-form" method="POST" action="{{ route('login') }}">
+            <form id="login-form">
                 @csrf
 
                 <div class="input-group">
@@ -63,12 +63,13 @@
                     <label for="remember">Recordar mis datos</label>
                 </div>
 
-                <button type="submit" id="login-btn" class="login-btn">INGRESAR</button>
+                <button type="button" id="login-btn" class="login-btn">INGRESAR</button>
             </form>
 
+
             <div class="help-links">
-                <a href="{{ route('register') }}">Registrate Aquí</a>
-                <a href="{{ route('support') }}">Contactar soporte</a>
+                <a href="{{ route('admin.indexusuario.registroestudiante') }}">Registrate Aquí</a>
+                <a href="{{ route('homologaciones.home') }}">Contactar soporte</a>
             </div>
         </div>
 
