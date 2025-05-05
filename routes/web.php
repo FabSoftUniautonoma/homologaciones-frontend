@@ -27,24 +27,31 @@ Route::get('/homologaciones/home', function () {
     return view('admin.indexusuario.index');
 })->name('homologaciones.home');
 
-Route::get('/homologaciones/registroestudiante', function () {
-    return view('admin.indexusuario.registroestudiante');
-})->name('admin.indexusuario.registroestudiante');
+Route::prefix('auth')->group(function () {
+    // Vista de login
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
 
+    // Vista de registro
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
 
-Route::get('/homologaciones/aspirante', function () {
-    return view('admin.homologacionesaspirante.dashboardAspirante');
-});
-Route::get('/homologaciones/login', function () {
-    return view('admin.indexusuario.login');
-})->name('admin.indexusuario.login');
-
-
-Route::get('/homologaciones/solicitudhomologacion', function () {
-    return view('admin.homologacionesaspirante.solicitudhomologacion');
 });
 
-Route::post('/homologaciones/guardar', [HomologacionController::class, 'guardarHomologacion'])->name('admin.homologaciones.guardar');
+// RUTAS PROTEGIDAS POR TOKEN
+Route::prefix('homologaciones')->group(function () {
+    Route::get('/aspirante', function () {
+        return view('admin.homologacionesaspirante.dashboardAspirante');
+    })->name('homologaciones.aspirante');
+
+    Route::get('/solicitudhomologacion', function () {
+        return view('admin.homologacionesaspirante.solicitudhomologacion');
+    })->name('homologaciones.solicitud');
+
+    Route::post('/guardar', [HomologacionController::class, 'guardarHomologacion'])->name('admin.homologaciones.guardar');
+});
 
 /*
 |--------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+
+    <script>
+        // Verificar autenticación ANTES de cargar la página
+        if (!localStorage.getItem('auth_token')) {
+            window.location.href = '{{ route('login') }}';
+        }
+    </script>
+
+
+
     <style>
         :root {
             --primary-color: #19407B;
@@ -25,10 +36,13 @@
         }
 
         .navbar {
-    background-color: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-        .navbar-brand, .nav-link, .nav-icon {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand,
+        .nav-link,
+        .nav-icon {
             color: white !important;
         }
 
@@ -48,12 +62,12 @@
         }
 
         .nav-icon-text {
-        font-size: 0.9rem;
-        color:rgb(241, 237, 243);
-        display: block;
-        text-align: center;
-        margin-top: -5px;
-}
+            font-size: 0.9rem;
+            color: rgb(241, 237, 243);
+            display: block;
+            text-align: center;
+            margin-top: -5px;
+        }
 
         .container {
             margin-top: 20px;
@@ -64,7 +78,7 @@
             margin: 30px auto;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .carousel-inner img {
@@ -79,7 +93,7 @@
             border-radius: 10px;
             margin: 30px auto;
             max-width: 900px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .info-section h2 {
@@ -116,7 +130,7 @@
 
         .menu-buttons button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .menu-buttons .btn-primary {
@@ -149,6 +163,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -241,7 +256,7 @@
         .modal-content {
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .modal-header {
@@ -352,7 +367,7 @@
             background-color: white;
             position: relative;
             border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .radicado-number {
@@ -370,14 +385,14 @@
             border-radius: 10px;
             padding: 20px;
             margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s;
             cursor: pointer;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
         }
 
         .feature-icon {
@@ -433,133 +448,140 @@
         .document-actions {
             margin-top: 10px;
         }
+
         .uac-header {
-        background-color: var(--primary-color);
-        color: var(--secondary-color);
-        padding: 1.5rem 0;
-        margin-bottom: 0;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            padding: 1.5rem 0;
+            margin-bottom: 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-    .uac-header::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(25, 64, 123, 0.9) 0%, rgba(23, 162, 184, 0.7) 100%);
-        z-index: 1;
-    }
+        .uac-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(25, 64, 123, 0.9) 0%, rgba(23, 162, 184, 0.7) 100%);
+            z-index: 1;
+        }
 
-    .uac-header .container {
-        position: relative;
-        z-index: 2;
-    }
+        .uac-header .container {
+            position: relative;
+            z-index: 2;
+        }
 
-    .uac-slogan {
-        font-style: italic;
-        letter-spacing: 1px;
-        margin-top: 0.5rem;
-    }
+        .uac-slogan {
+            font-style: italic;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+        }
 
-    .uac-header .accent-text {
-        color: var(--accent-color);
-        font-weight: bold;
-    }
+        .uac-header .accent-text {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
 
-    .carousel-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, rgba(25, 64, 123, 0.3), rgba(25, 64, 123, 0.1));
-        z-index: 1;
-    }
+        .carousel-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(25, 64, 123, 0.3), rgba(25, 64, 123, 0.1));
+            z-index: 1;
+        }
 
-    .carousel-caption {
-        z-index: 2;
-        bottom: 20%;
-    }
+        .carousel-caption {
+            z-index: 2;
+            bottom: 20%;
+        }
 
-    .caption-box {
-        background-color: rgba(25, 64, 123, 0.8);
-        border-left: 5px solid var(--accent-color);
-        padding: 1.5rem;
-        border-radius: 4px;
-        max-width: 80%;
-        margin: 0 auto;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
+        .caption-box {
+            background-color: rgba(25, 64, 123, 0.8);
+            border-left: 5px solid var(--accent-color);
+            padding: 1.5rem;
+            border-radius: 4px;
+            max-width: 80%;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
 
-    .carousel-caption h3 {
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.5rem;
-    }
+        .carousel-caption h3 {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
 
-    .carousel-indicators {
-        bottom: 30px;
-    }
+        .carousel-indicators {
+            bottom: 30px;
+        }
 
-    .carousel-indicators button {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        margin: 0 6px;
-        background-color: var(--secondary-color);
-        opacity: 0.6;
-    }
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 6px;
+            background-color: var(--secondary-color);
+            opacity: 0.6;
+        }
 
-    .carousel-indicators button.active {
-        background-color: var(--accent-color);
-        opacity: 1;
-    }
+        .carousel-indicators button.active {
+            background-color: var(--accent-color);
+            opacity: 1;
+        }
 
-    .carousel-control-prev, .carousel-control-next {
-        width: 5%;
-        opacity: 0.8;
-    }
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 5%;
+            opacity: 0.8;
+        }
 
-    .carousel-item {
-        height: 500px;
-    }
+        .carousel-item {
+            height: 500px;
+        }
 
-    .carousel-item img {
-        object-fit: cover;
-        height: 100%;
-    }
-
-
+        .carousel-item img {
+            object-fit: cover;
+            height: 100%;
+        }
     </style>
 </head>
+
 <body>
+    <!-- Cargar los scripts PRIMERO -->
+    <script src="{{ asset('js/authService.js') }}"></script>
+    <script src="{{ asset('js/authMiddleware.js') }}"></script>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-            <i class="bi bi-building-check me-2"></i>
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-building-check me-2"></i>
                 Homologaciones Uniautónoma
             </a>
             <div class="d-flex align-items-center">
                 <div class="text-center mx-2">
-                    <button class="btn p-0" onclick="showNotification()" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Notificaciones">
+                    <button class="btn p-0" onclick="showNotification()" data-bs-toggle="tooltip"
+                        data-bs-placement="bottom" title="Notificaciones">
                         <i class="bi bi-bell-fill nav-icon"></i>
                         <span class="nav-icon-text">Notificaciones</span>
                     </button>
                 </div>
                 <div class="text-center mx-2">
-                    <button class="btn p-0" data-bs-toggle="modal" data-bs-target="#userProfileModal" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Perfil de Usuario">
+                    <button class="btn p-0" data-bs-toggle="modal" data-bs-target="#userProfileModal"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" title="Perfil de Usuario">
                         <i class="bi bi-person-circle nav-icon"></i>
                         <span class="nav-icon-text">Perfil</span>
                     </button>
                 </div>
                 <div class="text-center mx-2">
-                    <button class="btn p-0" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Menú">
+                    <button class="btn p-0" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom" title="Menú">
                         <i class="bi bi-list nav-icon"></i>
                         <span class="nav-icon-text">Menú</span>
                     </button>
@@ -601,7 +623,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#editProfileModal">
                         <i class="bi bi-pencil-square me-2"></i>
                         Editar información
                     </button>
@@ -688,69 +711,77 @@
 
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
-<!-- Carousel -->
-<div class="uac-header">
-    <div class="container text-center">
-        <h2 class="display-4 fw-bold">Universidad Autónoma del Cauca</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <p class="lead uac-slogan">Formamos líderes con <span class="accent-text">visión</span>, <span class="accent-text">compromiso</span> y <span class="accent-text">excelencia</span></p>
-                <p class="d-none d-md-block">30 años de trayectoria educativa | Acreditación de Alta Calidad | Popayán, Cauca</p>
+    <!-- Carousel -->
+    <div class="uac-header">
+        <div class="container text-center">
+            <h2 class="display-4 fw-bold">Universidad Autónoma del Cauca</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <p class="lead uac-slogan">Formamos líderes con <span class="accent-text">visión</span>, <span
+                            class="accent-text">compromiso</span> y <span class="accent-text">excelencia</span></p>
+                    <p class="d-none d-md-block">30 años de trayectoria educativa | Acreditación de Alta Calidad |
+                        Popayán, Cauca</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Carousel mejorado -->
-<div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-        <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="1"></button>
-        <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="2"></button>
+    <!-- Carousel mejorado -->
+    <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="2"></button>
+        </div>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="carousel-overlay"></div>
+                <img src="https://www.uniautonoma.edu.co/sites/default/files/noticia/dsc_0071_0.jpg"
+                    class="d-block w-100" alt="Campus Universitario">
+                <div class="carousel-caption">
+                    <div class="caption-box">
+                        <h3>Formación integral y humanista</h3>
+                        <p>Desarrollamos profesionales competentes que transforman la realidad regional con
+                            responsabilidad social e innovación</p>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="carousel-overlay"></div>
+                <img src="https://static1.educaedu-colombia.com/adjuntos/12/00/06/corporaci-n-universitaria-aut-noma-del-cauca-000682_large.jpg"
+                    class="d-block w-100" alt="Carreras de Ingeniería">
+                <div class="carousel-caption">
+                    <div class="caption-box">
+                        <h3>Excelencia académica y tecnológica</h3>
+                        <p>Programas de vanguardia diseñados para los retos del siglo XXI con proyección internacional
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="carousel-overlay"></div>
+                <img src="https://www.uniautonoma.edu.co/sites/default/files/noticia/dsc_0093_0.jpg"
+                    class="d-block w-100" alt="Vida Universitaria">
+                <div class="carousel-caption">
+                    <div class="caption-box">
+                        <h3>Comunidad universitaria vibrante</h3>
+                        <p>Un espacio donde el conocimiento, la cultura y el desarrollo personal confluyen para crear
+                            experiencias transformadoras</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <div class="carousel-overlay"></div>
-            <img src="https://www.uniautonoma.edu.co/sites/default/files/noticia/dsc_0071_0.jpg" class="d-block w-100" alt="Campus Universitario">
-            <div class="carousel-caption">
-                <div class="caption-box">
-                    <h3>Formación integral y humanista</h3>
-                    <p>Desarrollamos profesionales competentes que transforman la realidad regional con responsabilidad social e innovación</p>
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <div class="carousel-overlay"></div>
-            <img src="https://static1.educaedu-colombia.com/adjuntos/12/00/06/corporaci-n-universitaria-aut-noma-del-cauca-000682_large.jpg" class="d-block w-100" alt="Carreras de Ingeniería">
-            <div class="carousel-caption">
-                <div class="caption-box">
-                    <h3>Excelencia académica y tecnológica</h3>
-                    <p>Programas de vanguardia diseñados para los retos del siglo XXI con proyección internacional</p>
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <div class="carousel-overlay"></div>
-            <img src="https://www.uniautonoma.edu.co/sites/default/files/noticia/dsc_0093_0.jpg" class="d-block w-100" alt="Vida Universitaria">
-            <div class="carousel-caption">
-                <div class="caption-box">
-                    <h3>Comunidad universitaria vibrante</h3>
-                    <p>Un espacio donde el conocimiento, la cultura y el desarrollo personal confluyen para crear experiencias transformadoras</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
-</div>
 
-<div class="container">
+    <div class="container">
         <div class="interactive-section">
             <div class="row w-100">
                 <div class="col-md-4">
@@ -762,7 +793,8 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card text-center" data-bs-toggle="modal" data-bs-target="#miInformacionModal">
+                    <div class="feature-card text-center" data-bs-toggle="modal"
+                        data-bs-target="#miInformacionModal">
                         <i class="bi bi-person-vcard feature-icon"></i>
                         <h5>Mi información</h5>
                         <p>Revisa y actualiza tus datos personales y académicos</p>
@@ -770,7 +802,8 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card text-center" data-bs-toggle="modal" data-bs-target="#primeraHomologacionModal">
+                    <div class="feature-card text-center" data-bs-toggle="modal"
+                        data-bs-target="#primeraHomologacionModal">
                         <i class="bi bi-eye feature-icon"></i>
                         <h5>Primera homologación</h5>
                         <p>Visualiza los detalles de tu primera solicitud de homologación</p>
@@ -784,8 +817,10 @@
     <!-- Info Section -->
     <div class="info-section">
         <h2>Corporación Universitaria Autónoma del Cauca</h2>
-        <p class="lead">Es una institución de educación superior, sin ánimo de lucro, fundada para responder a las necesidades educativas de la región y del país.</p>
-        <p>Forma profesionales altamente competitivos por su proyección científica, sensibilidad social y liderazgo cívico y empresarial.</p>
+        <p class="lead">Es una institución de educación superior, sin ánimo de lucro, fundada para responder a las
+            necesidades educativas de la región y del país.</p>
+        <p>Forma profesionales altamente competitivos por su proyección científica, sensibilidad social y liderazgo
+            cívico y empresarial.</p>
         <div class="mt-4">
             <span class="badge bg-primary custom-badge me-2">Calidad educativa</span>
             <span class="badge bg-success custom-badge me-2">Excelencia académica</span>
@@ -831,10 +866,13 @@
                                 <div class="card-body">
                                     <div class="alert alert-success">
                                         <i class="bi bi-check-circle-fill me-2"></i>
-                                        Su solicitud de homologación ha sido aprobada. A continuación puede ver el detalle del proceso.
+                                        Su solicitud de homologación ha sido aprobada. A continuación puede ver el
+                                        detalle del proceso.
                                     </div>
                                     <div class="progress" style="height: 25px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100% Completado</div>
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%;"
+                                            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100% Completado
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -862,19 +900,25 @@
 
                     <ul class="nav nav-tabs" id="homologacionTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline" aria-selected="true">
+                            <button class="nav-link active" id="timeline-tab" data-bs-toggle="tab"
+                                data-bs-target="#timeline" type="button" role="tab" aria-controls="timeline"
+                                aria-selected="true">
                                 <i class="bi bi-clock-history me-1"></i>
                                 Historial del proceso
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects" type="button" role="tab" aria-controls="subjects" aria-selected="false">
+                            <button class="nav-link" id="subjects-tab" data-bs-toggle="tab"
+                                data-bs-target="#subjects" type="button" role="tab" aria-controls="subjects"
+                                aria-selected="false">
                                 <i class="bi bi-journal-check me-1"></i>
                                 Asignaturas homologadas
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="false">
+                            <button class="nav-link" id="documents-tab" data-bs-toggle="tab"
+                                data-bs-target="#documents" type="button" role="tab" aria-controls="documents"
+                                aria-selected="false">
                                 <i class="bi bi-file-earmark-pdf me-1"></i>
                                 Documentos
                             </button>
@@ -882,34 +926,39 @@
                     </ul>
 
                     <div class="tab-content mt-3" id="homologacionTabContent">
-                        <div class="tab-pane fade show active" id="timeline" role="tabpanel" aria-labelledby="timeline-tab">
+                        <div class="tab-pane fade show active" id="timeline" role="tabpanel"
+                            aria-labelledby="timeline-tab">
                             <div class="timeline">
                                 <div class="timeline-container left">
                                     <div class="timeline-content">
                                         <h5>Radicación de solicitud</h5>
                                         <p class="text-muted">15/02/2025 - 10:30 AM</p>
-                                        <p>Se ha registrado correctamente su solicitud de homologación para el programa de Ingeniería de Software.</p>
+                                        <p>Se ha registrado correctamente su solicitud de homologación para el programa
+                                            de Ingeniería de Software.</p>
                                     </div>
                                 </div>
                                 <div class="timeline-container right">
                                     <div class="timeline-content">
                                         <h5>Verificación de documentos</h5>
                                         <p class="text-muted">18/02/2025 - 09:15 AM</p>
-                                        <p>Los documentos presentados han sido verificados y cumplen con los requisitos establecidos.</p>
+                                        <p>Los documentos presentados han sido verificados y cumplen con los requisitos
+                                            establecidos.</p>
                                     </div>
                                 </div>
                                 <div class="timeline-container left">
                                     <div class="timeline-content">
                                         <h5>Evaluación académica</h5>
                                         <p class="text-muted">22/02/2025 - 03:40 PM</p>
-                                        <p>El comité académico ha evaluado las asignaturas solicitadas para homologación.</p>
+                                        <p>El comité académico ha evaluado las asignaturas solicitadas para
+                                            homologación.</p>
                                     </div>
                                 </div>
                                 <div class="timeline-container right">
                                     <div class="timeline-content">
                                         <h5>Aprobación de homologación</h5>
                                         <p class="text-muted">28/02/2025 - 11:20 AM</p>
-                                        <p>Su solicitud de homologación ha sido aprobada. En la sección de asignaturas homologadas puede ver el detalle.</p>
+                                        <p>Su solicitud de homologación ha sido aprobada. En la sección de asignaturas
+                                            homologadas puede ver el detalle.</p>
                                     </div>
                                 </div>
                             </div>
@@ -924,7 +973,8 @@
     </div>
 
     <!-- Mi Información Modal -->
-    <div class="modal fade" id="miInformacionModal" tabindex="-1" aria-labelledby="miInformacionModalLabel" aria-hidden="true">
+    <div class="modal fade" id="miInformacionModal" tabindex="-1" aria-labelledby="miInformacionModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -960,7 +1010,8 @@
     </div>
 
     <!-- Primera Homologación Modal -->
-    <div class="modal fade" id="primeraHomologacionModal" tabindex="-1" aria-labelledby="primeraHomologacionModalLabel" aria-hidden="true">
+    <div class="modal fade" id="primeraHomologacionModal" tabindex="-1"
+        aria-labelledby="primeraHomologacionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -973,7 +1024,8 @@
                 <div class="modal-body">
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle-fill me-2"></i>
-                        La primera homologación fue realizada el 15/01/2024 para su ingreso al programa de Ingeniería de Software.
+                        La primera homologación fue realizada el 15/01/2024 para su ingreso al programa de Ingeniería de
+                        Software.
                     </div>
                     <div class="radicado-number mb-3">
                         <i class="bi bi-file-earmark-text me-2"></i>
@@ -1068,7 +1120,7 @@
                 // Aquí iría la lógica de cerrar sesión
                 alert('Sesión cerrada exitosamente');
                 // Redirigir a la página de inicio de sesión
-                 window.location.href = 'index.html';
+                window.location.href = 'index.html';
             }
         }
 
@@ -1109,4 +1161,5 @@
         });
     </script>
 </body>
-    </html>
+
+</html>

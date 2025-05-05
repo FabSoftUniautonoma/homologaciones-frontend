@@ -1,5 +1,6 @@
-        /* Variables de color */
-        :root {
+
+         /* Variables de color */
+         :root {
             --azul-oscuro: #19407b;
             --azul-medio: #0075bf;
             --azul-claro: #08dcff;
@@ -10,7 +11,22 @@
             --rojo-error: #ff4d4d;
         }
 
-        /* Estilos generales */
+        .btn-primary {
+            background-color: var(--azul-medio);
+            border-color: var(--azul-medio);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--azul-oscuro);
+            border-color: var(--azul-oscuro);
+        }
+
+        .btn-primary:active, .btn-primary:focus {
+            background-color: var(--azul-oscuro);
+            border-color: var(--azul-oscuro);
+            box-shadow: 0 0 0 0.25rem rgba(0, 117, 191, 0.5);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -20,12 +36,12 @@
 
         body {
             background: linear-gradient(135deg, var(--azul-medio), var(--azul-oscuro));
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
             position: relative;
+            padding: 20px 0;
         }
 
         /* Burbujas animadas de fondo */
@@ -148,7 +164,7 @@
         /* Encabezado del formulario */
         .header {
             background-color: var(--azul-oscuro);
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -177,8 +193,8 @@
         }
 
         .logo {
-            width: 180px;
-            height: 180px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background-color: var(--blanco);
             margin: 0 auto;
@@ -191,7 +207,7 @@
         }
 
         .logo img {
-            width: 220%;
+            width: 100%;
             height: auto;
             object-fit: contain;
             animation: pulse 3s infinite;
@@ -249,7 +265,7 @@
             transition: all 0.3s ease;
         }
 
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid var(--borde);
@@ -259,13 +275,13 @@
             background-color: var(--blanco);
         }
 
-        .input-group input:focus {
+        .input-group input:focus, .input-group select:focus {
             border-color: var(--azul-medio);
             box-shadow: 0 0 0 3px rgba(0, 117, 191, 0.2);
             outline: none;
         }
 
-        .input-group input:focus+.input-icon {
+        .input-group input:focus+.input-icon, .input-group select:focus+.input-icon {
             color: var(--azul-medio);
             transform: translateY(-50%) scale(1.1);
         }
@@ -273,22 +289,28 @@
         .input-icon {
             position: absolute;
             right: 15px;
-            top: 50%;
+            top: 20%;
             transform: translateY(-50%);
             color: #888;
             transition: all 0.3s ease;
         }
 
-        .remember-me {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            cursor: pointer;
+        /* Password toggle */
+        .password-container {
+            position: relative;
         }
 
-        .remember-me input {
-            margin-right: 8px;
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             cursor: pointer;
+            color: #888;
+        }
+
+        .toggle-password:hover {
+            color: var(--azul-medio);
         }
 
         /* Botón de login */
@@ -332,6 +354,24 @@
             transform: translateY(0);
         }
 
+        /* Remember me */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .remember-me input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .remember-me label {
+            color: #555;
+            font-size: 14px;
+        }
+
         /* Enlaces de ayuda */
         .help-links {
             text-align: center;
@@ -355,7 +395,7 @@
         }
 
         /* Mensaje de error */
-        .error-message {
+        .error-message, .alert.error-message {
             background-color: rgba(255, 77, 77, 0.1);
             border-left: 3px solid var(--rojo-error);
             color: var(--rojo-error);
@@ -367,8 +407,18 @@
             animation: shake 0.5s ease;
         }
 
-        @keyframes shake {
+        .alert.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 3px solid #28a745;
+            color: #155724;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+        }
 
+        @keyframes shake {
             0%,
             100% {
                 transform: translateX(0);
@@ -399,19 +449,19 @@
         @media (max-width: 480px) {
             .container {
                 border-radius: 0;
-                height: 100vh;
+                min-height: 100vh;
                 max-width: 100%;
                 display: flex;
                 flex-direction: column;
             }
 
             .header {
-                padding: 20px;
+                padding: 15px;
             }
 
             .logo {
-                width: 120px;
-                height: 120px;
+                width: 100px;
+                height: 100px;
             }
 
             .form-container {
@@ -421,3 +471,4 @@
                 justify-content: center;
             }
         }
+
