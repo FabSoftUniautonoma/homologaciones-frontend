@@ -35,8 +35,8 @@ class AuthService {
             this.setToken(data.access_token);
             this.setUser(data.user);
 
-            // Redirigir después del login exitoso
-            this.redirectAfterLogin();
+            // Ya no redirigimos aquí
+            // this.redirectAfterLogin();
 
             return data;
         } catch (error) {
@@ -45,66 +45,70 @@ class AuthService {
         }
     }
 
-   /**
-     * Registrar un nuevo usuario
-     * @param {Object} userData - Datos del usuario a registrar
-     * @returns {Promise} - Promesa con resultado del registro
-     */
-   async register(userData) {
-    try {
-      const response = await fetch(`${this.baseUrl}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': this.getCsrfToken() // Para protección CSRF de Laravel
-        },
-        body: JSON.stringify(userData),
-      });
+    /**
+      * Registrar un nuevo usuario
+      * @param {Object} userData - Datos del usuario a registrar
+      * @returns {Promise} - Promesa con resultado del registro
+      */
+    async register(userData) {
+        try {
+            const response = await fetch(`${this.baseUrl}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.getCsrfToken() // Para protección CSRF de Laravel
+                },
+                body: JSON.stringify(userData),
+            });
 
-      const data = await response.json();
+            const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(Object.values(data).join(', ') || 'Error en el registro');
-      }
+            if (!response.ok) {
+                throw new Error(Object.values(data).join(', ') || 'Error en el registro');
+            }
 
-      return data;
-    } catch (error) {
-      console.error('Error durante registro:', error);
-      throw error;
+            return data;
+        } catch (error) {
+            console.error('Error durante registro:', error);
+            throw error;
+        }
     }
-  }
 
     // Nuevo método para manejar la redirección
     redirectAfterLogin() {
+        // Obtener la ruta base correcta
+        const baseRoute = '/homologaciones-frontend/public';
+
         // Puedes redirigir basándote en el rol del usuario o una ruta predeterminada
         const user = this.getUser();
 
         // Redirigir basándote en el rol o simplemente a un dashboard general
         if (user && user.role === 'aspirante') {
-            window.location.href = '/homologaciones/aspirante';
+            window.location.href = `${baseRoute}/homologaciones/aspirante`;
         } else if (user && user.role === 'coordinador') {
-            window.location.href = '/coordinador';
+            window.location.href = `${baseRoute}/coordinador`;
         } else if (user && user.role === 'administrador') {
-            window.location.href = '/administrador';
+            window.location.href = `${baseRoute}/administrador`;
         } else {
             // Por defecto, redirigir a una vista general
-            window.location.href = '/homologaciones/solicitudhomologacion';
+            window.location.href = `${baseRoute}/homologaciones/solicitudhomologacion`;
         }
     }
 
     // Método para proteger rutas
     static middleware() {
         const token = localStorage.getItem('auth_token');
+        const baseRoute = '/homologaciones-frontend/public';
 
         if (!token) {
             // Redirigir al login si no hay token
-            window.location.href = '/auth/login';
+            window.location.href = `${baseRoute}/auth/login`;
             return false;
         }
 
         // Verificar si el token es válido
         this.verifyToken(token).catch(() => {
-            window.location.href = '/auth/login';
+            window.location.href = `${baseRoute}/auth/login`;
         });
 
         return true;

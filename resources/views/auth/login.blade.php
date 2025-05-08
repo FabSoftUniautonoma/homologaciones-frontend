@@ -138,9 +138,13 @@
                 successMessage.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
                 successMessage.style.display = 'block';
 
+                // En lugar de depender de la redirección automática del servicio,
+                // hacemos la redirección aquí de forma explícita
                 setTimeout(() => {
-                    window.location.href = '{{ route(name: 'homologaciones.solicitud') }}';
-                }, 3000);
+                    // Ruta completa y explícita
+                    window.location.href =
+                        'http://localhost/homologaciones-frontend/public/homologaciones/solicitudhomologacion';
+                }, 1500);
 
             } catch (error) {
                 errorMessage.textContent = error.message || 'Error al iniciar sesión. Inténtalo de nuevo.';
@@ -149,4 +153,5 @@
         });
     </script>
 </body>
+
 </html>

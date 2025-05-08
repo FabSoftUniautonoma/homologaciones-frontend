@@ -1,3 +1,4 @@
+
 // public/js/authMiddleware.js
 document.addEventListener('DOMContentLoaded', function() {
     // Proteger la ruta actual

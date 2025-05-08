@@ -53,6 +53,8 @@ Route::prefix('homologaciones')->group(function () {
     Route::post('/guardar', [HomologacionController::class, 'guardarHomologacion'])->name('admin.homologaciones.guardar');
 });
 
+
+
 /*
 |--------------------------------------------------------------------------
 | RUTAS PARA COORDINADOR
