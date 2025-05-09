@@ -430,6 +430,122 @@ class AuthService {
         return !!this.getToken();
     }
 
+    isAuthenticated() {
+        return !!this.getToken();
+    }
+
+    /**
+     * Verifica si el usuario actual tiene acceso a una ruta específica
+     * @param {string} route - Ruta que se quiere acceder
+     * @returns {boolean} - Verdadero si tiene acceso, falso si no
+     */
+    hasRouteAccess(route) {
+        const user = this.getUser();
+
+        if (!user || !user.rol_id) {
+            return false; // Sin usuario o rol, no hay acceso
+        }
+
+        const rolId = user.rol_id;
+        const baseRoute = this.getBaseRoute();
+
+        // Mapeo de rutas permitidas por rol
+        const rutasPermitidas = {
+            1: [ // Aspirante
+                `${baseRoute}/homologaciones/aspirante`,
+                `${baseRoute}/homologaciones/solicitudhomologacion`
+            ],
+            2: [ // Coordinador
+                `${baseRoute}/coordinador/inicio`,
+                `${baseRoute}/coordinador`
+            ],
+            3: [ // Administrador
+                `${baseRoute}/administrador`,
+                `${baseRoute}/admin`
+            ]
+        };
+
+        // Función para verificar si la ruta actual está permitida para el rol
+        const tieneAcceso = () => {
+            // Si el usuario no tiene un rol definido en el mapeo, no tiene acceso
+            if (!rutasPermitidas[rolId]) {
+                return false;
+            }
+
+            // Verificar si alguna de las rutas permitidas coincide con la ruta solicitada
+            return rutasPermitidas[rolId].some(rutaPermitida => {
+                // Verificar rutas exactas o rutas que sean padres (comienzan con)
+                return route === rutaPermitida || route.startsWith(rutaPermitida + '/');
+            });
+        };
+
+        // Las páginas de perfil y cambio de contraseña son accesibles para todos los roles
+        const rutasGenerales = [
+            `${baseRoute}/perfil`,
+            `${baseRoute}/cambiar-password`,
+            `${baseRoute}/auth/logout`
+        ];
+
+        // Si la ruta está en las generales, permitir acceso
+        if (rutasGenerales.some(r => route === r || route.startsWith(r + '/'))) {
+            return true;
+        }
+
+        return tieneAcceso();
+    }
+
+    /**
+     * Redirige al usuario a su ruta por defecto si no tiene acceso a la ruta actual
+     * @returns {boolean} - Verdadero si tiene acceso, falso si fue redirigido
+     */
+    enforceRouteAccess() {
+        const currentPath = window.location.pathname;
+
+        if (!this.hasRouteAccess(currentPath)) {
+            // El usuario no tiene acceso a esta ruta, redirigir a su dashboard según rol
+            this.getRedirectUrl().then(url => {
+                window.location.href = url;
+            });
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Actualiza el perfil del usuario
+     * @param {Object} userData - Datos del usuario a actualizar
+     * @returns {Promise} - Promesa con resultado de la actualización
+     */
+    async updateProfile(userData) {
+        try {
+            const user = this.getUser();
+
+            if (!user || !user.id) {
+                throw new Error('No hay usuario para actualizar');
+            }
+
+            const response = await this.authenticatedRequest(`/auth/update-profile`, {
+                method: 'POST',
+                body: JSON.stringify(userData)
+            });
+
+            if (response && response.user) {
+                // Actualizar datos del usuario en localStorage
+                this.setUser(response.user);
+
+                // Actualizar estado del perfil
+                await this.checkProfileStatus();
+            }
+
+            return response;
+        } catch (error) {
+            console.error('Error actualizando perfil:', error);
+            throw error;
+        }
+    }
+
+
 
 }
 

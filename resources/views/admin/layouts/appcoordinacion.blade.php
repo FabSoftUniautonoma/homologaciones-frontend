@@ -5,14 +5,46 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>{{ env('APP_NAME') }}</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ asset('img/icon.svg') }}" />
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Protección ANTES de cargar el authService -->
+    <!-- Protección de ruta: Verificar autenticación ANTES de cargar el contenido -->
     <script>
-        // Verificar autenticación ANTES de cargar la página
+        // Verificar autenticación básica para el primer nivel de protección
         if (!localStorage.getItem('auth_token')) {
-            window.location.href = '{{ route('login') }}';
+            window.location.href = '/homologaciones-frontend/public/auth/login';
+        } else {
+            // Si hay token, verificar si tiene el rol adecuado (Coordinador = 2)
+            const userData = localStorage.getItem('user_data');
+
+            if (userData) {
+                const user = JSON.parse(userData);
+
+                // Verificar si el usuario NO es coordinador (rol_id = 2)
+                if (user.rol_id !== 2) {
+                    // Determinar la redirección basada en el rol
+                    const baseRoute = '/homologaciones-frontend/public';
+                    let redirectUrl;
+
+                    switch(user.rol_id) {
+                        case 1: // Aspirante
+                            redirectUrl = `${baseRoute}/homologaciones/aspirante`;
+                            break;
+                        case 3: // Administrador
+                            redirectUrl = `${baseRoute}/administrador`;
+                            break;
+                        default:
+                            redirectUrl = `${baseRoute}/auth/login`;
+                    }
+
+                    // Redirigir al usuario a su dashboard correspondiente
+                    window.location.href = redirectUrl;
+                }
+            } else {
+                // Si no hay datos de usuario, redirigir al login
+                window.location.href = '/homologaciones-frontend/public/auth/login';
+            }
         }
     </script>
 
@@ -37,25 +69,26 @@
     <script src="{{ asset('atlantis/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
     <!-- AOS Animations -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <!-- Fonts and icons -->
-    <script src="{{ asset('atlantis/assets/js/plugin/webfont/webfont.min.js') }}"></script>
-    <!--Select 2-->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <!-- AOS Animation CSS -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- CSS Files -->
-    <link href="{{ asset('atlantis/assets/css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('atlantis/assets/css/atlantis.css') }}" rel="stylesheet">
-    <!-- Estilos personalizados -->
-    <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
-
-    <!-- Servicios de Autenticación - CARGADOS ANTES DEL DOCUMENTO READY -->
+    <!-- Autenticación Service -->
     <script src="{{ asset('js/authService.js') }}"></script>
     <script src="{{ asset('js/authMiddleware.js') }}"></script>
     <script src="{{ asset('js/login-script.js') }}"></script>
+    <!--JS personalizado-->
+    <script src="{{ asset('js/admin.js') }}"></script>
+    <!-- Fonts and icons -->
+    <script src="{{ asset('atlantis/assets/js/plugin/webfont/webfont.min.js') }}"></script>
+    <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
+   <!--Select 2-->
+   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+   <!-- AOS Animation CSS -->
+   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
+   <!-- CSS Files -->
+   <link href="{{ asset('atlantis/assets/css/bootstrap.min.css') }}" rel="stylesheet">
+   <link href="{{ asset('atlantis/assets/css/atlantis.css') }}" rel="stylesheet">
+   <!-- Estilos personalizados -->
+   <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
     <script>
         WebFont.load({
             google: {
@@ -74,14 +107,10 @@
 
         // Inicializar AOS para animaciones al cargar
         $(document).ready(function() {
-            // VERIFICACIÓN DE ROL - Ejecutar al inicio del documento ready
-            if (typeof RoleChecker !== 'undefined') {
-                if (!RoleChecker.isCoordinador()) {
-                    console.log('Acceso denegado: Esta página es solo para coordinadores');
-                    return; // Detener la ejecución del resto del script
-                }
-            } else {
-                console.error('RoleChecker no está disponible');
+            // Verificación adicional de rol de Coordinador usando nuestro middleware
+            if (!window.checkRoleAccess([2])) {
+                console.log('Acceso denegado: Esta página es solo para coordinadores');
+                return; // El middleware ya se encarga de la redirección
             }
 
             AOS.init({
@@ -140,22 +169,43 @@
                 });
             });
 
-            // Configurar evento de cierre de sesión
-            $('#logout-link, .logout-item').click(function(e) {
+            // Configurar el cierre de sesión
+            $('#logout-link, .logout-link').click(function(e) {
                 e.preventDefault();
 
                 const auth = new AuthService();
+
+                // Mostrar un indicador de carga
+                swal({
+                    title: "Cerrando sesión",
+                    text: "Por favor espere...",
+                    icon: "info",
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                });
+
+                // Cerrar sesión usando AuthService
                 auth.logout()
                     .then(() => {
-                        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+                        window.location.href = auth.getBaseRoute() + '/auth/login';
                     })
                     .catch(error => {
                         console.error('Error al cerrar sesión:', error);
-                        // Forzar cierre de sesión si hay error
+                        // Forzar cierre de sesión en caso de error
                         auth.clearSession();
-                        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+                        window.location.href = auth.getBaseRoute() + '/auth/login';
                     });
             });
+
+            // Mostrar información del usuario
+            const auth = new AuthService();
+            const user = auth.getUser();
+
+            if (user) {
+                // Actualizar el nombre del usuario en la bienvenida
+                $('#user-welcome').text('Bienvenid@ ' + (user.primer_nombre || '') + ' ' + (user.primer_apellido || ''));
+            }
         });
 
         // Función para mostrar notificaciones dinámicas
@@ -269,7 +319,7 @@
                     <div class="collapse" id="search-nav">
                         <div class="user-box">
                             <div class="u-text">
-                                <h2 style="color: white" data-aos="fade-right">Bienvenid@ {{-- {{ Auth::user()->nombre }} --}}</h2>
+                                <h2 id="user-welcome" style="color: white" data-aos="fade-right">Bienvenid@</h2>
                             </div>
                         </div>
                     </div>
@@ -281,7 +331,7 @@
                             <ul class="dropdown-menu dropdown-user animated fadeIn">
                                 <div class="dropdown-user-scroll scrollbar-outer">
                                     <li>
-                                        <a class="dropdown-item logout-item" href="#">
+                                        <a class="dropdown-item logout-link" href="#" id="logout-link">
                                             Cerrar sesión
                                         </a>
                                     </li>
@@ -305,28 +355,28 @@
                             <h4 class="text-section">Menú</h4>
                         </li>
 
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200" data-role="2">
                             <a href="{{ route('admin.homologacionescoordinador.pantallaprincipal') }}">
                                 <i class="fas fa-home"></i>
                                 <p>Inicio</p>
                             </a>
                         </li>
 
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="300" data-role="2">
                             <a href="{{ route('admin.homologacionescoordinador.index') }}">
                                 <i class="fas fa-university"></i>
                                 <p>Gestión de Homologaciones</p>
                             </a>
                         </li>
 
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="500">
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="500" data-role="2">
                             <a href="#">
                                 <i class="fas fa-cogs"></i>
                                 <p>Configuración</p>
                             </a>
                         </li>
 
-                        <li class="nav-item logout-item" data-aos="fade-right" data-aos-delay="600">
+                        <li class="nav-item logout-link" data-aos="fade-right" data-aos-delay="600">
                             <a href="#">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <p>Cerrar sesión</p>
@@ -355,6 +405,9 @@
         </div>
     </div>
 
+    <!-- Contenedor para notificaciones emergentes -->
+    <div class="notification-popup-container"></div>
+
     <script>
         // Eliminar el overlay de carga después de que la página esté completamente cargada
         $(window).on('load', function() {
@@ -366,6 +419,7 @@
         });
     </script>
     @yield('scripts')
+
 </body>
 
 </html>

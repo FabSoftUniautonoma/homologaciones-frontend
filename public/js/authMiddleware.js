@@ -1,3 +1,7 @@
+/**
+ * Middleware de autenticación para proteger rutas basadas en roles de usuario
+ * Incluye verificación de autenticación, control de acceso por rol, y verificación de estado del perfil
+ */
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar que AuthService está disponible
     if (typeof AuthService !== 'function') {
@@ -8,192 +12,204 @@ document.addEventListener('DOMContentLoaded', function() {
     // Crear instancia del servicio de autenticación
     const auth = new AuthService();
 
-    // Si no hay token, ya se redirigió en el script inicial de la página
+    // Si no hay token, redirigir a login
     if (!auth.getToken()) {
-        return;
-    }
-
-    // Obtener usuario desde localStorage
-    const user = auth.getUser();
-    if (!user) {
         window.location.href = `${auth.getBaseRoute()}/auth/login`;
         return;
     }
 
-    // Verificar si estamos en una página que requiere perfil completo
-    const currentPath = window.location.pathname;
+    // Obtener usuario y verificar que exista
+    const user = auth.getUser();
+    if (!user) {
+        console.error('Error: Usuario no encontrado en localStorage');
+        auth.clearSession();
+        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+        return;
+    }
 
-    // Si estamos en el formulario de homologación, verificar si el perfil está completo
-    if (currentPath.includes('solicitudhomologacion')) {
-        // Verificar si hay datos de usuario en localStorage para prellenar el formulario
-        if (user) {
-            // Prellenar campos del formulario con datos existentes
-            precargarDatosFormulario(user);
+    // Verificar si es una ruta pública (no requiere autenticación)
+    const currentPath = window.location.pathname;
+    const publicRoutes = [
+        '/auth/login',
+        '/auth/register',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+    ];
+
+    // Si es una ruta pública y hay token, redirigir según rol (para evitar volver al login)
+    if (publicRoutes.some(route => currentPath.includes(route)) && auth.isAuthenticated()) {
+        auth.getRedirectUrl().then(url => {
+            window.location.href = url;
+        });
+        return;
+    }
+
+    // Verificar si el perfil está completo
+    auth.checkProfileStatus().then(isComplete => {
+        // Si el perfil está incompleto y no estamos en la página de completar perfil
+        if (!isComplete && !currentPath.includes('solicitudhomologacion')) {
+            window.location.href = `${auth.getBaseRoute()}/homologaciones/solicitudhomologacion`;
+            return;
         }
 
-        // Verificar si hay campos sin llenar que sean obligatorios en step-1
-        configurarEnvioFormulario();
+        // Verificar si el usuario tiene acceso a la ruta actual según su rol
+        const hasAccess = auth.hasRouteAccess(currentPath);
+
+        if (!hasAccess) {
+            console.log('Acceso no permitido a esta ruta para este rol');
+
+            // Redirigir a la página adecuada según el rol
+            auth.getRedirectUrl().then(url => {
+                window.location.href = url;
+            });
+            return;
+        }
+
+        console.log('Acceso autorizado a la ruta:', currentPath);
+
+        // Si todo está bien, actualizar elementos de la UI
+        updateUIBasedOnRole(user);
+    }).catch(error => {
+        console.error('Error verificando estado del perfil:', error);
+
+        // En caso de error, intentar verificar solo el acceso a la ruta
+        if (!auth.hasRouteAccess(currentPath)) {
+            auth.getRedirectUrl().then(url => {
+                window.location.href = url;
+            });
+        }
+    });
+
+    /**
+     * Actualiza los elementos de la interfaz según el rol del usuario
+     * @param {Object} user - Datos del usuario
+     */
+    function updateUIBasedOnRole(user) {
+        if (!user) return;
+
+        // Actualizar nombre de usuario en la UI si existe el elemento
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+            userNameElement.textContent = `${user.primer_nombre || ''} ${user.primer_apellido || ''}`;
+        }
+
+        // Actualizar elementos que muestran el rol del usuario
+        const userRoleElement = document.getElementById('user-role');
+        if (userRoleElement && user.rol_id) {
+            const rolNames = {
+                1: 'Aspirante',
+                2: 'Coordinador',
+                3: 'Administrador'
+            };
+
+            userRoleElement.textContent = rolNames[user.rol_id] || 'Usuario';
+        }
+
+        // Ocultar/mostrar elementos del menú según el rol (utilizando el atributo data-role)
+        const menuItems = document.querySelectorAll('[data-role]');
+        if (menuItems.length > 0) {
+            menuItems.forEach(item => {
+                const rolesPermitidos = item.getAttribute('data-role').split(',').map(r => parseInt(r.trim()));
+
+                if (!rolesPermitidos.includes(user.rol_id)) {
+                    // Si el rol del usuario no está en la lista de roles permitidos para este elemento
+                    item.style.display = 'none';
+                } else {
+                    // Asegurarse que sea visible (por si se ha ocultado previamente)
+                    item.style.display = '';
+                }
+            });
+        }
+
+        // Ocultar/mostrar secciones completas según el rol (utilizando el atributo data-section-role)
+        const sections = document.querySelectorAll('[data-section-role]');
+        if (sections.length > 0) {
+            sections.forEach(section => {
+                const rolesPermitidos = section.getAttribute('data-section-role').split(',').map(r => parseInt(r.trim()));
+
+                if (!rolesPermitidos.includes(user.rol_id)) {
+                    section.style.display = 'none';
+                } else {
+                    section.style.display = '';
+                }
+            });
+        }
+
+        // Configurar logout automático por inactividad
+        setupInactivityLogout();
+    }
+
+    /**
+     * Configura el cierre de sesión automático por inactividad
+     * Tiempo de inactividad: 30 minutos
+     */
+    function setupInactivityLogout() {
+        let inactivityTime = 30 * 60 * 1000; // 30 minutos en milisegundos
+        let inactivityTimer;
+
+        // Función para reiniciar el temporizador
+        const resetTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                console.log('Sesión cerrada por inactividad');
+
+                // Cerrar sesión
+                auth.logout()
+                    .then(() => {
+                        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+                    })
+                    .catch(error => {
+                        console.error('Error al cerrar sesión por inactividad:', error);
+                        // Forzar cierre de sesión en caso de error
+                        auth.clearSession();
+                        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+                    });
+            }, inactivityTime);
+        };
+
+        // Reiniciar el temporizador en eventos de usuario
+        const events = ['click', 'keypress', 'scroll', 'mousemove', 'touchstart'];
+        events.forEach(event => {
+            document.addEventListener(event, resetTimer);
+        });
+
+        // Iniciar el temporizador
+        resetTimer();
     }
 });
 
 /**
- * Precarga los datos del usuario en el formulario
- * @param {Object} userData - Datos del usuario
+ * Función de middleware estática para usar en páginas específicas
+ * @param {Array} allowedRoles - Array con los roles permitidos para la página
+ * @returns {boolean} - Verdadero si el usuario tiene acceso, falso si no
  */
-function precargarDatosFormulario(userData) {
-    // Mapeo de campos del usuario a campos del formulario
-    const camposFormulario = {
-        'tipo_identificacion': document.getElementById('tipo_identificacion'),
-        'numero_identificacion': document.getElementById('numero_identificacion'),
-        'primer_nombre': document.getElementById('primer_nombre'),
-        'segundo_nombre': document.getElementById('segundo_nombre'),
-        'primer_apellido': document.getElementById('primer_apellido'),
-        'segundo_apellido': document.getElementById('segundo_apellido'),
-        'email': document.getElementById('email'),
-        'telefono': document.getElementById('telefono'),
-        'direccion': document.getElementById('direccion')
-    };
+window.checkRoleAccess = function(allowedRoles) {
+    try {
+        const auth = new AuthService();
 
-    // Llenar campos si existen en el userData
-    for (const [campo, elemento] of Object.entries(camposFormulario)) {
-        if (elemento && userData[campo]) {
-            elemento.value = userData[campo];
+        if (!auth.isAuthenticated()) {
+            window.location.href = `${auth.getBaseRoute()}/auth/login`;
+            return false;
         }
+
+        const user = auth.getUser();
+
+        if (!user || !user.rol_id) {
+            window.location.href = `${auth.getBaseRoute()}/auth/login`;
+            return false;
+        }
+
+        if (!allowedRoles.includes(user.rol_id)) {
+            // Redirigir al usuario a su dashboard correspondiente
+            auth.getRedirectUrl().then(url => {
+                window.location.href = url;
+            });
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error verificando acceso por rol:', error);
+        return false;
     }
-
-    // Si hay departamento seleccionado, cargar y seleccionar municipios
-    if (userData.departamento_id && document.getElementById('departamento')) {
-        document.getElementById('departamento').value = userData.departamento_id;
-
-        // Ejecutar función de carga de municipios
-        if (typeof updateMunicipios === 'function') {
-            updateMunicipios();
-
-            // Esperar a que carguen los municipios y seleccionar el correcto
-            setTimeout(() => {
-                if (userData.municipio_id && document.getElementById('municipio')) {
-                    document.getElementById('municipio').value = userData.municipio_id;
-                }
-            }, 100);
-        }
-    }
-}
-
-
-/**
- * Configura el envío del formulario para guardar los datos del usuario
- */
-function configurarEnvioFormulario() {
-    // Reemplazar la función original validarFormularioStep1
-    window.validarFormularioStep1Original = window.validarFormularioStep1;
-
-    window.validarFormularioStep1 = function(step) {
-        // Validar campos requeridos
-        const camposRequeridos = [
-            'tipo_identificacion', 'numero_identificacion', 'primer_nombre',
-            'primer_apellido', 'email', 'telefono', 'direccion'
-        ];
-
-        let formValido = true;
-
-        for (const campo of camposRequeridos) {
-            const elemento = document.getElementById(campo);
-            if (elemento && (!elemento.value || elemento.value.trim() === '')) {
-                // Mostrar error
-                const errorMsg = elemento.parentNode.querySelector('.error-message');
-                if (errorMsg) {
-                    errorMsg.textContent = 'Este campo es requerido';
-                }
-                formValido = false;
-            } else if (elemento) {
-                // Limpiar mensaje de error
-                const errorMsg = elemento.parentNode.querySelector('.error-message');
-                if (errorMsg) {
-                    errorMsg.textContent = '';
-                }
-            }
-        }
-
-        // Validar email
-        const emailInput = document.getElementById('email');
-        if (emailInput && emailInput.value) {
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            if (!emailPattern.test(emailInput.value)) {
-                const errorMsg = emailInput.parentNode.querySelector('.error-message');
-                if (errorMsg) {
-                    errorMsg.textContent = 'Correo electrónico inválido';
-                }
-                formValido = false;
-            }
-        }
-
-        // Si el formulario es válido, guardar datos y continuar
-        if (formValido) {
-            // Recopilar datos del formulario
-            const userData = {};
-
-            const elementosFormulario = [
-                'tipo_identificacion', 'numero_identificacion', 'primer_nombre', 'segundo_nombre',
-                'primer_apellido', 'segundo_apellido', 'email', 'telefono', 'direccion'
-            ];
-
-            // Añadir mapeos para departamento y municipio
-            if (document.getElementById('departamento')) {
-                userData.departamento_id = document.getElementById('departamento').value;
-            }
-
-            if (document.getElementById('municipio')) {
-                userData.municipio_id = document.getElementById('municipio').value;
-            }
-
-            for (const campo of elementosFormulario) {
-                const elemento = document.getElementById(campo);
-                if (elemento) {
-                    userData[campo] = elemento.value;
-                }
-            }
-
-            // Obtener instancia de AuthService
-            const auth = new AuthService();
-
-            // Obtener ID del usuario actual
-            const user = auth.getUser();
-
-            if (user && user.id_usuario) {
-                // Mostrar spinner o indicador de carga si está disponible
-                const submitButton = document.querySelector('.next-button');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Guardando...';
-                }
-
-                // Actualizar perfil en el servidor
-                auth.updateProfile(userData)
-                    .then(response => {
-                        console.log('Perfil actualizado:', response);
-
-                        // Avanzar al siguiente paso
-                        if (typeof changeStep === 'function') {
-                            changeStep(step);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al actualizar perfil:', error);
-                        alert('Error al guardar los datos. Por favor, inténtelo de nuevo.');
-                    })
-                    .finally(() => {
-                        // Restaurar botón
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                            submitButton.textContent = 'Siguiente';
-                        }
-                    });
-            } else {
-                // Si no hay usuario autenticado, solo avanzar
-                if (typeof changeStep === 'function') {
-                    changeStep(step);
-                }
-            }
-        }
-    };
-}
+};

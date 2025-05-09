@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     auth.clearSession();
                     console.error('Token inválido:', error);
                 });
+        } else {
+            // En otras páginas, verificar acceso según rol
+            auth.enforceRouteAccess();
         }
     }
 
