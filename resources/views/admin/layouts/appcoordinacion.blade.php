@@ -5,7 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>{{ env('APP_NAME') }}</title>
     <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ asset('img/icon.svg') }}" />
+
+    <!-- Protección ANTES de cargar el authService -->
+    <script>
+        // Verificar autenticación ANTES de cargar la página
+        if (!localStorage.getItem('auth_token')) {
+            window.location.href = '{{ route('login') }}';
+        }
+    </script>
+
     <!-- Core JS Files -->
     <script src="{{ asset('atlantis/assets/js/core/jquery.3.2.1.min.js') }}"></script>
     <script src="{{ asset('atlantis/assets/js/core/popper.min.js') }}"></script>
@@ -27,22 +37,25 @@
     <script src="{{ asset('atlantis/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
     <!-- AOS Animations -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <!--JS personalizado-->
-    <script src="{{ asset('js/admin.js') }}"></script>
     <!-- Fonts and icons -->
     <script src="{{ asset('atlantis/assets/js/plugin/webfont/webfont.min.js') }}"></script>
-    <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
-   <!--Select 2-->
-   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-   <!-- AOS Animation CSS -->
-   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!--Select 2-->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-   <!-- CSS Files -->
-   <link href="{{ asset('atlantis/assets/css/bootstrap.min.css') }}" rel="stylesheet">
-   <link href="{{ asset('atlantis/assets/css/atlantis.css') }}" rel="stylesheet">
-   <!-- Estilos personalizados -->
-   <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
+    <!-- AOS Animation CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- CSS Files -->
+    <link href="{{ asset('atlantis/assets/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('atlantis/assets/css/atlantis.css') }}" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
+
+    <!-- Servicios de Autenticación - CARGADOS ANTES DEL DOCUMENTO READY -->
+    <script src="{{ asset('js/authService.js') }}"></script>
+    <script src="{{ asset('js/authMiddleware.js') }}"></script>
+    <script src="{{ asset('js/login-script.js') }}"></script>
+
     <script>
         WebFont.load({
             google: {
@@ -61,6 +74,16 @@
 
         // Inicializar AOS para animaciones al cargar
         $(document).ready(function() {
+            // VERIFICACIÓN DE ROL - Ejecutar al inicio del documento ready
+            if (typeof RoleChecker !== 'undefined') {
+                if (!RoleChecker.isCoordinador()) {
+                    console.log('Acceso denegado: Esta página es solo para coordinadores');
+                    return; // Detener la ejecución del resto del script
+                }
+            } else {
+                console.error('RoleChecker no está disponible');
+            }
+
             AOS.init({
                 duration: 800,
                 easing: 'ease-in-out',
@@ -115,6 +138,23 @@
                     $(this).remove();
                     updateNotificationCount();
                 });
+            });
+
+            // Configurar evento de cierre de sesión
+            $('#logout-link, .logout-item').click(function(e) {
+                e.preventDefault();
+
+                const auth = new AuthService();
+                auth.logout()
+                    .then(() => {
+                        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+                    })
+                    .catch(error => {
+                        console.error('Error al cerrar sesión:', error);
+                        // Forzar cierre de sesión si hay error
+                        auth.clearSession();
+                        window.location.href = `${auth.getBaseRoute()}/auth/login`;
+                    });
             });
         });
 
@@ -191,9 +231,6 @@
             }
         }
     </script>
-
-
-
 </head>
 
 <body>
@@ -244,13 +281,9 @@
                             <ul class="dropdown-menu dropdown-user animated fadeIn">
                                 <div class="dropdown-user-scroll scrollbar-outer">
                                     <li>
-                                        <a class="dropdown-item" href="{{-- {{ route('logout') }} --}}"
-                                            onclick="event.preventDefault();
-                                            document.getElementById('logout-form').submit();">
+                                        <a class="dropdown-item logout-item" href="#">
                                             Cerrar sesión
                                         </a>
-                                        <form id="logout-form" action="{{-- {{ route('logout') }} --}}" method="POST"
-                                            style="display: none;">@csrf</form>
                                     </li>
                                 </div>
                             </ul>
@@ -274,7 +307,6 @@
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
                             <a href="{{ route('admin.homologacionescoordinador.pantallaprincipal') }}">
-
                                 <i class="fas fa-home"></i>
                                 <p>Inicio</p>
                             </a>
@@ -282,12 +314,10 @@
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
                             <a href="{{ route('admin.homologacionescoordinador.index') }}">
-
                                 <i class="fas fa-university"></i>
                                 <p>Gestión de Homologaciones</p>
                             </a>
                         </li>
-
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="500">
                             <a href="#">
@@ -296,11 +326,11 @@
                             </a>
                         </li>
 
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="600">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <p>Cerrar sesión</p>
+                        <li class="nav-item logout-item" data-aos="fade-right" data-aos-delay="600">
+                            <a href="#">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <p>Cerrar sesión</p>
                             </a>
-
                         </li>
                     </ul>
                 </div>
@@ -336,7 +366,6 @@
         });
     </script>
     @yield('scripts')
-
 </body>
 
 </html>

@@ -1,20 +1,23 @@
 /**
- * Servicio de autenticación para manejar la comunicación con la API JWT
+ * Servicio de autenticación mejorado para manejar la comunicación con la API JWT
+ * Incluye funciones para verificar perfil completo y redirección inteligente
  */
 class AuthService {
     constructor(baseUrl) {
         this.baseUrl = baseUrl || 'http://127.0.0.1:8000/api'; // URL relativa para API en el mismo proyecto Laravel
         this.tokenKey = 'auth_token';
         this.userKey = 'user_data';
+        this.profileStatusKey = 'profile_status'; // Nueva clave para almacenar estado del perfil
     }
 
     /**
-     * Iniciar sesión con email y contraseña
-     * @param {string} email - Correo electrónico del usuario
-     * @param {string} password - Contraseña del usuario
-     * @returns {Promise} - Promesa con resultado de la autenticación
-     */
-    async login(email, password) {
+ * Iniciar sesión con email y contraseña
+ * @param {string} email - Correo electrónico del usuario
+ * @param {string} password - Contraseña del usuario
+ * @param {boolean} remember - Si se debe recordar la sesión
+ * @returns {Promise} - Promesa con resultado de la autenticación
+ */
+    async login(email, password, remember = false) {
         try {
             const response = await fetch(`${this.baseUrl}/auth/login`, {
                 method: 'POST',
@@ -23,6 +26,7 @@ class AuthService {
                     'X-CSRF-TOKEN': this.getCsrfToken()
                 },
                 body: JSON.stringify({ email, password }),
+                credentials: 'include' // Para soportar cookies HTTP-only
             });
 
             const data = await response.json();
@@ -35,14 +39,99 @@ class AuthService {
             this.setToken(data.access_token);
             this.setUser(data.user);
 
-            // Ya no redirigimos aquí
-            // this.redirectAfterLogin();
+            // Verificar si el perfil está completo (sin await para evitar bloquear)
+            this.checkProfileStatus().then(() => {
+                // Determinar redirección según estado del perfil
+                this.getRedirectUrl().then(redirectUrl => {
+                    // Realizar la redirección después de completar todas las promesas
+                    window.location.href = redirectUrl;
+                });
+            });
 
+            // Retornar datos sin esperar la redirección
             return data;
         } catch (error) {
             console.error('Error durante login:', error);
             throw error;
         }
+    }
+
+    /**
+   * Verificar estado del perfil del usuario (completo o incompleto)
+   * @returns {Promise<boolean>} - Verdadero si el perfil está completo, falso si no
+   */
+    async checkProfileStatus() {
+        try {
+            if (!this.getToken()) {
+                return false;
+            }
+
+            const userData = await this.getUserProfile();
+            const user = userData || this.getUser();
+
+            if (!user) {
+                return false;
+            }
+
+            // Validación mínima requerida
+            const isComplete = !!(user.primer_nombre && user.primer_apellido);
+
+            localStorage.setItem(this.profileStatusKey, isComplete ? 'complete' : 'incomplete');
+            return isComplete;
+        } catch (error) {
+            console.error('Error verificando estado del perfil:', error);
+            localStorage.setItem(this.profileStatusKey, 'incomplete');
+            return false;
+        }
+    }
+
+
+    /**
+    * Determina la URL a la que se debe redirigir según el estado del perfil y rol
+    * @returns {string} - URL para redirección
+    */
+    async getRedirectUrl() {
+        const profileStatus = localStorage.getItem(this.profileStatusKey);
+        const user = this.getUser();
+        const baseRoute = this.getBaseRoute();
+
+        if (!user) {
+            return `${baseRoute}/auth/login`;
+        }
+
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/auth/login')) {
+            console.log('Ya estamos en login, determinando ruta correcta...');
+        }
+
+        const rolId = user.rol_id;
+
+        if (profileStatus === 'incomplete') {
+            return `${baseRoute}/homologaciones/solicitudhomologacion`;
+        }
+
+        if (rolId === 1) { // Aspirante
+            return `${baseRoute}/homologaciones/aspirante`;
+        }
+
+        switch (rolId) {
+            case 2:
+                return `${baseRoute}/coordinador/inicio`;
+            case 3:
+                return `${baseRoute}/administrador`;
+            default:
+                return `${baseRoute}/homologaciones/solicitudhomologacion`;
+        }
+    }
+
+
+    /**
+     * Obtiene la URL base de la aplicación para redirecciones
+     * @returns {string} - URL base de la aplicación
+     */
+    getBaseRoute() {
+        // Ajusta esto según sea necesario para tu entorno
+        return '/homologaciones-frontend/public';
     }
 
     /**
@@ -74,27 +163,6 @@ class AuthService {
         }
     }
 
-    // Nuevo método para manejar la redirección
-    redirectAfterLogin() {
-        // Obtener la ruta base correcta
-        const baseRoute = '/homologaciones-frontend/public';
-
-        // Puedes redirigir basándote en el rol del usuario o una ruta predeterminada
-        const user = this.getUser();
-
-        // Redirigir basándote en el rol o simplemente a un dashboard general
-        if (user && user.role === 'aspirante') {
-            window.location.href = `${baseRoute}/homologaciones/aspirante`;
-        } else if (user && user.role === 'coordinador') {
-            window.location.href = `${baseRoute}/coordinador`;
-        } else if (user && user.role === 'administrador') {
-            window.location.href = `${baseRoute}/administrador`;
-        } else {
-            // Por defecto, redirigir a una vista general
-            window.location.href = `${baseRoute}/homologaciones/solicitudhomologacion`;
-        }
-    }
-
     // Método para proteger rutas
     static middleware() {
         const token = localStorage.getItem('auth_token');
@@ -116,21 +184,26 @@ class AuthService {
 
     // Verificar token con el backend
     static async verifyToken(token) {
-        const response = await fetch('http://127.0.0.1:8000/api/auth/user-profile', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        try {
+            const response = await fetch('http://127.0.0.1:8000/api/auth/user-profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.error('Token inválido o expirado');
+                throw new Error('Token inválido');
             }
-        });
 
-        if (!response.ok) {
-            throw new Error('Token inválido');
+            return await response.json();
+        } catch (error) {
+            console.error('Error verificando token:', error);
+            throw error;
         }
-
-        return response.json();
     }
-
     /**
      * Cerrar sesión del usuario actual
      * @returns {Promise} - Promesa con resultado del cierre de sesión
@@ -296,6 +369,31 @@ class AuthService {
         }
     }
 
+    /**
+     * Obtiene un usuario específico por ID
+     * @param {number} userId - ID del usuario a obtener
+     * @returns {Promise} - Promesa con datos del usuario
+     */
+    async getUser(userId) {
+        try {
+            // Si no se proporciona ID, usar el ID del usuario actual
+            const id = userId || (this.getUser() && this.getUser().id);
+
+            if (!id) {
+                throw new Error('ID de usuario no proporcionado');
+            }
+
+            return this.authenticatedRequest(`/usuarios/${id}`, {
+                method: 'GET'
+            });
+        } catch (error) {
+            console.error('Error obteniendo usuario:', error);
+            throw error;
+        }
+    }
+
+
+
     // Método para obtener el token CSRF de Laravel
     getCsrfToken() {
         // Obtener del meta tag que Laravel suele incluir en sus vistas
@@ -325,11 +423,14 @@ class AuthService {
     clearSession() {
         localStorage.removeItem(this.tokenKey);
         localStorage.removeItem(this.userKey);
+        localStorage.removeItem(this.profileStatusKey);
     }
 
     isAuthenticated() {
         return !!this.getToken();
     }
+
+
 }
 
 // Exportar servicio para uso en otros archivos

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SolicitudHomologacionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomologacionController;
 use App\Http\Controllers\InstitucionesController;
@@ -52,9 +53,6 @@ Route::prefix('homologaciones')->group(function () {
 
     Route::post('/guardar', [HomologacionController::class, 'guardarHomologacion'])->name('admin.homologaciones.guardar');
 });
-
-
-
 /*
 |--------------------------------------------------------------------------
 | RUTAS PARA COORDINADOR

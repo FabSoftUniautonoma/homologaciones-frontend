@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <script src="{{ asset('js/loginn.js') }}"></script>
     <!-- Burbujas animadas de fondo -->
     <div class="bubbles">
         <div class="bubble"></div>
@@ -138,13 +139,10 @@
                 successMessage.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
                 successMessage.style.display = 'block';
 
-                // En lugar de depender de la redirección automática del servicio,
-                // hacemos la redirección aquí de forma explícita
-                setTimeout(() => {
-                    // Ruta completa y explícita
-                    window.location.href =
-                        'http://localhost/homologaciones-frontend/public/homologaciones/solicitudhomologacion';
-                }, 1500);
+                getRedirectUrl().then((url) => {
+                    window.location.href = url;
+                });
+
 
             } catch (error) {
                 errorMessage.textContent = error.message || 'Error al iniciar sesión. Inténtalo de nuevo.';

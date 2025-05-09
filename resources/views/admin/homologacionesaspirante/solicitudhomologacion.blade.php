@@ -23,6 +23,7 @@
     <!-- Cargar los scripts PRIMERO -->
     <script src="{{ asset('js/authService.js') }}"></script>
     <script src="{{ asset('js/authMiddleware.js') }}"></script>
+    <script src="{{ asset('js/login-script.js') }}"></script>
 
     <header>
         <h1>Universidad Autónoma del Cauca</h1>
@@ -74,9 +75,9 @@
                             <label>Tipo de identificación:</label>
                             <select id="tipo_identificacion" required>
                                 <option value="">Seleccione</option>
-                                <option value="TI">Tarjeta de Identidad (TI)</option>
-                                <option value="CC">Cédula de Ciudadanía (CC)</option>
-                                <option value="TE">Tarjeta de Extranjería (TE)</option>
+                                <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
                             </select>
                             <span class="error-message"></span>
                         </div>
