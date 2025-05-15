@@ -6,6 +6,7 @@ use App\Http\Controllers\InstitucionesController;
 use App\Http\Controllers\ProgramasController;
 use App\Http\Controllers\AsignaturasController;
 use App\Http\Controllers\PaisesControllerApi;
+use App\Http\Controllers\SolicitudHomologacionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,9 +41,17 @@ Route::get('/homologaciones/login', function () {
 })->name('admin.indexusuario.login');
 
 
-Route::get('/homologaciones/solicitudhomologacion', function () {
-    return view('admin.homologacionesaspirante.solicitudhomologacion');
-});
+//Route::get('/homologaciones/solicitudhomologacion', function () {
+  //  return view('admin.homologacionesaspirante.solicitudhomologacion');
+//});
+
+// Mi cambio
+
+Route::get('/homologaciones/solicitudhomologacion',[SolicitudHomologacionController::class, 'index'])->name('admin.homologacionesaspirante.solicitudhomologacion');
+
+
+
+
 
 Route::post('/homologaciones/guardar', [HomologacionController::class, 'guardarHomologacion'])->name('admin.homologaciones.guardar');
 
