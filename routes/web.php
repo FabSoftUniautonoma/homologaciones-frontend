@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SolicitudHomologacionController;
 use App\Http\Controllers\HomologacionController;
 use App\Http\Controllers\InstitucionesController;
@@ -45,14 +45,23 @@ Route::get('/homologaciones/home', function () {
     return view('admin.indexusuario.index');
 })->name('homologaciones.home');
 
+// Vista adicional del login del antiguo archivo
+Route::get('/homologaciones/login', function () {
+    return view('admin.indexusuario.login');
+})->name('admin.indexusuario.login');
+
+// Vista adicional para registrar estudiante
+Route::get('/homologaciones/registroestudiante', function () {
+    return view('admin.indexusuario.registroestudiante');
+})->name('admin.indexusuario.registroestudiante');
+
 Route::prefix('homologaciones')->group(function () {
     Route::get('/aspirante', function () {
         return view('admin.homologacionesaspirante.dashboardAspirante');
     })->name('homologaciones.aspirante');
 
-    Route::get('/solicitudhomologacion', function () {
-        return view('admin.homologacionesaspirante.solicitudhomologacion');
-    })->name('homologaciones.solicitud');
+    // Usamos el controlador como en el primer archivo (versión funcional)
+    Route::get('/solicitudhomologacion', [SolicitudHomologacionController::class, 'index'])->name('admin.homologacionesaspirante.solicitudhomologacion');
 
     Route::post('/guardar', [HomologacionController::class, 'guardarHomologacion'])->name('admin.homologaciones.guardar');
 });
@@ -155,10 +164,12 @@ Route::get('/homologacion/{id}/descargar', [HomologacionController::class, 'desc
 
 Route::put('/admin/homologaciones/{id}', [HomologacionController::class, 'actualizar'])->name('admin.homologaciones.actualizar');
 
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD API
+|--------------------------------------------------------------------------
+*/
 
-//dashboard
-
-// Rutas corregidas para evitar conflictos
 Route::prefix('api')->group(function () {
     Route::get('/usuarios/{id}', [DashboardController::class, 'obtenerPerfilUsuario']);
     Route::get('/solicitudes/usuario/{usuarioId}', [DashboardController::class, 'obtenerSolicitudesUsuario']);

@@ -195,8 +195,6 @@ class HomologacionController extends Controller
     }
 
 
-
-
     public function procesarHomologacion($id)
     {
         try {

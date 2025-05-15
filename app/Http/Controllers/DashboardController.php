@@ -83,61 +83,61 @@ class DashboardController extends Controller
      * Obtiene las solicitudes de homologación del usuario
      */
     public function obtenerSolicitudesUsuario($usuarioId)
-{
-    try {
-        Log::info("Obteniendo solicitudes para usuario ID: {$usuarioId}");
+    {
+        try {
+            Log::info("Obteniendo solicitudes para usuario ID: {$usuarioId}");
 
-        // Verificar que el ID sea válido
-        if (!$usuarioId || !is_numeric($usuarioId)) {
-            return response()->json([
-                'mensaje' => 'ID de usuario inválido',
-                'error' => 'El ID debe ser un número'
-            ], 400);
-        }
+            // Verificar que el ID sea válido
+            if (!$usuarioId || !is_numeric($usuarioId)) {
+                return response()->json([
+                    'mensaje' => 'ID de usuario inválido',
+                    'error' => 'El ID debe ser un número'
+                ], 400);
+            }
 
-        // Usar parámetros de consulta específicos
-        $response = Http::timeout(15)->get($this->apiUrl . '/solicitudes', [
-            'usuario_id' => $usuarioId
-        ]);
+            // Usar parámetros de consulta específicos
+            $response = Http::timeout(15)->get($this->apiUrl . '/solicitudes', [
+                'usuario_id' => $usuarioId
+            ]);
 
-        if (!$response->successful()) {
-            Log::error("Error al obtener solicitudes de usuario: {$response->status()}", [
+            if (!$response->successful()) {
+                Log::error("Error al obtener solicitudes de usuario: {$response->status()}", [
+                    'id' => $usuarioId,
+                    'respuesta' => $response->body()
+                ]);
+
+                return response()->json([
+                    'mensaje' => 'No se pudieron obtener las solicitudes',
+                    'error' => $response->status() . ': ' . $response->body()
+                ], $response->status());
+            }
+
+            // Obtener datos JSON y asegurar que se devuelve en una estructura consistente
+            $responseData = $response->json();
+            $solicitudes = isset($responseData['datos']) ? $responseData['datos'] : $responseData;
+
+            Log::info("Solicitudes obtenidas exitosamente", [
                 'id' => $usuarioId,
-                'respuesta' => $response->body()
+                'cantidad' => is_array($solicitudes) ? count($solicitudes) : 0
             ]);
 
             return response()->json([
-                'mensaje' => 'No se pudieron obtener las solicitudes',
-                'error' => $response->status() . ': ' . $response->body()
-            ], $response->status());
+                'mensaje' => 'Solicitudes encontradas',
+                'datos' => is_array($solicitudes) ? $solicitudes : []
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Excepción al obtener solicitudes de usuario: {$e->getMessage()}", [
+                'id' => $usuarioId,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'mensaje' => 'Error al conectar con la API',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Obtener datos JSON y asegurar que se devuelve en una estructura consistente
-        $responseData = $response->json();
-        $solicitudes = isset($responseData['datos']) ? $responseData['datos'] : $responseData;
-
-        Log::info("Solicitudes obtenidas exitosamente", [
-            'id' => $usuarioId,
-            'cantidad' => is_array($solicitudes) ? count($solicitudes) : 0
-        ]);
-
-        return response()->json([
-            'mensaje' => 'Solicitudes encontradas',
-            'datos' => is_array($solicitudes) ? $solicitudes : []
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error("Excepción al obtener solicitudes de usuario: {$e->getMessage()}", [
-            'id' => $usuarioId,
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'mensaje' => 'Error al conectar con la API',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
     /**
      * Obtiene los detalles de una solicitud específica
@@ -234,87 +234,87 @@ class DashboardController extends Controller
      * Actualiza la información del perfil del usuario
      */
     public function actualizarPerfilUsuario(Request $request, $id)
-{
-    try {
-        Log::info("Actualizando perfil para usuario ID: {$id}", [
-            'datos' => $request->except(['password'])  // No logueamos contraseñas
-        ]);
+    {
+        try {
+            Log::info("Actualizando perfil para usuario ID: {$id}", [
+                'datos' => $request->except(['password'])  // No logueamos contraseñas
+            ]);
 
-        // Verificar que el ID sea válido
-        if (!$id || !is_numeric($id)) {
+            // Verificar que el ID sea válido
+            if (!$id || !is_numeric($id)) {
+                return response()->json([
+                    'mensaje' => 'ID de usuario inválido',
+                    'error' => 'El ID debe ser un número'
+                ], 400);
+            }
+
+            // Primero obtener datos actuales para asegurar que todos los campos requeridos estén presentes
+            $datosActuales = Http::get($this->apiUrl . '/usuarios/' . $id);
+
+            if (!$datosActuales->successful()) {
+                return response()->json([
+                    'mensaje' => 'No se pudieron obtener los datos actuales del usuario',
+                    'error' => $datosActuales->status() . ': ' . $datosActuales->body()
+                ], $datosActuales->status());
+            }
+
+            $datosUsuario = $datosActuales->json();
+
+            // Combinar datos actuales con los enviados
+            $datosCompletos = array_merge(
+                $datosUsuario['datos'] ?? [],
+                $request->all()
+            );
+
+            // Validar datos mínimos requeridos
+            $validator = Validator::make($datosCompletos, [
+                'email' => 'required|email',
+                'primer_nombre' => 'required|string',
+                'primer_apellido' => 'required|string',
+                'tipo_identificacion' => 'required|string',
+                'numero_identificacion' => 'required|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'mensaje' => 'Datos de usuario inválidos',
+                    'error' => $validator->errors()
+                ], 422);
+            }
+
+            $response = Http::timeout(15)
+                ->withHeaders(['Accept' => 'application/json'])
+                ->put($this->apiUrl . '/usuarios/' . $id, $datosCompletos);
+
+            if (!$response->successful()) {
+                Log::error("Error al actualizar perfil de usuario: {$response->status()}", [
+                    'id' => $id,
+                    'respuesta' => $response->body()
+                ]);
+
+                return response()->json([
+                    'mensaje' => 'No se pudo actualizar la información del usuario',
+                    'error' => $response->status() . ': ' . $response->body()
+                ], $response->status());
+            }
+
+            Log::info("Perfil de usuario actualizado exitosamente", ['id' => $id]);
+
             return response()->json([
-                'mensaje' => 'ID de usuario inválido',
-                'error' => 'El ID debe ser un número'
-            ], 400);
-        }
+                'mensaje' => 'Perfil actualizado correctamente',
+                'datos' => $response->json()
+            ]);
 
-        // Primero obtener datos actuales para asegurar que todos los campos requeridos estén presentes
-        $datosActuales = Http::get($this->apiUrl . '/usuarios/' . $id);
-
-        if (!$datosActuales->successful()) {
-            return response()->json([
-                'mensaje' => 'No se pudieron obtener los datos actuales del usuario',
-                'error' => $datosActuales->status() . ': ' . $datosActuales->body()
-            ], $datosActuales->status());
-        }
-
-        $datosUsuario = $datosActuales->json();
-
-        // Combinar datos actuales con los enviados
-        $datosCompletos = array_merge(
-            $datosUsuario['datos'] ?? [],
-            $request->all()
-        );
-
-        // Validar datos mínimos requeridos
-        $validator = Validator::make($datosCompletos, [
-            'email' => 'required|email',
-            'primer_nombre' => 'required|string',
-            'primer_apellido' => 'required|string',
-            'tipo_identificacion' => 'required|string',
-            'numero_identificacion' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'mensaje' => 'Datos de usuario inválidos',
-                'error' => $validator->errors()
-            ], 422);
-        }
-
-        $response = Http::timeout(15)
-            ->withHeaders(['Accept' => 'application/json'])
-            ->put($this->apiUrl . '/usuarios/' . $id, $datosCompletos);
-
-        if (!$response->successful()) {
-            Log::error("Error al actualizar perfil de usuario: {$response->status()}", [
+        } catch (\Exception $e) {
+            Log::error("Excepción al actualizar perfil de usuario: {$e->getMessage()}", [
                 'id' => $id,
-                'respuesta' => $response->body()
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
-                'mensaje' => 'No se pudo actualizar la información del usuario',
-                'error' => $response->status() . ': ' . $response->body()
-            ], $response->status());
+                'mensaje' => 'Error al conectar con la API',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        Log::info("Perfil de usuario actualizado exitosamente", ['id' => $id]);
-
-        return response()->json([
-            'mensaje' => 'Perfil actualizado correctamente',
-            'datos' => $response->json()
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error("Excepción al actualizar perfil de usuario: {$e->getMessage()}", [
-            'id' => $id,
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'mensaje' => 'Error al conectar con la API',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 }
