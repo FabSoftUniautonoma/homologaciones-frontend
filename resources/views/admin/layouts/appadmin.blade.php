@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="{{ asset('img/icon.svg') }}" />
 
     <!-- Core JS Files -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="{{ asset('atlantis/assets/js/core/jquery.3.2.1.min.js') }}"></script>
     <script src="{{ asset('atlantis/assets/js/core/popper.min.js') }}"></script>
     <script src="{{ asset('atlantis/assets/js/core/bootstrap.min.js') }}"></script>
@@ -1237,13 +1238,13 @@
                         </li>
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
-                            <a href="{{ url(path: '/admin') }}" class="btn btn-outline-secondary">
+                            <a href="{{ url(path: '/administrador') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-home"></i>
                                 <p>Home</p>
                             </a>
                         </li>
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
-                            <a href="{{ url(path: '/instituciones') }}" class="btn btn-outline-secondary">
+                            <a href="{{ url(path: '/sinstituciones') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-building"></i>
                                 <p>Instituciones</p>
                             </a>
@@ -1263,7 +1264,7 @@
                             </ul>
                         </li>
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
-                            <a href="{{ url(path: '/admin/usuarios') }}" class="btn btn-outline-secondary">
+                            <a href="{{ url(path: '/administrador/usuarios') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-users"></i>
                                 <p>Usuarios</p>
                             </a>
