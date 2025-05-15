@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SolicitudHomologacionController;
 use App\Http\Controllers\HomologacionController;
@@ -153,3 +154,15 @@ Route::get('/homologacion/{id}/documentos', [HomologacionController::class, 'ver
 Route::get('/homologacion/{id}/descargar', [HomologacionController::class, 'descargarPDF'])->name('homologacion.pdf');
 
 Route::put('/admin/homologaciones/{id}', [HomologacionController::class, 'actualizar'])->name('admin.homologaciones.actualizar');
+
+
+//dashboard
+
+// Rutas corregidas para evitar conflictos
+Route::prefix('api')->group(function () {
+    Route::get('/usuarios/{id}', [DashboardController::class, 'obtenerPerfilUsuario']);
+    Route::get('/solicitudes/usuario/{usuarioId}', [DashboardController::class, 'obtenerSolicitudesUsuario']);
+    Route::get('/solicitudes/{id}', [DashboardController::class, 'obtenerDetalleSolicitud']);
+    Route::put('/usuarios/{id}', [DashboardController::class, 'actualizarPerfilUsuario']);
+    Route::get('/solicitud-asignaturas/{id}', [DashboardController::class, 'obtenerSolicitudAsignaturas']);
+});

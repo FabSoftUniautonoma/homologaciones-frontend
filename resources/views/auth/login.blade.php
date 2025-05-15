@@ -6,11 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Homologaciones - UniAutónoma del Cauca</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <script src="{{ asset('js/authService.js') }}"></script>
+ {{--    <script src="{{ asset('js/authMiddleware.js') }}"></script> --}}
+    <script src="{{ asset('js/login-script.js') }}"></script>
 
 </head>
 
 <body>
-    <script src="{{ asset('js/loginn.js') }}"></script>
+        <!-- Importar servicio de autenticación -->
+
     <!-- Burbujas animadas de fondo -->
     <div class="bubbles">
         <div class="bubble"></div>
@@ -85,9 +89,6 @@
             Universidad Autónoma del Cauca © 2025 - Sistema de Homologaciones
         </div>
     </div>
-
-    <!-- Importar servicio de autenticación -->
-    <script src="{{ asset('js/auth-service.js') }}"></script>
 
     <script>
         // Inicializar servicio de autenticación

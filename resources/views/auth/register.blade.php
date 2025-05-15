@@ -539,7 +539,7 @@
     </div>
 
     <!-- Importar servicio de autenticación -->
-    <script src="{{ asset('js/auth-service.js') }}"></script>
+    <script src="{{ asset('js/authService.js') }}"></script>
 
     <script>
         // Inicializar servicio de autenticación
