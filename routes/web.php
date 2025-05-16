@@ -25,11 +25,11 @@ Route::get('/', function () {
 
 Route::prefix('auth')->group(function () {
     Route::get('/login', function () {
-        return view('auth.login');
+        return view('admin.auth.login');
     })->name('login');
 
     Route::get('/register', function () {
-        return view('auth.register');
+        return view('admin.auth.register');
     })->name('register');
 });
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
