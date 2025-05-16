@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homologaciones UNIAUTÓNOMA DEL CAUCA</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Registro - Sistema</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Variables de color */
-       :root {
+        :root {
             --azul-oscuro: #19407b;
             --azul-medio: #0075bf;
             --azul-claro: #08dcff;
@@ -19,22 +17,6 @@
             --borde: #dddddd;
             --sombra: rgba(0, 0, 0, 0.1);
             --rojo-error: #ff4d4d;
-        }
-
-        .btn-primary {
-            background-color: var(--azul-medio);
-            border-color: var(--azul-medio);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--azul-oscuro);
-            border-color: var(--azul-oscuro);
-        }
-
-        .btn-primary:active, .btn-primary:focus {
-            background-color: var(--azul-oscuro);
-            border-color: var(--azul-oscuro);
-            box-shadow: 0 0 0 0.25rem rgba(0, 117, 191, 0.5);
         }
 
         * {
@@ -217,7 +199,7 @@
         }
 
         .logo img {
-            width: 200%;
+            width: 100%;
             height: auto;
             object-fit: contain;
             animation: pulse 3s infinite;
@@ -245,12 +227,17 @@
             z-index: 10;
             padding: 8px 15px;
             border-radius: 20px;
+            background-color: var(--azul-medio);
+            color: var(--blanco);
+            border: none;
             font-size: 14px;
+            text-decoration: none;
             transition: all 0.3s ease;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
         .home-btn:hover {
+            background-color: var(--azul-oscuro);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
@@ -317,21 +304,14 @@
         .input-icon {
             position: absolute;
             right: 15px;
-            top: 20%;
+            top: 50%;
             transform: translateY(-50%);
             color: #888;
             transition: all 0.3s ease;
         }
 
-        /* reCAPTCHA container */
-        .recaptcha-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
         /* Botón de registro */
-        .registro-btn {
+        button[type="submit"] {
             width: 100%;
             padding: 14px;
             background: linear-gradient(to right, var(--azul-medio), var(--azul-claro));
@@ -347,7 +327,7 @@
             overflow: hidden;
         }
 
-        .registro-btn::before {
+        button[type="submit"]::before {
             content: '';
             position: absolute;
             top: 0;
@@ -358,43 +338,39 @@
             transition: all 0.6s ease;
         }
 
-        .registro-btn:hover::before {
+        button[type="submit"]:hover::before {
             left: 100%;
         }
 
-        .registro-btn:hover {
+        button[type="submit"]:hover {
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(0, 117, 191, 0.5);
         }
 
-        .registro-btn:active {
+        button[type="submit"]:active {
             transform: translateY(0);
         }
 
         /* Enlaces de ayuda */
-        .help-links {
+        .login-link {
             text-align: center;
             margin-top: 20px;
         }
 
-        .help-links a {
+        .login-link a {
             color: var(--azul-medio);
             text-decoration: none;
             font-size: 14px;
             transition: all 0.3s ease;
         }
 
-        .help-links a:hover {
+        .login-link a:hover {
             color: var(--azul-oscuro);
             text-decoration: underline;
         }
 
-        .help-links a:first-child {
-            margin-right: 15px;
-        }
-
         /* Mensaje de error */
-        .error-message {
+        .alert {
             background-color: rgba(255, 77, 77, 0.1);
             border-left: 3px solid var(--rojo-error);
             color: var(--rojo-error);
@@ -406,19 +382,20 @@
             animation: shake 0.5s ease;
         }
 
+        .alert.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid #4CAF50;
+            color: #4CAF50;
+        }
+
         @keyframes shake {
-            0%,
-            100% {
+            0%, 100% {
                 transform: translateX(0);
             }
-
-            20%,
-            60% {
+            20%, 60% {
                 transform: translateX(-5px);
             }
-
-            40%,
-            80% {
+            40%, 80% {
                 transform: translateX(5px);
             }
         }
@@ -497,58 +474,47 @@
     </div>
 
     <!-- Botón de inicio (fuera del container) -->
-    <a href="index.html" class="btn btn-primary home-btn">
+    <a href="{{ route('homologaciones.home') }}" class="home-btn">
         <i class="fas fa-home"></i> Inicio
     </a>
 
     <div class="container">
         <div class="header">
             <div class="logo">
-                <img src="{{ asset('imagenes/quimeritocuerpocompleto.png') }}" alt="Logo">
+                <img src="{{ asset('imagenes/logo.png') }}" alt="Logo">
             </div>
         </div>
 
         <div class="form-container">
-            <h2 class="form-
+            <h2 class="form-title">Registro de Usuario</h2>
 
-        <div class="form-container">
-            <h2 class="form-title">Homologaciones Uniautonoma</h2>
+            <div id="error-message" class="alert"></div>
+            <div id="success-message" class="alert success"></div>
 
-            <!-- Mensaje de error (oculto por defecto) -->
-            <div id="errorMessage" class="error-message">
-                <i class="fas fa-exclamation-circle"></i> Verifica los datos ingresados e intenta nuevamente.
-            </div>
-
-            <form id="registroForm">
+            <form id="register-form">
                 <div class="input-group">
                     <label for="email">Correo electrónico:</label>
-                    <input type="email" id="email" placeholder="Ingrese su correo" required>
+                    <input type="email" id="email" name="email" placeholder="Ingrese su correo" required>
                     <i class="fas fa-envelope input-icon"></i>
                 </div>
 
                 <div class="input-group">
-                    <label for="confirmEmail">Confirmación de correo:</label>
-                    <input type="email" id="confirmEmail" placeholder="Confirme su correo" required>
-                    <i class="fas fa-envelope-open input-icon"></i>
-                </div>
-
-                <div class="input-group">
-                    <label for="tipoDocumento">Tipo de documento:</label>
-                    <select id="tipoDocumento" required>
+                    <label for="tipo_identificacion">Tipo de Identificación:</label>
+                    <select id="tipo_identificacion" name="tipo_identificacion" required>
                         <option value="" selected disabled>Seleccione un tipo de documento</option>
-                        <option value="TI">Tarjeta de Identidad (TI)</option>
-                        <option value="CC">Cédula de Ciudadanía (CC)</option>
-                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                        <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                        <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
                     </select>
                     <i class="fas fa-id-card input-icon"></i>
                 </div>
 
                 <div class="input-group">
-                    <label for="numeroDocumento">Número de documento:</label>
+                    <label for="numero_identificacion">Número de Identificación:</label>
                     <input
                         type="text"
-                        id="numeroDocumento"
-                        name="numeroDocumento"
+                        id="numero_identificacion"
+                        name="numero_identificacion"
                         placeholder="Ingrese su número de documento"
                         pattern="[0-9]{5,}"
                         title="Solo números, mínimo 5 dígitos"
@@ -556,139 +522,109 @@
                         required>
                     <i class="fas fa-hashtag input-icon"></i>
                 </div>
-                <!-- reCAPTCHA -->
-                <div class="recaptcha-container mb-3">
-                    <div class="g-recaptcha" data-sitekey="6Lcqj-cqAAAAAEwiItxDZJqnze8re8ej45zYdM_z"></div>
-                </div>
 
-                <button type="submit" class="registro-btn">
-                    <i class="fas fa-user-plus"></i> Guardar solicitud
+                <button type="submit">
+                    <i class="fas fa-user-plus"></i> Registrarse
                 </button>
             </form>
-            <div class="help-links">
-                <a href="#" id="ayudaLink"><i class="fas fa-question-circle"></i>Información</a>
 
+            <div class="login-link">
+                <p>¿Ya tienes una cuenta? <a href="{{ route('login') }}"><i class="fas fa-sign-in-alt"></i> Inicia sesión aquí</a></p>
+            </div>
         </div>
-        <div class="help-links">
-            <a href="#" id="ayudaLink">
-                <i class="fas fa-sign-in-alt"></i> Iniciar sesión
-            </a>
-        </div>
-
-        <script>
-            document.getElementById("ayudaLink").addEventListener("click", function(event) {
-                event.preventDefault(); // Evita que el enlace se comporte como uno normal
-                window.location.href = 'login.html';
-              });
-        </script>
-
-
 
         <div class="footer">
-            © 2025 UNIAUTÓNOMA DEL CAUCA - Todos los derechos reservados
+            © 2025 - Todos los derechos reservados
         </div>
     </div>
 
+    <!-- Importar servicio de autenticación -->
+    <script src="{{ asset('js/auth-service.js') }}"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('registroForm');
+        // Inicializar servicio de autenticación
+        const authService = new AuthService('http://127.0.0.1:8000/api');
+
+        // Referencias a elementos del DOM
+        const registerForm = document.getElementById('register-form');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+
+        // Manejar envío del formulario
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Limpiar mensajes
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+
+            // Validar número de identificación (mínimo 5 dígitos)
+            const numeroDocumento = document.getElementById('numero_identificacion');
+            if (numeroDocumento.value.length < 5 || !/^\d+$/.test(numeroDocumento.value)) {
+                errorMessage.textContent = 'El número de documento debe tener al menos 5 dígitos y solo puede contener números.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Validar que se haya seleccionado un tipo de documento
+            const tipoDocumento = document.getElementById('tipo_identificacion');
+            if (tipoDocumento.value === "" || tipoDocumento.value === null) {
+                errorMessage.textContent = 'Debe seleccionar un tipo de documento.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            // Validar el formato del correo
             const email = document.getElementById('email');
-            const confirmEmail = document.getElementById('confirmEmail');
-            const errorMessage = document.getElementById('errorMessage');
-            const ayudaLink = document.getElementById('ayudaLink');
-            const contactoLink = document.getElementById('contactoLink');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                errorMessage.textContent = 'El formato del correo electrónico no es válido.';
+                errorMessage.style.display = 'block';
+                return;
+            }
 
-            // Validar el formulario antes de enviar
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+            // Recoger datos del formulario
+            const userData = {
+                email: email.value,
+                tipo_identificacion: tipoDocumento.value,
+                numero_identificacion: numeroDocumento.value
+            };
 
-                // Validar que los correos coincidan
-                if (email.value !== confirmEmail.value) {
-                    errorMessage.style.display = 'block';
-                    errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Los correos electrónicos no coinciden.';
-                    return;
-                }
+            try {
+                // Intentar registrar usuario
+                const registerResponse = await authService.register(userData);
 
-                // Validar el formato del correo
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(email.value)) {
-                    errorMessage.style.display = 'block';
-                    errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> El formato del correo electrónico no es válido.';
-                    return;
-                }
-
-                // Validar que se haya seleccionado un tipo de documento
-                const tipoDocumento = document.getElementById('tipoDocumento');
-                if (tipoDocumento.value === "") {
-                    errorMessage.style.display = 'block';
-                    errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Debe seleccionar un tipo de documento.';
-                    return;
-                }
-
-                // Validar que el número de documento tenga al menos 5 caracteres
-                const numeroDocumento = document.getElementById('numeroDocumento');
-                if (numeroDocumento.value.length < 5) {
-                    errorMessage.style.display = 'block';
-                    errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> El número de documento debe tener al menos 5 caracteres.';
-                    return;
-                }
-
-                // Validar reCAPTCHA
-                const recaptchaResponse = grecaptcha.getResponse();
-                if (recaptchaResponse.length === 0) {
-                    errorMessage.style.display = 'block';
-                    errorMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> Por favor, complete el reCAPTCHA.';
-                    return;
-                }
-
-                // Si todo está correcto, mostrar mensaje de éxito
+                // Usar SweetAlert para mostrar el mensaje de éxito
                 Swal.fire({
                     title: 'Registro Exitoso',
-                    text: 'Su solicitud ha sido registrada correctamente. Recibirá información en su correo electrónico.',
+                    text: registerResponse.message || 'Usuario registrado correctamente. Revisa tu correo para obtener tus credenciales.',
                     icon: 'success',
                     confirmButtonText: 'Aceptar',
                     confirmButtonColor: '#0075bf'
                 }).then((result) => {
-                    // Resetear el formulario
-                    form.reset();
-                    grecaptcha.reset();
-                    errorMessage.style.display = 'none';
+                    // Limpiar formulario
+                    registerForm.reset();
+
+                    // Opcional: redirigir a la página de login después de un retraso
+                    setTimeout(() => {
+                        window.location.href = '{{ route('login') }}';
+                    }, 3000);
                 });
+
+            } catch (error) {
+                // Mostrar mensaje de error
+                errorMessage.textContent = error.message || 'Error en el registro. Inténtalo de nuevo.';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Ocultar mensaje de error cuando se modifica algún campo
+        const inputs = registerForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                errorMessage.style.display = 'none';
             });
-
-            // Ocultar mensaje de error cuando se modifica algún campo
-            const inputs = form.querySelectorAll('input, select');
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    errorMessage.style.display = 'none';
-                });
-            });
-
-            // Enlaces de ayuda
-            ayudaLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Ayuda',
-                    html: `
-                        <div style="text-align: left;">
-                            <p><strong>¿Cómo funciona el proceso de homologación?</strong></p>
-                            <p>1. Complete este formulario con sus datos.</p>
-                            <p>2. Recibirá un correo con instrucciones para subir sus documentos.</p>
-                            <p>3. La universidad evaluará su solicitud y le notificará el resultado.</p>
-
-                        </div>
-                    `,
-                    icon: 'info',
-                    confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#0075bf'
-                });
-            });
-
-
-
-
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

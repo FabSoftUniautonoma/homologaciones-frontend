@@ -1,0 +1,630 @@
+@extends('admin.layouts.appcoordinacion')
+
+@section('title', 'Proceso de Homologación')
+
+@section('content')
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center bg-gradient-primary">
+            <h3 class="m-0 font-weight-bold text-white">Proceso de Homologación</h3>
+            <input type="hidden" id="solicitud_id" value="{{ $solicitud['id_solicitud'] ?? ($solicitud['id_homologacion'] ?? '') }}">
+        </div>
+        <div class="card-body">
+            {{-- Alertas --}}
+            @if (!empty($warnings))
+                <div class="alert-container mb-4">
+                    @foreach ($warnings as $warning)
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle mr-2"></i> {{ $warning }}
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            {{-- Datos del estudiante --}}
+            <div class="card mb-4 border-left-primary">
+                <div class="card-header py-3 bg-light">
+                    <h4 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-graduate mr-2"></i>Datos del Estudiante
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Nombre</label>
+                                <p class="font-weight-bold mb-0">
+                                    {{ $solicitud['estudiante'] ?? ($solicitud['nombre_estudiante'] ?? 'No disponible') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Identificación</label>
+                                <p class="font-weight-bold mb-0">
+                                    {{ $solicitud['numero_identificacion'] ?? 'No disponible' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Universidad de Origen</label>
+                                <p class="font-weight-bold mb-0">
+                                    {{ $solicitud['universidad_origen'] ?? 'No disponible' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Programa de interés</label>
+                                <p class="font-weight-bold mb-0">
+                                    {{ $solicitud['programa_destino_nombre'] ?? ($solicitud['programa_destino'] ?? 'No disponible') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Fecha Solicitud</label>
+                                <p class="font-weight-bold mb-0">
+                                    {{ $solicitud['fecha'] ?? ($solicitud['fecha_solicitud'] ?? 'No disponible') }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Número de Radicado</label>
+                                <p class="font-weight-bold mb-0">
+                                    {{ $solicitud['numero_radicado'] ?? 'No disponible' }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">Estado</label>
+                                <p class="mb-0">
+                                    <span id="estado-solicitud"
+                                        class="badge badge-pill px-3 py-2 {{ ($solicitud['estado_solicitud'] ?? '') == 'Pendiente' ? 'badge-warning' : (($solicitud['estado'] ?? '') == 'Aprobada' ? 'badge-success' : 'badge-secondary') }}">
+                                        {{ $solicitud['estado_solicitud'] ?? 'No disponible' }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-item mb-3">
+                                <label class="text-muted small mb-1">ID Homologación</label>
+                                <p class="font-weight-bold mb-0" id="id-homologacion">
+                                    {{ $solicitud['id_homologacion'] ?? 'No disponible' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Proceso de Homologación --}}
+            <div class="card mb-4 border-left-success">
+                <div class="card-header py-3 bg-light d-flex justify-content-between align-items-center">
+                    <h4 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-exchange-alt mr-2"></i>Proceso de Homologación
+                    </h4>
+                    <button id="btn-agregar-homologacion" class="btn btn-success">
+                        <i class="fas fa-plus mr-1"></i> Agregar Homologación
+                    </button>
+                </div>
+                <div class="card-body">
+                    {{-- Panel de selección simplificado --}}
+                    <div class="row mb-4">
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-left-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-university mr-1"></i> Asignaturas de Origen</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="form-group px-3 pt-3">
+                                        <label for="filtro-semestre-origen" class="font-weight-bold text-primary">Filtrar por semestre:</label>
+                                        <select id="filtro-semestre-origen" class="form-control form-control-sm">
+                                            <option value="0">Todos los semestres</option>
+                                            @for ($i = 1; $i <= 10; $i++)
+                                                <option value="{{ $i }}">Semestre {{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div class="table-responsive" style="max-height: 400px;">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="thead-light sticky-top">
+                                                <tr>
+                                                    <th>Asignatura</th>
+                                                    <th class="text-center" width="80">Créditos</th>
+                                                    <th class="text-center" width="60">Nota</th>
+                                                    <th class="text-center" width="80">Semestre</th>
+                                                    <th class="text-center" width="60">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse ($asignaturasOrigen as $materia)
+                                                    <tr class="asignatura-row" data-id="{{ $materia['id_asignatura'] ?? ($materia['id'] ?? '') }}" data-semestre="{{ $materia['semestre'] ?? 0 }}">
+                                                        <td>
+                                                            <span class="text-primary">{{ $materia['nombre'] ?? 'Sin nombre' }}</span>
+                                                            <br>
+                                                            <small class="text-muted">{{ $materia['codigo'] ?? 'Sin código' }}</small>
+                                                        </td>
+                                                        <td class="text-center">{{ $materia['creditos'] ?? '—' }}</td>
+                                                        <td class="text-center">{{ $materia['nota_origen'] ?? ($materia['nota'] ?? '—') }}</td>
+                                                        <td class="text-center">{{ $materia['semestre'] ?? '—' }}</td>
+                                                        <td class="text-center">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-primary seleccionar-asignatura"
+                                                                data-tipo="origen"
+                                                                data-id="{{ $materia['id_asignatura'] ?? ($materia['id'] ?? '') }}">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="5" class="text-center py-3">
+                                                            <span class="text-muted">No hay asignaturas de origen disponibles</span>
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card h-100 border-left-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="fas fa-graduation-cap mr-1"></i> Asignaturas de Destino</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="form-group px-3 pt-3">
+                                        <label for="filtro-semestre-destino" class="font-weight-bold text-success">Filtrar por semestre:</label>
+                                        <select id="filtro-semestre-destino" class="form-control form-control-sm">
+                                            <option value="0">Todos los semestres</option>
+                                            @for ($i = 1; $i <= 10; $i++)
+                                                <option value="{{ $i }}">Semestre {{ $i }}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div class="table-responsive" style="max-height: 400px;">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="thead-light sticky-top">
+                                                <tr>
+                                                    <th>Asignatura</th>
+                                                    <th class="text-center" width="80">Créditos</th>
+                                                    <th class="text-center" width="80">Semestre</th>
+                                                    <th class="text-center" width="60">Acción</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse ($asignaturasDestino ?? ($pensum ?? []) as $materia)
+                                                    <tr class="asignatura-row" data-id="{{ $materia['id_asignatura'] ?? ($materia['id'] ?? '') }}" data-semestre="{{ $materia['semestre'] ?? 0 }}">
+                                                        <td>
+                                                            <span class="text-success">{{ $materia['nombre'] ?? 'Sin nombre' }}</span>
+                                                            <br>
+                                                            <small class="text-muted">{{ $materia['codigo'] ?? 'Sin código' }}</small>
+                                                        </td>
+                                                        <td class="text-center">{{ $materia['creditos'] ?? '—' }}</td>
+                                                        <td class="text-center">{{ $materia['semestre'] ?? '—' }}</td>
+                                                        <td class="text-center">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-success seleccionar-asignatura"
+                                                                data-tipo="destino"
+                                                                data-id="{{ $materia['id_asignatura'] ?? ($materia['id'] ?? '') }}">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="4" class="text-center py-3">
+                                                            <span class="text-muted">No hay asignaturas de destino disponibles</span>
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Selecciones actuales --}}
+                    <div class="card mb-4 border-left-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-clipboard-check mr-1"></i> Selección Actual</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card border mb-3">
+                                        <div class="card-header bg-light py-2">
+                                            <h6 class="mb-0 text-primary"><i class="fas fa-university mr-1"></i> Asignatura de Origen Seleccionada</h6>
+                                        </div>
+                                        <div class="card-body" id="seleccion-origen-info">
+                                            <p class="text-center text-muted">Ninguna asignatura seleccionada</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border mb-3">
+                                        <div class="card-header bg-light py-2">
+                                            <h6 class="mb-0 text-success"><i class="fas fa-graduation-cap mr-1"></i> Asignatura de Destino Seleccionada</h6>
+                                        </div>
+                                        <div class="card-body" id="seleccion-destino-info">
+                                            <p class="text-center text-muted">Ninguna asignatura seleccionada</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center mt-3">
+                                <form id="form-homologacion" class="row justify-content-center">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="nota-homologada">Nota Homologada:</label>
+                                            <input type="number" class="form-control" id="nota-homologada"
+                                                   step="0.1" min="0" max="5" placeholder="Ingrese nota">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label for="observacion">Observación:</label>
+                                            <input type="text" class="form-control" id="observacion"
+                                                   placeholder="Ingrese observación (opcional)">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="button" id="btn-confirmar-homologacion"
+                                                class="btn btn-primary btn-lg mt-2" disabled>
+                                            <i class="fas fa-plus-circle mr-1"></i> Añadir a Homologaciones
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Tabla de Homologaciones --}}
+                    <div class="card mb-4 border-left-dark">
+                        <div class="card-header py-3 bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h4 class="m-0 font-weight-bold">
+                                <i class="fas fa-list-alt mr-2"></i>Asignaturas Homologadas
+                            </h4>
+                            <div>
+                                <button id="btn-guardar-homologaciones" class="btn btn-success mr-2">
+                                    <i class="fas fa-save mr-1"></i> Guardar
+                                </button>
+                                <button id="btn-limpiar-homologaciones" class="btn btn-danger">
+                                    <i class="fas fa-trash-alt mr-1"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered" id="tabla-homologaciones">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Asignatura Origen</th>
+                                            <th>Asignatura Destino</th>
+                                            <th width="100" class="text-center">Nota Origen</th>
+                                            <th width="100" class="text-center">Nota Homologada</th>
+                                            <th width="80" class="text-center">Créditos</th>
+                                            <th width="100" class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="homologaciones-body">
+                                        <tr id="no-homologaciones">
+                                            <td colspan="6" class="text-center py-4">
+                                                <div class="empty-state">
+                                                    <i class="fas fa-clipboard-list text-muted fa-3x mb-3"></i>
+                                                    <p class="text-muted">No hay asignaturas homologadas</p>
+                                                    <p class="text-muted small">Seleccione asignaturas de origen y destino para comenzar</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="bg-light">
+                                        <tr>
+                                            <td colspan="4" class="text-right"><strong>Total de Créditos:</strong></td>
+                                            <td id="total-creditos" class="font-weight-bold text-center">0</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Sección de Firma --}}
+                    <div class="card mb-4 border-left-warning">
+                        <div class="card-header py-3 bg-warning text-white">
+                            <h4 class="m-0 font-weight-bold">
+                                <i class="fas fa-signature mr-2"></i>Firma del Coordinador
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="firma" class="font-weight-bold"><i class="fas fa-file-upload mr-1"></i> Subir Firma:</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="firma" accept="image/*">
+                                            <label class="custom-file-label" for="firma">Seleccionar archivo...</label>
+                                        </div>
+                                        <small class="form-text text-muted">Formatos aceptados: JPG, PNG, GIF</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div id="firma-preview" class="border rounded p-3 text-center d-flex align-items-center justify-content-center" style="height: 150px; background-color: #f8f9fc;">
+                                        <p class="text-muted mb-0">Vista previa de la firma</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Botones de Acción --}}
+                    <div class="action-buttons text-center mb-4">
+                        <div class="card border-left-primary">
+                            <div class="card-body py-4">
+                                <button id="btn-guardar" class="btn btn-primary btn-lg mx-2">
+                                    <i class="fas fa-save mr-1"></i> Guardar Cambios
+                                </button>
+                                <button id="btn-generar-pdf" class="btn btn-success btn-lg mx-2">
+                                    <i class="fas fa-file-pdf mr-1"></i> Generar PDF
+                                </button>
+                                <button id="btn-cerrar-homologacion" class="btn btn-danger btn-lg mx-2">
+                                    <i class="fas fa-times-circle mr-1"></i> Cerrar Homologación
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal para información de asignatura --}}
+    <div class="modal fade" id="modalInfoAsignatura" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle mr-1"></i> Información de Asignatura
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="info-item mb-3 p-2 bg-light rounded">
+                        <label class="small text-muted mb-1">Nombre</label>
+                        <p class="font-weight-bold mb-0" id="infoNombre">-</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3 p-2 bg-light rounded">
+                                <label class="small text-muted mb-1">Código</label>
+                                <p class="font-weight-bold mb-0" id="infoCodigo">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3 p-2 bg-light rounded">
+                                <label class="small text-muted mb-1">Semestre</label>
+                                <p class="font-weight-bold mb-0" id="infoSemestre">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item mb-3 p-2 bg-light rounded">
+                                <label class="small text-muted mb-1">Créditos</label>
+                                <p class="font-weight-bold mb-0" id="infoCreditos">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item mb-3 p-2 bg-light rounded">
+                                <label class="small text-muted mb-1">Modalidad</label>
+                                <p class="font-weight-bold mb-0" id="infoModalidad">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-item mb-3 p-2 bg-light rounded" id="infoNota">
+                        <label class="small text-muted mb-1">Nota</label>
+                        <p class="font-weight-bold mb-0" id="infoNotaValue">-</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de Vista Previa PDF --}}
+    <div class="modal fade" id="pdf-preview-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-pdf mr-1"></i> Vista Previa del PDF
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="pdf-preview-content">
+                    <div class="text-center p-5 bg-light">
+                        <i class="fas fa-file-pdf fa-3x text-primary mb-3"></i>
+                        <h5>Visualización del documento</h5>
+                        <p class="text-muted">El documento se está generando...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-confirmar-pdf">
+                        <i class="fas fa-check mr-1"></i> Confirmar y Descargar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal de alertas --}}
+    <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-bell mr-1"></i> Notificación
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="alertModalMessage">
+                    <!-- El mensaje se insertará aquí -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">
+                        <i class="fas fa-check mr-1"></i> Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Estilos adicionales para mejorar la interfaz --}}
+<style>
+    /* Mejora visual para los encabezados de las tarjetas */
+    .card-header {
+        border-bottom: 0;
+    }
+
+    /* Mejora la visualización de los elementos seleccionados */
+    .asignatura-row.selected {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    /* Estiliza los filtros de semestre */
+    #filtro-semestre-origen, #filtro-semestre-destino {
+        border-radius: 20px;
+    }
+
+    /* Mejora la visibilidad de las badges */
+    .badge-pill {
+        font-size: 14px;
+    }
+
+    /* Estado vacío mejorado */
+    .empty-state {
+        padding: 30px;
+        text-align: center;
+    }
+
+    /* Mejora visual para la sección de información del estudiante */
+    .info-item {
+        border-radius: 5px;
+    }
+
+    /* Estilo mejorado para los botones principales */
+    .action-buttons .btn {
+        min-width: 180px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .action-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Mejoras para tablas */
+    .table-responsive {
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    thead.sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    /* Estilo para resaltar filas al pasar el ratón */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+</style>
+@endsection
+
+@section('scripts')
+{{-- Estilos para la versión imprimible --}}
+<style media="print">
+    .card {
+        border: 1px solid #ddd !important;
+        margin-bottom: 20px !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .table-bordered {
+        border: 1px solid #ddd !important;
+    }
+
+    .page-break {
+        page-break-before: always;
+    }
+
+    .bg-primary, .bg-success, .bg-info, .bg-warning, .bg-danger {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    .text-white {
+        color: black !important;
+    }
+
+    /* Asegura que el contenido importante se muestre correctamente */
+    #tabla-homologaciones {
+        width: 100% !important;
+        page-break-inside: avoid;
+    }
+</style>
+@endsection
+
+@section('scripts')
+    <script src="{{ asset('js/procesohomologacion.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Agregar autoTable para las tablas en PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+@endsection
+@section('scripts')
+    <!-- Variables de PHP a JavaScript -->
+    <script>
+        // Pasar datos del controlador al JavaScript
+        window._asignaturasOrigen = @json($asignaturasOrigen ?? []);
+        window._asignaturasDestino = @json($asignaturasDestino ?? []);
+        window._homologacionesExistentes = @json($homologacionesExistentes ?? []);
+        let solicitudId = @json($solicitud['id_homologacion']); // Asumiendo que 'id_homologacion' es el id que necesitas
+
+    </script>
+
+    <script src="{{ asset('js/procesohomologacion.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Agregar autoTable para las tablas en PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+@endsection

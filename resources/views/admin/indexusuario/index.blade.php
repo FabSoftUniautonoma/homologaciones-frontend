@@ -91,41 +91,7 @@
             </div>
         </section>
 
-        <!-- testimonios -->
-        <section class="carousel-section">
-            <h2 class="section-title">Experiencias de Estudiantes</h2>
-            <div class="carousel-container">
-                <div class="carousel-track" id="carouselTrack">
-                    <div class="carousel-slide">
-                        <img src="{{ asset('img/quimecara.png') }}" alt="Estudiante 1">
-                        <h3>Ana María Rodríguez</h3>
-                        <p class="student-program">Ingeniería de Sistemas</p>
-                        <p>"El proceso de homologación fue muy sencillo y rápido. Pude avanzar en mi carrera sin perder
-                            los créditos que ya había cursado. El apoyo del personal fue excelente."</p>
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('img/quimecara.png') }}" alt="Estudiante 2">
-                        <h3>Carlos Mendoza</h3>
-                        <p class="student-program">Administración de Empresas</p>
-                        <p>"Gracias al sistema de homologación pude transferirme sin problemas y continuar mi carrera en
-                            la UAC. El proceso online facilitó todo."</p>
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('img/quimecara.png') }}" alt="Estudiante 3">
-                        <h3>Laura Valencia</h3>
-                        <p class="student-program">Derecho</p>
-                        <p>"La plataforma es muy intuitiva y el seguimiento de mi solicitud fue transparente. Recibí
-                            notificaciones en cada paso del proceso."</p>
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="{{ asset('img/quimecara.png') }}" alt="Estudiante 4">
-                        <h3>Juan Camilo Ruiz</h3>
-                        <p class="student-program">Psicología</p>
-                        <p>"No imaginé que homologar fuera tan simple. Todo el proceso se hizo en línea y siempre
-                            estuvieron atentos a resolver mis dudas."</p>
-                    </div>
-                </div>
-        </section>
+
 
         <!-- beneficios  -->
         <section id="beneficios" class="benefits-section">

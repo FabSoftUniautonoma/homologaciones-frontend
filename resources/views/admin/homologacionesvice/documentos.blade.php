@@ -1,5 +1,5 @@
-@extends('admin.layouts.appcoordinacion')
-
+{{-- {{-- // --}}@extends('admin.layouts.appvice')
+ --}}
 @section('content')
     <div class="container mt-5 position-relative">
         @php

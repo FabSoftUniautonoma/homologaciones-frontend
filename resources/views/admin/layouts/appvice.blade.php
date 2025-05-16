@@ -44,8 +44,8 @@
     <link href="{{ asset('atlantis/assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('atlantis/assets/css/atlantis.css') }}" rel="stylesheet">
     <!-- Estilos personalizados -->
-{{--     <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
- --}}    <script>
+    <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
+    <script>
         WebFont.load({
             google: {
                 "families": ["Lato:300,400,700,900"]
@@ -197,13 +197,12 @@
 
 
 </head>
-
 <style>
     /*
  * Estilos modernos para el sistema de homologaciones
  * Fondo blanco con predominancia de azules oscuros y medios
  * El azul claro solo para detalles y acentos
- * Con animaciones reducidas y enfocadas en botones y efectos de color
+ * Con animaciones y transiciones avanzadas
  */
 
     /* Importación de fuentes inclusivas y legibles */
@@ -215,7 +214,7 @@
         /* Color principal para elementos importantes */
         --azul-medio: #0075bf;
         /* Color secundario para elementos destacados */
-        --azul-claro: #0e869b;
+        --azul-claro: #08dcff;
         /* Solo para detalles y acentos */
         --azul-muy-claro: #e1f5fe;
         /* Fondo para áreas de contenido secundario */
@@ -263,7 +262,7 @@
 
     a {
         color: var(--azul-medio);
-        transition: color 0.3s ease;
+        transition: all 0.3s ease;
         text-decoration: none;
     }
 
@@ -276,6 +275,7 @@
     .content {
         padding: 25px;
         position: relative;
+        animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .content-container {
@@ -285,12 +285,38 @@
         padding: 25px;
         margin-bottom: 25px;
         border-left: 4px solid var(--azul-oscuro);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        opacity: 0;
+        transform: translateY(20px);
         position: relative;
         overflow: hidden;
     }
 
+    .content-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--azul-oscuro), var(--azul-medio));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .content-container:hover::before {
+        transform: scaleX(1);
+    }
+
+    .container-animated {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
     .content-container:hover {
         box-shadow: 0 8px 25px var(--sombra-hover);
+        transform: translateY(-2px);
     }
 
     .content-title {
@@ -321,30 +347,14 @@
     /* ===== CABECERA Y NAVEGACIÓN ===== */
     .logo-header[data-background-color="dark2"],
     .navbar[data-background-color="dark2"] {
-        background: var(--azul-oscuro) !important;
+        background: linear-gradient(135deg, var(--azul-oscuro) 0%, #143261 100%) !important;
         transition: background 0.4s ease;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     }
 
     .sidebar[data-background-color="dark2"] {
-        background: var(--azul-oscuro);
+        background: linear-gradient(170deg, var(--azul-oscuro) 0%, #152b4d 100%) !important;
         transition: all 0.4s ease;
-    }
-
-    .scroll-wrapper>.scroll-content {
-        background-color: var(--azul-oscuro);
-        border: none !important;
-        box-sizing: content-box !important;
-        height: auto;
-        left: 0;
-        margin: 0;
-        max-height: none;
-        max-width: none !important;
-        overflow: scroll !important;
-        padding: 0;
-        position: relative !important;
-        top: 0;
-        width: auto !important;
     }
 
     /* Efectos de partículas sutiles en la barra lateral */
@@ -493,6 +503,24 @@
         transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
+    .logo::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+        opacity: 0;
+        transform: scale(0.5);
+        transition: transform 0.6s ease, opacity 0.6s ease;
+    }
+
+    .logo:hover::before {
+        opacity: 1;
+        transform: scale(1);
+    }
+
     .logo:hover img {
         transform: scale(1.05);
     }
@@ -502,14 +530,30 @@
         border-radius: 10px;
         border: none;
         box-shadow: 0 6px 15px var(--sombra);
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        opacity: 0;
+        transform: translateY(20px);
         background-color: var(--blanco);
         overflow: hidden;
         position: relative;
     }
 
-    /* .card:hover {
-        box-shadow: 0 8px 20px var(--sombra-hover);
-    } */
+    .card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(90deg, var(--azul-oscuro), var(--azul-medio));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .card:hover::after {
+        transform: scaleX(1);
+    }
 
     .card-header {
         background-color: var(--azul-oscuro);
@@ -523,6 +567,22 @@
         overflow: hidden;
     }
 
+    .card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+
+    .card:hover .card-header::before {
+        transform: translateX(100%);
+    }
+
     .card-header i {
         margin-right: 10px;
         font-size: 1.1rem;
@@ -531,6 +591,29 @@
 
     .card-body {
         padding: 20px;
+    }
+
+    .card-animated {
+        opacity: 1;
+        transform: translateY(0);
+        animation: cardEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    @keyframes cardEnter {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card:hover {
+        box-shadow: 0 12px 25px var(--sombra-hover);
+        transform: translateY(-5px);
     }
 
     /* ===== BOTONES ===== */
@@ -657,7 +740,7 @@
         justify-content: center;
         border: 2px solid var(--azul-oscuro);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-        /*animation: notificationPulse 2s infinite;*/
+        animation: notificationPulse 2s infinite;
         transition: all 0.3s ease;
         z-index: 1;
     }
@@ -687,7 +770,8 @@
         z-index: 1000;
         opacity: 0;
         visibility: hidden;
-        transform: translateY(20px);
+        transform: translateY(20px) scale(0.95);
+        transform-origin: top right;
         transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         overflow: hidden;
         backdrop-filter: blur(10px);
@@ -696,7 +780,7 @@
     .notification-dropdown.show-notification {
         opacity: 1;
         visibility: visible;
-        transform: translateY(10px);
+        transform: translateY(10px) scale(1);
     }
 
     .notification-header {
@@ -736,13 +820,30 @@
         padding: 15px 20px;
         border-bottom: 1px solid var(--borde);
         background-color: var(--blanco);
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
     }
 
+    .notification-item::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: var(--azul-medio);
+        transform: scaleY(0);
+        transform-origin: bottom;
+        transition: transform 0.3s ease;
+    }
+
     .notification-item:hover {
         background-color: var(--azul-muy-claro);
+    }
+
+    .notification-item:hover::after {
+        transform: scaleY(1);
     }
 
     .notification-icon {
@@ -897,8 +998,91 @@
         background: linear-gradient(to bottom, #039be5, #0277bd);
     }
 
+    /* ===== ANIMACIONES Y EFECTOS ===== */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(8, 220, 255, 0.5);
+        }
+
+        70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 10px rgba(8, 220, 255, 0);
+        }
+
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(8, 220, 255, 0);
+        }
+    }
+
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
     /* ===== ALERTAS Y MENSAJES ===== */
     .alert {
+        animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         border-radius: 10px;
         border: none;
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
@@ -950,6 +1134,18 @@
 
     .alert-warning::before {
         background: linear-gradient(to bottom, #fb8c00, #ef6c00);
+    }
+
+    /* ===== FORMULARIOS ===== */
+    .form-control {
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        color: var(--texto-oscuro);
+        background-color: var(--blanco);
+        padding: 10px 15px;
+        height: auto;
+        box-shadow: 0 2px
     }
 
     /* ===== FORMULARIOS ===== */
@@ -1148,6 +1344,7 @@
         height: 8px;
         border-radius: 50%;
         background: var(--azul-medio);
+        transform: scale(0);
         transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
@@ -1191,7 +1388,7 @@
     }
 
     .table tbody tr {
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
         position: relative;
         border-bottom: 1px solid var(--borde);
     }
@@ -1202,6 +1399,9 @@
 
     .table tbody tr:hover {
         background-color: var(--azul-muy-claro);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--sombra);
+        z-index: 1;
     }
 
     .table tbody td {
@@ -1306,8 +1506,27 @@
         overflow: hidden;
     }
 
-    .pagination .page-link:hover {
+    .pagination .page-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, rgba(0, 117, 191, 0.1) 0%, transparent 70%);
+        transform: scale(0);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .pagination .page-link:hover::before {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+
+    .pagination .page-item:hover .page-link {
         color: var(--azul-medio);
+        transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0, 117, 191, 0.15);
     }
 
@@ -1315,6 +1534,11 @@
         background-color: var(--azul-oscuro);
         color: var(--blanco);
         z-index: 1;
+    }
+
+    .pagination .page-item.active .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(25, 64, 123, 0.2);
     }
 
     .pagination .page-item.disabled .page-link {
@@ -1375,6 +1599,16 @@
         border-top: 1px solid var(--borde);
         padding: 15px 25px;
         background-color: var(--azul-contenedor);
+    }
+
+    /* Efectos de apertura del modal */
+    .modal.fade .modal-dialog {
+        transform: scale(0.95) translateY(-30px);
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .modal.show .modal-dialog {
+        transform: scale(1) translateY(0);
     }
 
     /* ===== LOADERS Y SPINNERS ===== */
@@ -1491,6 +1725,28 @@
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         position: relative;
         overflow: hidden;
+    }
+
+    .tooltip .tooltip-inner::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        animation: tooltipShine 2s infinite;
+    }
+
+    @keyframes tooltipShine {
+        0% {
+            transform: translateX(-100%);
+        }
+
+        40%,
+        100% {
+            transform: translateX(100%);
+        }
     }
 
     .tooltip .arrow::before {
@@ -1781,13 +2037,13 @@
     ::-webkit-scrollbar-thumb:hover {
         background: linear-gradient(var(--azul-medio), var(--azul-oscuro));
     }
-
     .nav-item a {
-        position: relative;
-        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        color: #6098df !important;
-        padding: 12px 15px;
-    }
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: #6098df !important;
+    padding: 12px 15px;
+    /* border: #c900ef; */
+}
 </style>
 
 <body>
@@ -1868,6 +2124,7 @@
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
                             <a href="{{ route('admin.homologacionescoordinador.pantallaprincipal') }}">
+
                                 <i class="fas fa-home"></i>
                                 <p>Inicio</p>
                             </a>
@@ -1875,36 +2132,12 @@
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
                             <a href="{{ route('admin.homologacionescoordinador.index') }}">
+
                                 <i class="fas fa-university"></i>
                                 <p>Gestión de Homologaciones</p>
                             </a>
                         </li>
 
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="350">
-                            <a href="{{ url('coordinador/notificaciones') }}">
-                                <i class="fas fa-bell"></i>
-                                <p>Notificaciones</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="400">
-                            <a href="{{ route('admin.homologacionescoordinador.reportes') }}">
-                                <i class="fas fa-chart-line"></i>
-                                <p>Reportes</p>
-                            </a>
-                        </li>
-
-                        {{-- Ejemplo para Documentos con ID fijo (reemplaza 1 con el id dinámico cuando sea necesario) --}}
-                        {{--
-                        <li class="nav-item" data-aos="fade-right" data-aos-delay="450">
-                            <a href="{{ route('admin.homologacionescoordinador.documentos', ['id' => 1]) }}">
-                                <i class="fas fa-file-alt"></i>
-                                <p>Documentos</p>
-                            </a>
-                        </li>
-                        --}}
-
-                        {{-- Puedes incluir lógica desde el controlador para mostrar estas rutas según el contexto --}}
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="500">
                             <a href="#">
@@ -1914,21 +2147,15 @@
                         </li>
 
                         <li class="nav-item" data-aos="fade-right" data-aos-delay="600">
-                            <a href="{{ route('logout') }}"
-                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <p>Cerrar sesión</p>
+                            <i class="fas fa-sign-out-alt"></i>
+                            <p>Cerrar sesión</p>
                             </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                                style="display: none;">
-                                @csrf
-                            </form>
+
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
-
 
         <div class="main-panel">
             <div class="content">

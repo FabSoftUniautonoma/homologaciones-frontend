@@ -17,7 +17,6 @@ class HomologacionController extends Controller
     {
         return rtrim(env('BASE_URL_BACKEND', 'http://127.0.0.1:8000'), '/') . '/api/';
     }
-
     /**
      * Realiza una solicitud HTTP de forma segura y con reintentos
      */
@@ -65,7 +64,6 @@ class HomologacionController extends Controller
             throw $e;
         }
     }
-
     public function actualizar(Request $request, $id)
     {
         try {
@@ -80,7 +78,6 @@ class HomologacionController extends Controller
             return redirect()->back()->with('error', 'Error al comunicarse con el servidor: ' . $e->getMessage());
         }
     }
-
     public function buscarSolicitudPorUsuario($idUsuario)
     {
         try {
@@ -100,7 +97,6 @@ class HomologacionController extends Controller
             return null;
         }
     }
-
     public function obtenerUsuario($idUsuario)
     {
         try {
@@ -111,7 +107,6 @@ class HomologacionController extends Controller
             return null;
         }
     }
-
     public function verInformacion($radicado)
     {
         try {
@@ -136,7 +131,6 @@ class HomologacionController extends Controller
             abort(500, 'Error: ' . $e->getMessage());
         }
     }
-
     public function obtenerDatosBack()
     {
         try {
@@ -157,7 +151,6 @@ class HomologacionController extends Controller
             ]);
         }
     }
-
     public function descargarDocumento($documento)
     {
         $ruta = storage_path("app/documentos/{$documento}");
@@ -167,23 +160,69 @@ class HomologacionController extends Controller
 
         return response()->download($ruta);
     }
-
     public function verReportes()
     {
         return view('admin.homologacionescoordinador.reportes');
     }
+    public function verDocumentos($radicado)
+{
+    try {
+        // Obtener todas las solicitudes
+        $respSolicitudes = $this->safeApiCall('GET', 'solicitudes');
+        if (!$respSolicitudes->successful())
+            abort(500, 'Error al obtener solicitudes');
 
-    public function verDocumentos($solicitud_id)
-    {
-        try {
-            $solicitud = Solicitud::findOrFail($solicitud_id);
-            $documentos = $solicitud->documentos;
-            return view('admin.homologacionescoordinador.documentos', compact('solicitud', 'documentos'));
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'No se pudo obtener la información de los documentos.');
+        // Buscar la solicitud específica por radicado
+        $solicitud = collect($respSolicitudes->json())->firstWhere('numero_radicado', $radicado);
+        if (!$solicitud)
+            abort(404, 'Solicitud no encontrada');
+
+        // Obtener el usuario asociado a la solicitud
+        $respUsuarios = $this->safeApiCall('GET', 'usuarios');
+        if (!$respUsuarios->successful())
+            abort(500, 'Error al obtener usuarios');
+
+        $usuario = collect($respUsuarios->json())->firstWhere('numero_identificacion', $solicitud['numero_identificacion']);
+        if (!$usuario)
+            abort(404, 'Usuario no encontrado');
+
+        // Ahora que tenemos el ID del usuario, obtenemos sus documentos
+        $respDocumentos = $this->safeApiCall('GET', 'documentos/usuario/' . $usuario['id']);
+        if (!$respDocumentos->successful()) {
+            return view('admin.homologacionescoordinador.documentos', [
+                'radicado' => $radicado,
+                'id' => $solicitud['id'],
+                'nombreEstudiante' => $usuario['nombre'],
+                'documentos' => [
+                    'mensaje' => 'Sin documentos',
+                    'datos' => []
+                ]
+            ])->withErrors([
+                'error' => 'No se pudieron cargar los datos de documentos. Error: ' . $respDocumentos->body()
+            ]);
         }
-    }
 
+        // Pasar los datos a la vista
+        return view('admin.homologacionescoordinador.documentos', [
+            'documentos' => $respDocumentos->json(),
+            'id' => $solicitud['id'],
+            'radicado' => $radicado,
+            'nombreEstudiante' => $usuario['nombre']
+        ]);
+    } catch (\Exception $e) {
+        return view('admin.homologacionescoordinador.documentos', [
+            'radicado' => $radicado,
+            'id' => 0,
+            'nombreEstudiante' => 'Estudiante',
+            'documentos' => [
+                'mensaje' => 'Error al cargar documentos',
+                'datos' => []
+            ]
+        ])->withErrors([
+            'error' => 'Error al obtener datos del backend: ' . $e->getMessage()
+        ]);
+    }
+}
     public function obtenerSolicitud($solicitud_id)
     {
         try {
@@ -194,66 +233,265 @@ class HomologacionController extends Controller
         }
     }
 
-
-
-
-    public function procesarHomologacion($id)
-    {
-        try {
-            // Normalizar el ID (eliminar prefijo si existe)
-            $idNumerico = $id;
-            if (strpos($id, 'HOM-') === 0) {
-                $idNumerico = substr($id, 9); // Obtener los últimos dígitos (ej. 0001)
-            }
-
-            // Inicializar las variables por defecto
-            $solicitud = null;
-            $asignaturasOrigen = [];
-            $asignaturasDestino = [];
-
-            // Usar HTTP Client para llamar al API endpoint en lugar del procedimiento almacenado
-            $response = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
-
-            if ($response->successful() && isset($response['datos'])) {
-                // Obtenemos los datos completos de la respuesta API
-                $homologacion = $response['datos'];
-                $solicitud = $homologacion;
-
-                // Extraer asignaturas_origen y asignaturas_destino del JSON devuelto por el API
-                if (isset($homologacion['asignaturas_origen'])) {
-                    $asignaturasOrigen = $homologacion['asignaturas_origen'];
-                }
-
-                if (isset($homologacion['asignaturas_destino'])) {
-                    $asignaturasDestino = $homologacion['asignaturas_destino'];
-                }
-
-                // Para debugging (opcional)
-                // \Log::info('Datos homologación: ', (array)$homologacion);
-                // \Log::info('Asignaturas origen: ', $asignaturasOrigen);
-                // \Log::info('Asignaturas destino: ', $asignaturasDestino);
-
-                return view('admin.homologacionescoordinador.procesohomologacion', [
-                    'solicitud' => $solicitud,
-                    'asignaturasOrigen' => $asignaturasOrigen,
-                    'asignaturasDestino' => $asignaturasDestino
-                ]);
-            } else {
-                return view('admin.homologacionescoordinador.procesohomologacion', [
-                    'solicitud' => null,
-                    'asignaturasOrigen' => [],
-                    'asignaturasDestino' => [],
-                    'errors' => ['No se encontró la homologación con ID: ' . $id]
-                ]);
-            }
-        } catch (\Exception $e) {
-            \Log::error('Error al procesar homologación: ' . $e->getMessage());
-            return view('admin.homologacionescoordinador.procesohomologacion', [
-                'solicitud' => null,
-                'asignaturasOrigen' => [],
-                'asignaturasDestino' => [],
-                'errors' => ['Error al procesar homologación: ' . $e->getMessage()]
-            ]);
+public function procesarHomologacion($id)
+{
+    try {
+        // Normalizar el ID (eliminar prefijo si existe)
+        $idNumerico = $id;
+        if (strpos($id, 'HOM-') === 0) {
+            $idNumerico = substr($id, 9); // Obtener los últimos dígitos (ej. 0001)
         }
+
+        // Inicializar variables por defecto
+        $solicitud = null;
+        $asignaturasOrigen = [];
+        $asignaturasDestino = [];
+        $homologacionesExistentes = [];
+        $solicitudId = null;  // Inicializar la variable solicitudId
+
+        // Llamar al API de homologaciones
+        $responseHomologacion = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
+
+        // Llamar al API de pensum de Autónoma (programaId = 12)
+        $responsePensum = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/12');
+
+        // Procesar respuesta de homologación
+        if ($responseHomologacion->successful()) {
+            // Normalizar los datos independientemente de cómo vengan estructurados
+            $homologacion = isset($responseHomologacion['datos'])
+                ? $responseHomologacion['datos']
+                : (isset($responseHomologacion['data'])
+                    ? $responseHomologacion['data']
+                    : []);
+
+            // Obtener el solicitud_id con mayor seguridad
+            if (isset($homologacion['solicitud_id'])) {
+                $solicitudId = $homologacion['solicitud_id'];
+            } elseif (isset($homologacion['solicitudId'])) {
+                $solicitudId = $homologacion['solicitudId'];
+            } elseif (isset($homologacion['id_solicitud'])) {
+                $solicitudId = $homologacion['id_solicitud'];
+            }
+
+            // Rellenar los datos de solicitud
+            $solicitud = $homologacion;
+
+            // Obtener asignaturas origen
+            $asignaturasOrigen = isset($homologacion['asignaturas_origen'])
+                ? $homologacion['asignaturas_origen']
+                : [];
+
+            // Obtener homologaciones existentes para que el frontend pueda actualizar los IDs
+            $homologacionesExistentes = isset($homologacion['homologaciones'])
+                ? $homologacion['homologaciones']
+                : [];
+        }
+
+        // Procesar respuesta de pensum y asignarla a asignaturasDestino
+        if ($responsePensum->successful()) {
+            $asignaturasDestino = isset($responsePensum['datos'])
+                ? $responsePensum['datos']
+                : (isset($responsePensum['data'])
+                    ? $responsePensum['data']
+                    : []);
+        }
+
+        // Debug el solicitudId para verificar que se está obteniendo correctamente
+        \Log::info('SolicitudId obtenido: ' . $solicitudId);
+
+        // Pasar el solicitudId a la vista y también crear un JavaScript global
+        return view('admin.homologacionescoordinador.procesohomologacion', [
+            'solicitud' => $solicitud,
+            'asignaturasOrigen' => $asignaturasOrigen,
+            'asignaturasDestino' => $asignaturasDestino,
+            'homologacionesExistentes' => $homologacionesExistentes,
+            'solicitudId' => $solicitudId, // Pasar el solicitudId a la vista
+            'homologacionId' => $idNumerico, // También pasar el homologacionId
+        ])->with('jsVariables', [
+            'solicitudId' => $solicitudId,
+            'homologacionId' => $idNumerico
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error al procesar homologación: ' . $e->getMessage());
+        return view('admin.homologacionescoordinador.procesohomologacion', [
+            'solicitud' => null,
+            'asignaturasOrigen' => [],
+            'asignaturasDestino' => [],
+            'homologacionesExistentes' => [],
+            'errors' => ['Error al procesar homologación: ' . $e->getMessage()],
+            'solicitudId' => null // Si ocurre un error, pasamos null
+        ]);
     }
 }
+public function obtenerPensumAutonoma($programaId = 12)
+{
+    try {
+        // Inicializar variables
+        $asignaturasDestino = [];
+
+        // Llamar a la API para obtener las asignaturas del programa
+        $response = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/' . $programaId);
+
+        if ($response->successful()) {
+            // Normalizar la estructura de datos
+            $datosRespuesta = isset($response['datos'])
+                ? $response['datos']
+                : (isset($response['data'])
+                    ? $response['data']
+                    : []);
+
+            // Asegurarnos de que cada asignatura tenga el ID correctamente
+            $asignaturasDestino = array_map(function($asignatura) {
+                // Verificar que el id_asignatura exista
+                if (!isset($asignatura['id_asignatura']) && isset($asignatura['id'])) {
+                    $asignatura['id_asignatura'] = $asignatura['id'];
+                } elseif (!isset($asignatura['id_asignatura'])) {
+                    // Si no existe ningún ID, asignar uno para evitar errores
+                    $asignatura['id_asignatura'] = 0;
+                }
+
+                return $asignatura;
+            }, $datosRespuesta);
+
+            // Registrar los IDs para verificación
+            \Log::info('IDs de asignaturas obtenidos para programa ' . $programaId . ':',
+                array_map(function($a) {
+                    return [
+                        'nombre' => $a['nombre'] ?? 'Sin nombre',
+                        'id_asignatura' => $a['id_asignatura'] ?? 'No definido'
+                    ];
+                }, $asignaturasDestino)
+            );
+
+            return view('admin.homologacionescoordinador.pensumautonoma', [
+                'asignaturasDestino' => $asignaturasDestino,
+                'programaId' => $programaId
+            ]);
+        } else {
+            \Log::warning('No se encontraron materias para el programa con ID: ' . $programaId . '. Código de respuesta: ' . $response->status());
+
+            return view('admin.homologacionescoordinador.pensumautonoma', [
+                'asignaturasDestino' => [],
+                'programaId' => $programaId,
+                'errors' => ['No se encontraron materias para el programa con ID: ' . $programaId]
+            ]);
+        }
+    } catch (\Exception $e) {
+        \Log::error('Error al obtener pensum de programa: ' . $e->getMessage());
+
+        return view('admin.homologacionescoordinador.pensumautonoma', [
+            'asignaturasDestino' => [],
+            'programaId' => $programaId,
+            'errors' => ['Error al obtener pensum: ' . $e->getMessage()]
+        ]);
+    }
+}
+public function show($id)
+{
+    try {
+        // Normalizar el ID
+        $idNumerico = $id;
+        if (strpos($id, 'HOM-') === 0) {
+            $idNumerico = substr($id, 9);
+        }
+
+        // Llamar al API de homologaciones
+        $responseHomologacion = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
+
+        if (!$responseHomologacion->successful()) {
+            throw new \Exception('No se pudo obtener la homologación desde la API');
+        }
+
+        $homologacion = $responseHomologacion['datos'] ?? $responseHomologacion['data'] ?? [];
+
+        // Obtener solicitud relacionada con estudiante (consulta por solicitud_id)
+        $solicitudId = $homologacion['solicitud_id'] ?? $homologacion['solicitudId'] ?? $homologacion['id_solicitud'] ?? null;
+
+        if (!$solicitudId) {
+            throw new \Exception('No se pudo identificar el ID de la solicitud desde los datos de homologación.');
+        }
+
+        $solicitud = Solicitud::with('estudiante')->findOrFail($solicitudId);
+
+        // Obtener asignaturas de origen directamente desde la respuesta de API
+        $asignaturasOrigen = $homologacion['asignaturas_origen'] ?? [];
+
+        // Obtener asignaturas de destino desde pensum
+        $responsePensum = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/12');
+
+        $asignaturasDestino = $responsePensum->successful()
+            ? ($responsePensum['datos'] ?? $responsePensum['data'] ?? [])
+            : [];
+
+        // Estructurar la respuesta JSON
+        $respuesta = [
+            "mensaje" => "Homologación de asignatura encontrada",
+            "datos" => [
+                "id_homologacion" => $homologacion['id'] ?? null,
+                "solicitud_id" => $solicitud->id,
+                "numero_radicado" => $homologacion['numero_radicado'] ?? null,
+                "estudiante" => $solicitud->estudiante->nombre_completo,
+                "numero_identificacion" => $solicitud->estudiante->numero_identificacion,
+                "programa_destino" => $homologacion['programa_destino'] ?? null,
+                "estado_solicitud" => $homologacion['estado'] ?? null,
+                "fecha" => $homologacion['fecha'] ?? null,
+                "ruta_pdf_resolucion" => $homologacion['ruta_pdf_resolucion'] ?? null,
+                "url_pdf_resolucion" => $homologacion['url_pdf_resolucion'] ?? null,
+                "comentarios" => $homologacion['comentarios'] ?? null,
+                "universidad_origen" => $homologacion['universidad_origen'] ?? null,
+
+                "asignaturas_origen" => collect($asignaturasOrigen)->map(function ($asig) {
+                    return [
+                        "id" => $asig['id'] ?? null,
+                        "nombre" => $asig['nombre'] ?? null,
+                        "codigo" => $asig['codigo'] ?? null,
+                        "semestre" => $asig['semestre'] ?? null,
+                        "programa" => $asig['programa'] ?? null,
+                        "facultad" => $asig['facultad'] ?? null,
+                        "institucion" => $asig['institucion'] ?? null,
+                        "nota_origen" => $asig['nota'] ?? null,
+                        "creditos" => $asig['creditos'] ?? null,
+                        "contenido_programatico" => isset($asig['contenido_programatico']) ? [
+                            "id" => $asig['contenido_programatico']['id'] ?? null,
+                            "tema" => $asig['contenido_programatico']['tema'] ?? null,
+                            "resultados_aprendizaje" => $asig['contenido_programatico']['resultados_aprendizaje'] ?? null,
+                            "descripcion" => $asig['contenido_programatico']['descripcion'] ?? null
+                        ] : null
+                    ];
+                }),
+
+                "asignaturas_destino" => collect($asignaturasDestino)->map(function ($asig) {
+                    return [
+                        "id" => $asig['id'] ?? null,
+                        "nombre" => $asig['nombre'] ?? null,
+                        "codigo" => $asig['codigo'] ?? null,
+                        "semestre" => $asig['semestre'] ?? null,
+                        "programa" => $asig['programa'] ?? null,
+                        "facultad" => $asig['facultad'] ?? null,
+                        "institucion" => $asig['institucion'] ?? null,
+                        "creditos" => $asig['creditos'] ?? null,
+                        "nota_destino" => $asig['nota_destino'] ?? null,
+                        "contenido_programatico" => isset($asig['contenido_programatico']) ? [
+                            "id" => $asig['contenido_programatico']['id'] ?? null,
+                            "tema" => $asig['contenido_programatico']['tema'] ?? null,
+                            "resultados_aprendizaje" => $asig['contenido_programatico']['resultados_aprendizaje'] ?? null,
+                            "descripcion" => $asig['contenido_programatico']['descripcion'] ?? null
+                        ] : null
+                    ];
+                }),
+            ]
+        ];
+
+        return response()->json($respuesta, 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            "mensaje" => "Error al obtener la homologación",
+            "error" => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+}
+
