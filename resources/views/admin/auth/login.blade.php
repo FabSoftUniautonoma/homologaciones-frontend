@@ -7,13 +7,13 @@
     <title>Consulta de Homologaciones - UniAutónoma del Cauca</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <script src="{{ asset('js/authService.js') }}"></script>
- {{--    <script src="{{ asset('js/authMiddleware.js') }}"></script> --}}
+    {{--    <script src="{{ asset('js/authMiddleware.js') }}"></script> --}}
     <script src="{{ asset('js/login-script.js') }}"></script>
 
 </head>
 
 <body>
-        <!-- Importar servicio de autenticación -->
+    <!-- Importar servicio de autenticación -->
 
     <!-- Burbujas animadas de fondo -->
     <div class="bubbles">
@@ -140,10 +140,9 @@
                 successMessage.textContent = '¡Inicio de sesión exitoso! Redirigiendo...';
                 successMessage.style.display = 'block';
 
-                getRedirectUrl().then((url) => {
+                authService.getRedirectUrl().then((url) => {
                     window.location.href = url;
                 });
-
 
             } catch (error) {
                 errorMessage.textContent = error.message || 'Error al iniciar sesión. Inténtalo de nuevo.';

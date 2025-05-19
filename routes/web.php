@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomologacionController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\HomologacionViceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SolicitudHomologacionController;
@@ -32,7 +31,9 @@ Route::prefix('auth')->group(function () {
         return view('admin.auth.register');
     })->name('register');
 });
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+
+//Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 /*
 |--------------------------------------------------------------------------
 | RUTAS PARA ASPIRANTES / ESTUDIANTES

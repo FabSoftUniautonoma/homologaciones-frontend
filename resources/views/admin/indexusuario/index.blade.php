@@ -33,7 +33,7 @@
                     <li><a href="#requisitos">Requisitos</a></li>
                     <li><a href="#faq">Preguntas Frecuentes</a></li>
                     <li><a href="#contacto">Contacto</a></li>
-                    <li><a href="{{ route('admin.indexusuario.login') }}" id="login-btn">Iniciar Sesión</a></li>
+                    <li><a href="{{ route('login') }}" id="login-btn">Iniciar Sesión</a></li>
                 </ul>
             </nav>
         </div>
@@ -44,7 +44,7 @@
         <div class="banner-content">
             <h2>Sistema de Homologación Académica</h2>
             <p>Tu camino hacia la excelencia académica en la Autónoma del Cauca</p>
-            <a href="{{ route('admin.indexusuario.registroestudiante') }}" class="btn">Comenzar Proceso</a>
+            <a href="{{ route('register') }}" class="btn">Comenzar Proceso</a>
 
         </div>
 

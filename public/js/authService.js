@@ -39,16 +39,9 @@ class AuthService {
             this.setToken(data.access_token);
             this.setUser(data.user);
 
-            // Verificar si el perfil está completo (sin await para evitar bloquear)
-            this.checkProfileStatus().then(() => {
-                // Determinar redirección según estado del perfil
-                this.getRedirectUrl().then(redirectUrl => {
-                    // Realizar la redirección después de completar todas las promesas
-                    window.location.href = redirectUrl;
-                });
-            });
+            // Verificar perfil primero y asegurar que se complete antes de continuar
+            await this.checkProfileStatus();
 
-            // Retornar datos sin esperar la redirección
             return data;
         } catch (error) {
             console.error('Error durante login:', error);
@@ -60,21 +53,56 @@ class AuthService {
    * Verificar estado del perfil del usuario (completo o incompleto)
    * @returns {Promise<boolean>} - Verdadero si el perfil está completo, falso si no
    */
+    /**
+ * Verificar estado del perfil del usuario (completo o incompleto)
+ * @returns {Promise<boolean>} - Verdadero si el perfil está completo, falso si no
+ */
+    /**
+     * Verificar estado del perfil del usuario (completo o incompleto)
+     * @returns {Promise<boolean>} - Verdadero si el perfil está completo, falso si no
+     */
     async checkProfileStatus() {
         try {
             if (!this.getToken()) {
+                console.log("No hay token, perfil considerado incompleto");
+                localStorage.setItem(this.profileStatusKey, 'incomplete');
                 return false;
             }
 
-            const userData = await this.getUserProfile();
+            // Obtener datos actualizados del usuario desde la API
+            let userData;
+            try {
+                userData = await this.getUserProfile();
+                console.log("Datos del usuario obtenidos de la API:", userData);
+            } catch (error) {
+                console.error("Error obteniendo datos de usuario de la API, usando datos locales");
+                userData = this.getUser();
+            }
+
             const user = userData || this.getUser();
+            console.log("Datos del usuario para verificar perfil:", user);
 
             if (!user) {
+                console.log("No hay datos de usuario, perfil considerado incompleto");
+                localStorage.setItem(this.profileStatusKey, 'incomplete');
                 return false;
             }
 
-            // Validación mínima requerida
-            const isComplete = !!(user.primer_nombre && user.primer_apellido);
+            // Verificar los campos realmente necesarios para considerar un perfil completo
+            // IMPORTANTE: Ajusta estos criterios según lo que tu aplicación considere un "perfil completo"
+            const requiredFields = ['primer_nombre', 'primer_apellido'];
+            const missingFields = [];
+
+            for (const field of requiredFields) {
+                if (!user[field]) {
+                    missingFields.push(field);
+                }
+            }
+
+            const isComplete = missingFields.length === 0;
+
+            console.log("Campos faltantes:", missingFields.length ? missingFields.join(', ') : "Ninguno");
+            console.log("Estado del perfil determinado:", isComplete ? "COMPLETO" : "INCOMPLETO");
 
             localStorage.setItem(this.profileStatusKey, isComplete ? 'complete' : 'incomplete');
             return isComplete;
@@ -90,37 +118,50 @@ class AuthService {
     * Determina la URL a la que se debe redirigir según el estado del perfil y rol
     * @returns {string} - URL para redirección
     */
+    /**
+    * Determina la URL a la que se debe redirigir según el estado del perfil y rol
+    * @returns {Promise<string>} - URL para redirección
+    */
     async getRedirectUrl() {
-        const profileStatus = localStorage.getItem(this.profileStatusKey);
-        const user = this.getUser();
-        const baseRoute = this.getBaseRoute();
+        try {
+            const user = this.getUser();
+            const baseRoute = this.getBaseRoute();
 
-        if (!user) {
-            return `${baseRoute}/auth/login`;
-        }
+            if (!user) {
+                console.log("No hay usuario, redirigiendo a login");
+                return `${baseRoute}/auth/login`;
+            }
 
-        const currentPath = window.location.pathname;
-        if (currentPath.includes('/auth/login')) {
-            console.log('Ya estamos en login, determinando ruta correcta...');
-        }
+            // Verificar explícitamente el estado del perfil
+            const isProfileComplete = await this.checkProfileStatus();
+            console.log("Estado del perfil en getRedirectUrl:", isProfileComplete ? "COMPLETO" : "INCOMPLETO");
 
-        const rolId = user.rol_id;
-
-        if (profileStatus === 'incomplete') {
-            return `${baseRoute}/homologaciones/solicitudhomologacion`;
-        }
-
-        if (rolId === 1) { // Aspirante
-            return `${baseRoute}/homologaciones/aspirante`;
-        }
-
-        switch (rolId) {
-            case 2:
-                return `${baseRoute}/coordinador/inicio`;
-            case 3:
-                return `${baseRoute}/administrador`;
-            default:
+            // Si el perfil está incompleto, siempre redirigir a solicitud de homologación
+            if (!isProfileComplete) {
+                console.log("Perfil incompleto, redirigiendo a solicitud de homologación");
                 return `${baseRoute}/homologaciones/solicitudhomologacion`;
+            }
+
+            // A partir de aquí, sabemos que el perfil está completo
+            console.log("Perfil completo, determinando ruta según rol:", user.rol_id);
+
+            const rolId = user.rol_id;
+
+            if (rolId === 1) { // Aspirante
+                return `${baseRoute}/homologaciones/aspirante`;
+            }
+
+            switch (rolId) {
+                case 2:
+                    return `${baseRoute}/coordinador/inicio`;
+                case 3:
+                    return `${baseRoute}/administrador`;
+                default:
+                    return `${baseRoute}/homologaciones/aspirante`; // Default para perfiles completos
+            }
+        } catch (error) {
+            console.error("Error en getRedirectUrl:", error);
+            return `${this.getBaseRoute()}/auth/login`;
         }
     }
 
@@ -245,6 +286,10 @@ class AuthService {
      * Obtiene el perfil del usuario actual
      * @returns {Promise} - Promesa con datos del usuario
      */
+    /**
+ * Obtiene el perfil del usuario actual
+ * @returns {Promise} - Promesa con datos del usuario
+ */
     async getUserProfile() {
         try {
             const token = this.getToken();
@@ -253,6 +298,7 @@ class AuthService {
                 throw new Error('No hay sesión activa');
             }
 
+            console.log("Solicitando perfil de usuario a la API...");
             const response = await fetch(`${this.baseUrl}/auth/user-profile`, {
                 method: 'GET',
                 headers: {
@@ -262,10 +308,19 @@ class AuthService {
             });
 
             const data = await response.json();
+            console.log("Respuesta de API user-profile:", data);
 
             if (!response.ok) {
                 throw new Error(data.error || 'Error al obtener perfil');
             }
+
+            // Asegurarse de que tenemos todos los datos necesarios
+            if (!data || typeof data !== 'object') {
+                throw new Error('Formato de respuesta incorrecto');
+            }
+
+            // Actualizar datos del usuario en localStorage
+            this.setUser(data);
 
             return data;
         } catch (error) {
