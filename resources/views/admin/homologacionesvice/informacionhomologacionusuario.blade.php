@@ -93,7 +93,8 @@
                         <div class="col-md-6 mb-3">
                             <label class="text-muted small text-uppercase">Fecha de solicitud</label>
                             @if (!empty($solicitud['fecha_solicitud']))
-                                <p class="mb-0 fw-bold">{{ \Carbon\Carbon::parse($solicitud['fecha_solicitud'])->format('d/m/Y') }}</p>
+                                <p class="mb-0 fw-bold">
+                                    {{ \Carbon\Carbon::parse($solicitud['fecha_solicitud'])->format('d/m/Y') }}</p>
                             @else
                                 <p class="mb-0 fw-bold">No disponible</p>
                             @endif
@@ -115,7 +116,8 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.homologaciones.actualizar', $solicitud['id_solicitud']) }}" method="POST">
+                        <form action="{{ route('admin.homologaciones.actualizar', $solicitud['id_solicitud']) }}"
+                            method="POST">
                             @csrf
                             @method('PUT')
 
@@ -142,19 +144,16 @@
                                 </div>
                             </div>
 
-                            <a href="{{ route('admin.homologacionescoordinador.documentos', $solicitud['id_solicitud']) }}"
+                            <a href="{{ route('admin.homologaciones.vice.documentos', $solicitud['id_solicitud']) }}"
                                 class="btn btn-primary w-100 mb-3 py-3 shadow-sm">
                                 <i class="fas fa-file-pdf me-2"></i> Verificar Documentos
                             </a>
 
-                            <a href="{{ route('admin.homologacionescoordinador.procesohomologacion', $solicitud['numero_radicado']) }}"
+                            <a href="{{ route('admin.homologaciones.vice.procesohomologacion.vicerrectoria', $solicitud['numero_radicado']) }}"
                                 class="btn btn-success w-100 mb-3 py-3 shadow-sm">
-                                <i class="fas fa-play-circle me-2"></i> Iniciar Proceso
+                                <i class="fas fa-play-circle me-2"></i> Proceso
                             </a>
 
-                            <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm">
-                                <i class="fas fa-save me-2"></i> Guardar Cambios
-                            </button>
                         </form>
                     </div>
                 </div>
