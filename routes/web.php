@@ -191,6 +191,8 @@ Route::prefix('api')
         Route::get('/solicitudes/{id}', [DashboardController::class, 'obtenerDetalleSolicitud']);
         Route::put('/usuarios/{id}', [DashboardController::class, 'actualizarPerfilUsuario']);
         Route::get('/solicitud-asignaturas/{id}', [DashboardController::class, 'obtenerSolicitudAsignaturas']);
+        // Añadir esta ruta dentro del grupo de rutas API
+Route::get('/homologacion-asignaturas/{id}', [DashboardController::class, 'obtenerHomologacionAsignaturas']);
 });
 
 /*

@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function configurarEventListeners() {
     const btnNotificaciones = document.getElementById('btnNotificaciones');
     if (btnNotificaciones) {
-        btnNotificaciones.addEventListener('click', function() {
+        btnNotificaciones.addEventListener('click', function () {
             mostrarNotificacion('Verificando actualizaciones...', 'info');
 
             if (usuarioActual && usuarioActual.id_usuario) {
@@ -75,7 +75,7 @@ function configurarEventListeners() {
 function configurePasswordToggle() {
     const togglePasswordBtn = document.getElementById('togglePasswordBtn');
     if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener('click', function() {
+        togglePasswordBtn.addEventListener('click', function () {
             const passwordDisplay = document.getElementById('passwordDisplay');
             const toggleIcon = document.getElementById('togglePasswordIcon');
 
@@ -193,6 +193,8 @@ function mostrarDatosUsuario(usuario) {
     updateElement('info-telefono', usuario.telefono || 'No especificado');
     updateElement('info-correo', usuario.email || 'No especificado');
     updateElement('info-direccion', usuario.direccion || 'No especificado');
+
+    // Asegurarse que estos valores nunca sean 'null' o undefined
     updateElement('info-institucion', usuario.institucion_origen || 'No especificado');
     updateElement('info-departamento', usuario.departamento || 'No especificado');
     updateElement('info-municipio', usuario.municipio || 'No especificado');
@@ -616,8 +618,16 @@ function cargarAsignaturasHomologadas(solicitudId) {
     // Mostrar estado de carga
     tablaCuerpo.innerHTML = '<tr><td colspan="7" class="text-center"><i class="bi bi-hourglass-split me-2"></i>Cargando asignaturas homologadas...</td></tr>';
 
-    // Llamar a la API de solicitud-asignaturas
-    fetch(`${apiBaseUrl}/solicitud-asignaturas/${solicitudId}`)
+    // Llamar a la API de homologacion-asignaturas
+    fetch(`${apiBaseUrl}/homologacion-asignaturas/${solicitudId}`)
+        .then(response => {
+            if (!response.ok) {
+                // Si la API de homologación no está disponible, intentar con solicitud-asignaturas como fallback
+                console.log('No se encontraron homologaciones, buscando datos en solicitud-asignaturas como alternativa');
+                return fetch(`${apiBaseUrl}/solicitud-asignaturas/${solicitudId}`);
+            }
+            return response;
+        })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Error al obtener asignaturas. Estado: ${response.status}`);
@@ -625,32 +635,31 @@ function cargarAsignaturasHomologadas(solicitudId) {
             return response.json();
         })
         .then(data => {
-            console.log('Asignaturas homologadas recibidas:', data);
+            console.log('Datos de asignaturas recibidos:', data);
 
-            // Corregido para manejar diferentes estructuras de respuesta
-            const datos = data.datos || data;
-            const asignaturas = datos.asignaturas || datos;
+            // Verificar el formato de la respuesta para determinar si proviene de homologacion-asignaturas
+            // o de solicitud-asignaturas
+            const esHomologacion = data.datos && (data.datos.asignaturas_origen || data.asignaturas_origen);
 
-            if (!asignaturas || asignaturas.length === 0) {
-                if (tablaCuerpo) {
-                    tablaCuerpo.innerHTML = '<tr><td colspan="7" class="text-center">No hay asignaturas homologadas para esta solicitud</td></tr>';
-                }
-                if (creditosEl) creditosEl.textContent = '0';
-                return;
+            if (esHomologacion) {
+                // Datos desde homologacion-asignaturas
+                const homologacionData = data.datos || data;
+                mostrarAsignaturasHomologadas(homologacionData);
+            } else {
+                // Datos desde solicitud-asignaturas (formato anterior)
+                const solicitudData = data.datos || data;
+                mostrarAsignaturasDesdeFormatoAntiguo(solicitudData);
             }
-
-            // Mostrar las asignaturas en la tabla
-            mostrarAsignaturasHomologadas({ asignaturas: asignaturas });
         })
         .catch(error => {
-            console.error('Error al cargar asignaturas homologadas:', error);
+            console.error('Error al cargar asignaturas:', error);
             if (tablaCuerpo) {
                 tablaCuerpo.innerHTML = `<tr><td colspan="7" class="text-center text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error: ${error.message}</td></tr>`;
             }
         });
 }
 
-function mostrarAsignaturasHomologadas(datosSolicitud) {
+function mostrarAsignaturasHomologadas(datosHomologacion) {
     const tablaCuerpo = document.getElementById('primera-homologacion-asignaturas');
     const creditosEl = document.getElementById('primera-homologacion-creditos');
 
@@ -662,8 +671,130 @@ function mostrarAsignaturasHomologadas(datosSolicitud) {
     // Total de créditos
     let totalCreditos = 0;
 
+    // Verificar que tengamos las asignaturas de origen
+    const asignaturasOrigen = datosHomologacion.asignaturas_origen || [];
+    const asignaturasDestino = datosHomologacion.asignaturas_destino || [];
+
+    if (asignaturasOrigen.length === 0) {
+        tablaCuerpo.innerHTML = '<tr><td colspan="8" class="text-center">No se encontraron asignaturas homologadas</td></tr>';
+        if (creditosEl) creditosEl.textContent = '0';
+        return;
+    }
+
+    // Recorrer asignaturas de origen y sus correspondientes destinos
+    asignaturasOrigen.forEach((asignaturaOrigen, index) => {
+        // Obtener la asignatura destino correspondiente o crear un objeto vacío si no existe
+        const asignaturaDestino = index < asignaturasDestino.length ? asignaturasDestino[index] : {};
+
+        const fila = document.createElement('tr');
+
+        // COLUMNAS PARA LA ASIGNATURA DE ORIGEN
+
+        // Código asignatura origen
+        const tdCodigoOrigen = document.createElement('td');
+        tdCodigoOrigen.textContent = asignaturaOrigen.codigo || 'N/A';
+        fila.appendChild(tdCodigoOrigen);
+
+        // Nombre asignatura origen
+        const tdNombreOrigen = document.createElement('td');
+        tdNombreOrigen.textContent = asignaturaOrigen.nombre || 'No disponible';
+        fila.appendChild(tdNombreOrigen);
+
+        // Institución origen
+        const tdInstitucionOrigen = document.createElement('td');
+        tdInstitucionOrigen.textContent = asignaturaOrigen.institucion || 'No disponible';
+        fila.appendChild(tdInstitucionOrigen);
+
+        // Nota origen
+        const tdNotaOrigen = document.createElement('td');
+        tdNotaOrigen.textContent = asignaturaOrigen.nota_origen !== null && asignaturaOrigen.nota_origen !== undefined
+            ? parseFloat(asignaturaOrigen.nota_origen).toFixed(1)
+            : 'N/A';
+        fila.appendChild(tdNotaOrigen);
+
+        // COLUMNAS PARA LA ASIGNATURA DESTINO
+
+        // Código asignatura destino
+        const tdCodigoDestino = document.createElement('td');
+        if (asignaturaDestino && asignaturaDestino.codigo) {
+            tdCodigoDestino.textContent = asignaturaDestino.codigo;
+        } else {
+            tdCodigoDestino.innerHTML = '<span class="text-muted">En proceso</span>';
+        }
+        fila.appendChild(tdCodigoDestino);
+
+        // Nombre asignatura homologada
+        const tdNombreDestino = document.createElement('td');
+        if (asignaturaDestino && asignaturaDestino.nombre) {
+            tdNombreDestino.textContent = asignaturaDestino.nombre;
+        } else {
+            tdNombreDestino.innerHTML = '<span class="text-muted">En proceso</span>';
+        }
+        fila.appendChild(tdNombreDestino);
+
+        // Nota destino (NUEVA COLUMNA)
+        const tdNotaDestino = document.createElement('td');
+        if (asignaturaDestino && asignaturaDestino.nota_destino) {
+            tdNotaDestino.textContent = parseFloat(asignaturaDestino.nota_destino).toFixed(1);
+        } else {
+            tdNotaDestino.innerHTML = '<span class="text-muted">En proceso</span>';
+        }
+        fila.appendChild(tdNotaDestino);
+
+        // Créditos
+        const tdCreditos = document.createElement('td');
+        let creditos;
+        if (asignaturaDestino && asignaturaDestino.creditos) {
+            creditos = asignaturaDestino.creditos;
+        } else if (asignaturaOrigen.creditos) {
+            creditos = asignaturaOrigen.creditos;
+        } else {
+            creditos = Math.min(asignaturaOrigen.semestre || 3, 4);
+        }
+
+        tdCreditos.textContent = creditos;
+        fila.appendChild(tdCreditos);
+
+        // Sumar créditos al total
+        totalCreditos += Number(creditos);
+
+        // Añadir fila a la tabla
+        tablaCuerpo.appendChild(fila);
+    });
+
+    // Actualizar total de créditos
+    if (creditosEl) {
+        creditosEl.textContent = totalCreditos;
+    }
+
+    // Actualizar tablas en otros contenedores
+    actualizarTablaEnOtrosContenedores(tablaCuerpo.innerHTML, totalCreditos);
+}
+
+// También actualizar la función para el formato antiguo
+function mostrarAsignaturasDesdeFormatoAntiguo(datosSolicitud) {
+    const tablaCuerpo = document.getElementById('primera-homologacion-asignaturas');
+    const creditosEl = document.getElementById('primera-homologacion-creditos');
+
+    if (!tablaCuerpo) return;
+
+    // Limpiar tabla
+    tablaCuerpo.innerHTML = '';
+
+    // Total de créditos
+    let totalCreditos = 0;
+
+    // Verificar si hay asignaturas
+    const asignaturas = datosSolicitud.asignaturas || [];
+
+    if (asignaturas.length === 0) {
+        tablaCuerpo.innerHTML = '<tr><td colspan="8" class="text-center">No hay asignaturas homologadas para esta solicitud</td></tr>';
+        if (creditosEl) creditosEl.textContent = '0';
+        return;
+    }
+
     // Recorrer asignaturas
-    datosSolicitud.asignaturas.forEach(asignatura => {
+    asignaturas.forEach(asignatura => {
         const fila = document.createElement('tr');
 
         // Código asignatura origen
@@ -682,21 +813,26 @@ function mostrarAsignaturasHomologadas(datosSolicitud) {
         fila.appendChild(tdInstitucionOrigen);
 
         // Nota origen
-        const tdNota = document.createElement('td');
-        tdNota.textContent = asignatura.nota_origen !== null ? asignatura.nota_origen.toFixed(1) : 'N/A';
-        fila.appendChild(tdNota);
+        const tdNotaOrigen = document.createElement('td');
+        tdNotaOrigen.textContent = asignatura.nota_origen !== null ? asignatura.nota_origen.toFixed(1) : 'N/A';
+        fila.appendChild(tdNotaOrigen);
 
-        // Código asignatura destino - usar el mismo código si no hay alternativa
+        // Código asignatura destino
         const tdCodigoDestino = document.createElement('td');
-        tdCodigoDestino.textContent = asignatura.codigo_destino || asignatura.codigo || 'N/A';
+        tdCodigoDestino.innerHTML = '<span class="text-muted">En proceso</span>';
         fila.appendChild(tdCodigoDestino);
 
-        // Nombre asignatura homologada - usar el mismo nombre si no hay alternativa
+        // Nombre asignatura homologada
         const tdNombreDestino = document.createElement('td');
-        tdNombreDestino.textContent = asignatura.nombre_destino || asignatura.nombre || 'No disponible';
+        tdNombreDestino.innerHTML = '<span class="text-muted">En proceso</span>';
         fila.appendChild(tdNombreDestino);
 
-        // Créditos (asignamos un valor basado en el semestre si no está disponible)
+        // Nota destino (NUEVA COLUMNA)
+        const tdNotaDestino = document.createElement('td');
+        tdNotaDestino.innerHTML = '<span class="text-muted">En proceso</span>';
+        fila.appendChild(tdNotaDestino);
+
+        // Créditos
         const tdCreditos = document.createElement('td');
         const creditos = asignatura.creditos || (asignatura.semestre ? Math.min(asignatura.semestre, 4) : 3);
         tdCreditos.textContent = creditos;
@@ -714,7 +850,12 @@ function mostrarAsignaturasHomologadas(datosSolicitud) {
         creditosEl.textContent = totalCreditos;
     }
 
-    // También actualizar en la pestaña de asignaturas del modal principal
+    // Actualizar tablas en otros contenedores
+    actualizarTablaEnOtrosContenedores(tablaCuerpo.innerHTML, totalCreditos);
+}
+
+// Función auxiliar para actualizar las tablas en otros contenedores
+function actualizarTablaEnOtrosContenedores(contenidoTabla, totalCreditos) {
     const asignaturasContainer = document.getElementById('asignaturas-container');
     if (asignaturasContainer) {
         // Clonar la tabla para mostrarla también en la pestaña de asignaturas
@@ -730,11 +871,12 @@ function mostrarAsignaturasHomologadas(datosSolicitud) {
                         <th>Nota</th>
                         <th>Código</th>
                         <th>Asignatura homologada</th>
+                        <th>Nota</th>
                         <th>Créditos</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${tablaCuerpo.innerHTML}
+                    ${contenidoTabla}
                 </tbody>
             </table>
             <div class="alert alert-success mt-3">
@@ -835,7 +977,7 @@ function guardarCambiosPerfil() {
     // Mostrar indicador de carga
     mostrarNotificacion('Preparando actualización de perfil...', 'info');
 
-    // Primero, obtener los datos actuales del usuario para mantener los campos que no se actualizan
+    // Primero, obtener los datos actuales del usuario para los campos obligatorios
     fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`)
         .then(response => {
             if (!response.ok) {
@@ -847,31 +989,21 @@ function guardarCambiosPerfil() {
             // Obtener datos actuales del usuario
             const datosActuales = response.datos || {};
 
-            // Preparar datos para enviar - mantener todos los campos originales y actualizar solo los que cambian
-            const datosActualizados = {
-                ...datosActuales,  // Mantener todos los datos actuales
-
-                // Eliminar el campo password para evitar el error de confirmación
-                password: undefined,
-
-                // Actualizar solo los campos del formulario
-                email: email || datosActuales.email,
-                numero_identificacion: identificacion || datosActuales.numero_identificacion,
-                telefono: telefono || datosActuales.telefono,
-                direccion: direccion || datosActuales.direccion,
-
-                // Actualizar nombres si se modificaron
-                primer_nombre: primer_nombre || datosActuales.primer_nombre,
-                segundo_nombre: segundo_nombre !== undefined ? segundo_nombre : datosActuales.segundo_nombre,
-                primer_apellido: primer_apellido || datosActuales.primer_apellido,
-                segundo_apellido: segundo_apellido !== undefined ? segundo_apellido : datosActuales.segundo_apellido
+            // Crear objeto con solo los campos que queremos actualizar
+            // Incluimos el tipo_identificacion que es obligatorio
+            const datosActualizar = {
+                email: email,
+                numero_identificacion: identificacion,
+                telefono: telefono,
+                direccion: direccion,
+                primer_nombre: primer_nombre,
+                segundo_nombre: segundo_nombre,
+                primer_apellido: primer_apellido,
+                segundo_apellido: segundo_apellido,
+                tipo_identificacion: datosActuales.tipo_identificacion || 'Cédula de Ciudadanía'
             };
 
-            // Eliminar explícitamente la propiedad password del objeto
-            delete datosActualizados.password;
-
-            console.log('Datos originales:', datosActuales);
-            console.log('Datos a enviar:', datosActualizados);
+            console.log('Datos a enviar (solo campos básicos):', datosActualizar);
 
             // Obtener token de autenticación y CSRF
             const authToken = localStorage.getItem('auth_token');
@@ -885,7 +1017,7 @@ function guardarCambiosPerfil() {
                     'X-CSRF-TOKEN': csrfToken,
                     'Authorization': authToken ? `Bearer ${authToken}` : ''
                 },
-                body: JSON.stringify(datosActualizados)
+                body: JSON.stringify(datosActualizar)
             });
         })
         .then(response => {
@@ -911,18 +1043,23 @@ function guardarCambiosPerfil() {
             if (usuarioActual && usuarioActual.id_usuario) {
                 // Actualizar también los datos en localStorage
                 const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-                userData.primer_nombre = primer_nombre || userData.primer_nombre;
-                userData.segundo_nombre = segundo_nombre || userData.segundo_nombre;
-                userData.primer_apellido = primer_apellido || userData.primer_apellido;
-                userData.segundo_apellido = segundo_apellido || userData.segundo_apellido;
-                userData.email = email || userData.email;
-                userData.numero_identificacion = identificacion || userData.numero_identificacion;
-                userData.telefono = telefono || userData.telefono;
-                userData.direccion = direccion || userData.direccion;
+
+                // Actualizar solo los campos modificados
+                if (primer_nombre) userData.primer_nombre = primer_nombre;
+                if (segundo_nombre !== undefined) userData.segundo_nombre = segundo_nombre;
+                if (primer_apellido) userData.primer_apellido = primer_apellido;
+                if (segundo_apellido !== undefined) userData.segundo_apellido = segundo_apellido;
+                if (email) userData.email = email;
+                if (identificacion) userData.numero_identificacion = identificacion;
+                if (telefono) userData.telefono = telefono;
+                if (direccion) userData.direccion = direccion;
+
                 localStorage.setItem('user_data', JSON.stringify(userData));
 
                 // Recargar datos del usuario
-                cargarDatosUsuario(usuarioActual.id_usuario);
+                setTimeout(() => {
+                    cargarDatosUsuario(usuarioActual.id_usuario);
+                }, 500);
             }
 
             // Mostrar notificación
@@ -934,16 +1071,31 @@ function guardarCambiosPerfil() {
         });
 }
 
-function cerrarSesion() {
-    if (confirm('¿Está seguro que desea cerrar sesión?')) {
-        // Eliminar datos de autenticación
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_data');
 
+function cerrarSesion() {
+    // En lugar de usar confirm, mostrar un modal de Bootstrap
+    const logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'));
+    logoutModal.show();
+
+    // El cierre de sesión actual se realizará cuando el usuario confirme en el modal
+    // (Ver código HTML del modal más abajo)
+}
+
+// Esta función será llamada cuando el usuario confirme en el modal
+function confirmarCerrarSesion() {
+    // Eliminar datos de autenticación
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
+
+    // Mostrar mensaje de cierre de sesión
+    mostrarNotificacion('Cerrando sesión...', 'info');
+
+    // Agregar un pequeño retraso para permitir que se muestre la notificación
+    setTimeout(() => {
         // Redireccionar al login con ruta absoluta
-        const baseRoute = '/homologaciones-frontend/public'; // Asegúrate de que esta ruta sea correcta
+        const baseRoute = '/homologaciones-frontend/public';
         window.location.href = `${baseRoute}/auth/login`;
-    }
+    }, 1000);
 }
 
 function mostrarNotificacion(mensaje, tipo = 'info') {
