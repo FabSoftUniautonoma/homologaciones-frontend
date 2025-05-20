@@ -199,15 +199,40 @@ function mostrarDatosUsuario(usuario) {
     updateElement('info-departamento', usuario.departamento || 'No especificado');
     updateElement('info-municipio', usuario.municipio || 'No especificado');
 
-    // Actualizar información del programa si está disponible
-    if (usuario.programas && usuario.programas.length > 0) {
-        updateElement('info-programa', usuario.programas[0].nombre || 'No especificado');
-        updateElement('info-semestre', usuario.programas[0].semestre || 'No especificado');
-        updateElement('info-creditos', usuario.programas[0].creditos_aprobados || '0');
+    // Ahora necesitamos cargar el programa desde las solicitudes
+    if (usuarioActual && usuarioActual.id_usuario) {
+        fetch(`${apiBaseUrl}/solicitudes/usuario/${usuarioActual.id_usuario}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al obtener solicitudes. Estado: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Verificar estructura correcta de la respuesta
+                const solicitudes = data.datos ? data.datos : data;
+
+                // Si hay solicitudes, tomar la información de programa de la más reciente
+                if (solicitudes && solicitudes.length > 0) {
+                    // Ordenar solicitudes por fecha (más reciente primero)
+                    solicitudes.sort((a, b) => new Date(b.fecha_solicitud) - new Date(a.fecha_solicitud));
+
+                    // Obtener la solicitud más reciente
+                    const ultimaSolicitud = solicitudes[0];
+
+                    // Actualizar información del programa
+                    updateElement('info-programa',
+                        ultimaSolicitud.programa_destino_nombre || 'No especificado');
+                } else {
+                    updateElement('info-programa', 'No especificado');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar programa:', error);
+                updateElement('info-programa', 'No especificado');
+            });
     } else {
         updateElement('info-programa', 'No especificado');
-        updateElement('info-semestre', 'No especificado');
-        updateElement('info-creditos', '0');
     }
 
     // Actualizar estado académico
@@ -938,7 +963,7 @@ function guardarCambiosPerfil() {
     // Obtener valores del formulario
     const getFormValue = (name) => {
         const input = form.querySelector(`input[name="${name}"]`);
-        return input ? input.value : '';
+        return input ? input.value.trim() : '';
     };
 
     const nombreCompleto = getFormValue('nombreCompleto');
@@ -946,6 +971,50 @@ function guardarCambiosPerfil() {
     const identificacion = getFormValue('identificacion');
     const telefono = getFormValue('telefono');
     const direccion = getFormValue('direccion');
+
+    // Validaciones básicas
+    const errores = [];
+
+    // Validar nombre completo
+    if (!nombreCompleto) {
+        errores.push('El nombre completo es obligatorio');
+    } else if (nombreCompleto.length < 5) {
+        errores.push('El nombre completo debe tener al menos 5 caracteres');
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+        errores.push('El correo electrónico es obligatorio');
+    } else if (!emailRegex.test(email)) {
+        errores.push('El formato del correo electrónico no es válido');
+    }
+
+    // Validar identificación
+    if (!identificacion) {
+        errores.push('El número de identificación es obligatorio');
+    } else if (!/^\d{4,20}$/.test(identificacion)) {
+        errores.push('El número de identificación debe tener entre 4 y 20 dígitos');
+    }
+
+    // Validar teléfono (opcional pero con formato si se proporciona)
+    if (telefono && !/^\d{7,15}$/.test(telefono)) {
+        errores.push('El número de teléfono debe tener entre 7 y 15 dígitos');
+    }
+
+    // Validar dirección (opcional pero con longitud mínima)
+    if (direccion && direccion.length < 5) {
+        errores.push('La dirección debe tener al menos 5 caracteres');
+    }
+
+    // Si hay errores, mostrarlos y detener el proceso
+    if (errores.length > 0) {
+        // Crear mensaje con todos los errores
+        const mensajeError = `Por favor, corrija los siguientes errores:\n• ${errores.join('\n• ')}`;
+        mostrarNotificacion(mensajeError, 'error');
+        console.error('Errores de validación:', errores);
+        return;
+    }
 
     // Dividir nombre completo en componentes
     let nombres = nombreCompleto.split(' ');
@@ -974,6 +1043,12 @@ function guardarCambiosPerfil() {
         segundo_apellido = '';
     }
 
+    // Validar que al menos haya un nombre y un apellido
+    if (!primer_nombre || !primer_apellido) {
+        mostrarNotificacion('Debe ingresar al menos un nombre y un apellido', 'error');
+        return;
+    }
+
     // Mostrar indicador de carga
     mostrarNotificacion('Preparando actualización de perfil...', 'info');
 
@@ -994,32 +1069,43 @@ function guardarCambiosPerfil() {
         // Ahora tenemos los datos con los IDs correctos
         console.log('Obtenidos datos completos con IDs:', userData);
 
+        // Verificar que los datos necesarios estén presentes
+        if (!userData || typeof userData !== 'object') {
+            throw new Error('Los datos del perfil no son válidos');
+        }
+
         // Crear objeto con campos actualizables y preservando los IDs existentes
         const datosActualizar = {
             email: email,
             numero_identificacion: identificacion,
-            telefono: telefono,
-            direccion: direccion,
+            telefono: telefono || null,  // Permitir null si está vacío
+            direccion: direccion || null, // Permitir null si está vacío
             primer_nombre: primer_nombre,
-            segundo_nombre: segundo_nombre,
+            segundo_nombre: segundo_nombre || null, // Permitir null si está vacío
             primer_apellido: primer_apellido,
-            segundo_apellido: segundo_apellido,
+            segundo_apellido: segundo_apellido || null, // Permitir null si está vacío
             tipo_identificacion: userData.tipo_identificacion || 'Cédula de Ciudadanía',
 
-            // Usar los IDs correctos del perfil completo
-            institucion_origen_id: userData.institucion_origen_id,
-            departamento_id: userData.departamento_id,
-            municipio_id: userData.municipio_id,
-            pais_id: userData.pais_id,
-            facultad_id: userData.facultad_id,
-            rol_id: userData.rol_id,
-            activo: userData.activo
+            // Usar los IDs correctos del perfil completo, con validación para casos undefined
+            institucion_origen_id: userData.institucion_origen_id || null,
+            departamento_id: userData.departamento_id || null,
+            municipio_id: userData.municipio_id || null,
+            pais_id: userData.pais_id || null,
+            facultad_id: userData.facultad_id || null,
+            rol_id: userData.rol_id || 1, // Valor predeterminado: Aspirante (1)
+            activo: userData.activo !== undefined ? userData.activo : true // Valor predeterminado: true
         };
 
         console.log('Datos a enviar (con IDs preservados):', datosActualizar);
 
         // Obtener CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const authToken = localStorage.getItem('auth_token') || '';
+
+        // Verificar que tenemos token de autenticación
+        if (!authToken) {
+            throw new Error('No se encontró el token de autenticación. Inicie sesión nuevamente.');
+        }
 
         // Enviar datos a la API
         return fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`, {
@@ -1027,7 +1113,7 @@ function guardarCambiosPerfil() {
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
-                'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
+                'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify(datosActualizar)
         });
@@ -1036,13 +1122,24 @@ function guardarCambiosPerfil() {
         console.log('Respuesta de actualización:', response.status);
         if (!response.ok) {
             return response.text().then(text => {
-                throw new Error(`Error al actualizar el perfil. Estado: ${response.status}. Detalle: ${text}`);
+                // Intentar parsear como JSON si es posible
+                try {
+                    const errorJson = JSON.parse(text);
+                    throw new Error(errorJson.mensaje || errorJson.error || `Error al actualizar el perfil. Estado: ${response.status}`);
+                } catch (e) {
+                    throw new Error(`Error al actualizar el perfil. Estado: ${response.status}. Detalle: ${text}`);
+                }
             });
         }
         return response.json();
     })
     .then(data => {
         console.log('Perfil actualizado:', data);
+
+        // Verificar que la respuesta contenga un mensaje de éxito
+        if (!data || !data.mensaje) {
+            throw new Error('Respuesta del servidor incompleta');
+        }
 
         // Cerrar modal
         const modalEl = document.getElementById('editProfileModal');
@@ -1079,10 +1176,32 @@ function guardarCambiosPerfil() {
     })
     .catch(error => {
         console.error('Error detallado:', error);
-        mostrarNotificacion('Error al actualizar el perfil: ' + error.message, 'error');
+
+        // Mensaje de error más amigable
+        let mensajeError = 'Error al actualizar el perfil';
+
+        if (error.message) {
+            // Limpiar mensajes técnicos para mostrar solo la información relevante
+            let errorMsg = error.message;
+
+            // Si contiene errores técnicos de SQL, simplificar el mensaje
+            if (errorMsg.includes('SQLSTATE') || errorMsg.includes('Integrity constraint')) {
+                errorMsg = 'Error en la base de datos. El correo o número de identificación ya podría estar en uso.';
+            }
+
+            mensajeError = `${mensajeError}: ${errorMsg}`;
+        }
+
+        mostrarNotificacion(mensajeError, 'error');
+
+        // Si es un error de autenticación, redirigir al login
+        if (error.message && (error.message.includes('token') || error.message.includes('autenticación'))) {
+            setTimeout(() => {
+                window.location.href = `${baseRoute}/auth/login`;
+            }, 2000);
+        }
     });
 }
-
 
 function cerrarSesion() {
     // En lugar de usar confirm, mostrar un modal de Bootstrap
