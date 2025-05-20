@@ -977,98 +977,110 @@ function guardarCambiosPerfil() {
     // Mostrar indicador de carga
     mostrarNotificacion('Preparando actualización de perfil...', 'info');
 
-    // Primero, obtener los datos actuales del usuario para los campos obligatorios
-    fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al obtener datos actuales del usuario. Estado: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(response => {
-            // Obtener datos actuales del usuario
-            const datosActuales = response.datos || {};
+    // Aquí vamos a hacer dos solicitudes para asegurarnos de tener los IDs correctos
+    // Primero obtendremos los datos completos del usuario desde authService (que tiene los IDs)
+    fetch(`${apiBaseUrl}/auth/user-profile`, {
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al obtener perfil completo. Estado: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(userData => {
+        // Ahora tenemos los datos con los IDs correctos
+        console.log('Obtenidos datos completos con IDs:', userData);
 
-            // Crear objeto con solo los campos que queremos actualizar
-            // Incluimos el tipo_identificacion que es obligatorio
-            const datosActualizar = {
-                email: email,
-                numero_identificacion: identificacion,
-                telefono: telefono,
-                direccion: direccion,
-                primer_nombre: primer_nombre,
-                segundo_nombre: segundo_nombre,
-                primer_apellido: primer_apellido,
-                segundo_apellido: segundo_apellido,
-                tipo_identificacion: datosActuales.tipo_identificacion || 'Cédula de Ciudadanía'
-            };
+        // Crear objeto con campos actualizables y preservando los IDs existentes
+        const datosActualizar = {
+            email: email,
+            numero_identificacion: identificacion,
+            telefono: telefono,
+            direccion: direccion,
+            primer_nombre: primer_nombre,
+            segundo_nombre: segundo_nombre,
+            primer_apellido: primer_apellido,
+            segundo_apellido: segundo_apellido,
+            tipo_identificacion: userData.tipo_identificacion || 'Cédula de Ciudadanía',
 
-            console.log('Datos a enviar (solo campos básicos):', datosActualizar);
+            // Usar los IDs correctos del perfil completo
+            institucion_origen_id: userData.institucion_origen_id,
+            departamento_id: userData.departamento_id,
+            municipio_id: userData.municipio_id,
+            pais_id: userData.pais_id,
+            facultad_id: userData.facultad_id,
+            rol_id: userData.rol_id,
+            activo: userData.activo
+        };
 
-            // Obtener token de autenticación y CSRF
-            const authToken = localStorage.getItem('auth_token');
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        console.log('Datos a enviar (con IDs preservados):', datosActualizar);
 
-            // Enviar datos a la API
-            return fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Authorization': authToken ? `Bearer ${authToken}` : ''
-                },
-                body: JSON.stringify(datosActualizar)
-            });
-        })
-        .then(response => {
-            console.log('Respuesta de actualización:', response.status);
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Error al actualizar el perfil. Estado: ${response.status}. Detalle: ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Perfil actualizado:', data);
+        // Obtener CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-            // Cerrar modal
-            const modalEl = document.getElementById('editProfileModal');
-            if (modalEl) {
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
-            }
-
-            // Actualizar datos localmente
-            if (usuarioActual && usuarioActual.id_usuario) {
-                // Actualizar también los datos en localStorage
-                const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-
-                // Actualizar solo los campos modificados
-                if (primer_nombre) userData.primer_nombre = primer_nombre;
-                if (segundo_nombre !== undefined) userData.segundo_nombre = segundo_nombre;
-                if (primer_apellido) userData.primer_apellido = primer_apellido;
-                if (segundo_apellido !== undefined) userData.segundo_apellido = segundo_apellido;
-                if (email) userData.email = email;
-                if (identificacion) userData.numero_identificacion = identificacion;
-                if (telefono) userData.telefono = telefono;
-                if (direccion) userData.direccion = direccion;
-
-                localStorage.setItem('user_data', JSON.stringify(userData));
-
-                // Recargar datos del usuario
-                setTimeout(() => {
-                    cargarDatosUsuario(usuarioActual.id_usuario);
-                }, 500);
-            }
-
-            // Mostrar notificación
-            mostrarNotificacion('Perfil actualizado correctamente', 'success');
-        })
-        .catch(error => {
-            console.error('Error detallado:', error);
-            mostrarNotificacion('Error al actualizar el perfil: ' + error.message, 'error');
+        // Enviar datos a la API
+        return fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
+            },
+            body: JSON.stringify(datosActualizar)
         });
+    })
+    .then(response => {
+        console.log('Respuesta de actualización:', response.status);
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al actualizar el perfil. Estado: ${response.status}. Detalle: ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Perfil actualizado:', data);
+
+        // Cerrar modal
+        const modalEl = document.getElementById('editProfileModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        // Actualizar datos localmente
+        if (usuarioActual && usuarioActual.id_usuario) {
+            // Actualizar también los datos en localStorage
+            const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+
+            // Actualizar solo los campos modificados
+            if (primer_nombre) userData.primer_nombre = primer_nombre;
+            if (segundo_nombre !== undefined) userData.segundo_nombre = segundo_nombre;
+            if (primer_apellido) userData.primer_apellido = primer_apellido;
+            if (segundo_apellido !== undefined) userData.segundo_apellido = segundo_apellido;
+            if (email) userData.email = email;
+            if (identificacion) userData.numero_identificacion = identificacion;
+            if (telefono) userData.telefono = telefono;
+            if (direccion) userData.direccion = direccion;
+
+            localStorage.setItem('user_data', JSON.stringify(userData));
+
+            // Recargar datos del usuario
+            setTimeout(() => {
+                cargarDatosUsuario(usuarioActual.id_usuario);
+            }, 500);
+        }
+
+        // Mostrar notificación
+        mostrarNotificacion('Perfil actualizado correctamente', 'success');
+    })
+    .catch(error => {
+        console.error('Error detallado:', error);
+        mostrarNotificacion('Error al actualizar el perfil: ' + error.message, 'error');
+    });
 }
 
 
