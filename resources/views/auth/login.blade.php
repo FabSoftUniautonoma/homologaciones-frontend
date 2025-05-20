@@ -24,7 +24,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <img src="/api/placeholder/180/60" alt="Universidad Autónoma del Cauca">
+                <img src="{{ asset('img/ChatGPT Image 20 may 2025, 01_06_09 p.m..png') }}"  alt="Universidad Autónoma del Cauca">
             </div>
         </div>
 

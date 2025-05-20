@@ -191,7 +191,7 @@
         }
 
         .logo img {
-            width: 220%;
+            width: 90%;
             height: auto;
             object-fit: contain;
             animation: pulse 3s infinite;

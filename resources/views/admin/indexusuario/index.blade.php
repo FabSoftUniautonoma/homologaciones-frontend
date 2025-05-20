@@ -91,8 +91,7 @@
             </div>
         </section>
 
-
-
+      
         <!-- beneficios  -->
         <section id="beneficios" class="benefits-section">
             <h2 class="section-title">Beneficios de la Homologación</h2>

@@ -1,5 +1,5 @@
 {{-- resources/views/homologacionescoordinador/coordinador.blade.php --}}
-@extends('admin.layouts.appcoordinacion')
+@extends('admin.layouts.appvice')
 
 @section('title', 'Dashboard Coordinador')
 
@@ -79,10 +79,13 @@
 
                                     // Construir nombre completo del usuario
                                     $nombre_usuario = trim(
-                                        ($solicitud['primer_nombre'] ?? '') . ' ' .
-                                        ($solicitud['segundo_nombre'] ?? '') . ' ' .
-                                        ($solicitud['primer_apellido'] ?? '') . ' ' .
-                                        ($solicitud['segundo_apellido'] ?? '')
+                                        ($solicitud['primer_nombre'] ?? '') .
+                                            ' ' .
+                                            ($solicitud['segundo_nombre'] ?? '') .
+                                            ' ' .
+                                            ($solicitud['primer_apellido'] ?? '') .
+                                            ' ' .
+                                            ($solicitud['segundo_apellido'] ?? ''),
                                     );
                                 @endphp
                                 <tr>
@@ -99,7 +102,8 @@
                                     </td>
                                     <td>{{ $solicitud['institucion_origen_nombre'] ?? 'Sin nombre de institución' }}</td>
                                     <td>
-                                        <span class="badge {{ $estado == 'aprobado' ? 'bg-success' : ($estado == 'rechazado' ? 'bg-danger' : ($estado == 'en revisión' ? 'bg-warning' : 'bg-secondary')) }}">
+                                        <span
+                                            class="badge {{ $estado == 'aprobado' ? 'bg-success' : ($estado == 'rechazado' ? 'bg-danger' : ($estado == 'en revisión' ? 'bg-warning' : 'bg-secondary')) }}">
                                             {{ $solicitud['estado'] ?? 'Estado no disponible' }}
                                         </span>
                                     </td>
@@ -112,25 +116,18 @@
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                             @else
-                                                <a href="{{ route('admin.homologacionescoordinador.procesohomologacion', $numero_radicado) }}"
+                                                <a href="{{ route('procesohomologacion.vicerrectoria', $numero_radicado) }}"
                                                     class="btn btn-sm btn-primary" title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                             @endif
 
                                             {{-- Botón Ver Información Homologación --}}
-                                            <a href="{{ route('homologacion.Informacion', $numero_radicado) }}"
+                                            <a href="{{ route('informacion', $numero_radicado) }}"
                                                 class="btn btn-sm btn-info" title="Ver información de homologación">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
 
-                                            {{-- Botón Descargar PDF (solo si aprobado, rechazado o cerrado) --}}
-                                            @if (in_array($estado, ['aprobado', 'rechazado', 'cerrado']))
-                                                <a href="{{ route('admin.homologacionescoordinador.descargar', $numero_radicado) }}"
-                                                    class="btn btn-sm btn-success" title="Descargar PDF">
-                                                    <i class="fas fa-file-download"></i>
-                                                </a>
-                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -141,7 +138,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <script src="{{ asset('js/gestionhomologacioncoordinacion.js') }}"></script>
 @endsection

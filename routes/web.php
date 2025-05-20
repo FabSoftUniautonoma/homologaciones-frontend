@@ -1,14 +1,16 @@
 <?php
 
-use App\Http\Controllers\Admin\homologacionvicecontroller;
+
+use App\Http\Controllers\HomologacionViceController;
+use App\Http\Controllers\PDFController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomologacionController;
 use App\Http\Controllers\InstitucionesController;
 use App\Http\Controllers\ProgramasController;
 use App\Http\Controllers\AsignaturasController;
 use App\Http\Controllers\PaisesControllerApi;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\HomologacionesCoordinadorController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -26,11 +28,12 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/homologaciones/login', function () {
-    return view('admin.indexusuario.login');
-})->name('auth.indexusuario.login');
 
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect()->route('login');
+})->name('logout');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -43,10 +46,16 @@ Route::get('/homologaciones/home', function () {
     return view('admin.indexusuario.index');
 })->name('homologaciones.home');
 
-// Registro de estudiante
-Route::get('/homologaciones/registroestudiante', function () {
-    return view('admin.indexusuario.registroestudiante');
-})->name('admin.indexusuario.registroestudiante');
+
+Route::prefix('auth')->group(function () {
+    Route::get('/login', function () {
+        return view('admin.auth.login');
+    })->name('login');
+
+    Route::get('/register', function () {
+        return view('admin.auth.register');
+    })->name('register');
+});
 
 // Dashboard y solicitudes
 Route::get('/homologaciones/aspirante', function () {
@@ -90,14 +99,32 @@ Route::prefix('coordinador')->group(function () {
     Route::get('/documentos/{id}', [HomologacionController::class, 'verDocumentos'])
         ->name('admin.homologacionescoordinador.documentos');
 
-    Route::get('/informacion/{id}', [HomologacionController::class, 'verInformacion'])
-        ->name('homologacion.Informacion');
 
     Route::get('/homologaciones/{id}/proceso', [HomologacionController::class, 'procesarHomologacion'])
         ->name('admin.homologacionescoordinador.procesohomologacion');
 
     Route::get('/descargar/{documento}', [HomologacionController::class, 'descargarDocumento'])
         ->name('admin.homologacionescoordinador.descargar');
+
+
+    // Página principal del coordinador (lista general de homologaciones)
+    Route::get('/admin/homologacionescoordinador', [HomologacionController::class, 'obtenerDatosBack'])
+        ->name('admin.homologacionescoordinador.index');
+    // Ver información de homologación individual (usada fuera del módulo admin)
+    Route::get('/informacion/{id}', [HomologacionController::class, 'verInformacion'])
+        ->name('homologacion.Informacion');
+
+
+
+    // Ver información detallada por número de radicado
+    Route::get('/admin/homologacionescoordinador/ver/{radicado}', [HomologacionController::class, 'verInformacion'])
+        ->name('admin.homologacionescoordinador.informacionhomologacionusuario');
+
+    // Actualizar el estado de una solicitud - Acepta tanto radicado como ID
+    Route::match(['put', 'post', 'patch'], '/admin/homologacionescoordinador/actualizar-estado/{identificador}', [HomologacionController::class, 'actualizarEstado'])
+        ->name('admin.homologacionescoordinador.actualizarestado');
+
+
 });
 
 
@@ -174,30 +201,15 @@ Route::prefix('homologacion')->group(function () {
 
 Route::prefix('homologaciones-vicerrectoria')
     ->name('admin.homologaciones.vice.')
-    //->middleware(['auth', 'role:vicerrector']) // Descomentar en producción
     ->group(function () {
-        // Dashboard principal
-        Route::get('/inicio', [HomologacionViceController::class, 'obtenerDatosBack'])->name('index');
-
-        // Notificaciones y reportes
-        Route::get('/notificaciones', function () {
-            return view('admin.homologacionesvice.componentes.notificaciones');
-        })->name('notificaciones');
-
-        Route::get('/reportes', [homologacionvicecontroller::class, 'verReportes'])
-            ->name('reportes');
-
-        // Gestión de documentos y procesos
-        Route::get('/documentos/{radicado}', [homologacionvicecontroller::class, 'verDocumentos'])
-            ->name('documentos');
-
-        Route::get('/informacion/{radicado}', [homologacionvicecontroller::class, 'verInformacion'])
-            ->name('informacion');
-
-        Route::get('/homologaciones/{id}/proceso', [homologacionvicecontroller::class, 'procesarHomologacion'])
-            ->name('procesohomologacion');
-
+        Route::get('/inicio', [HomologacionViceController::class, 'index'])->name('index');
+        Route::get('/reportes', [HomologacionViceController::class, 'verReportes'])->name('reportes');
+        Route::get('/vicerrector', [HomologacionViceController::class, 'obtenerDatosBack']) ->name('procesohomologacion.vicerrectoria');
+         Route::get('/documentos/{radicado}', [HomologacionViceController::class, 'verDocumentos'])->name('documentos');
+        Route::get('/informacion/{radicado}', [HomologacionViceController::class, 'verInformacion'])->name('informacion');
+        Route::get('/homologaciones/{id}/proceso', [HomologacionViceController::class, 'vicerrectoria'])->name('procesohomologacion.vicerrectoria');
     });
+
 /*
 |--------------------------------------------------------------------------
 | FUNCIONES COMPARTIDAS (TODOS LOS ROLES)

@@ -2069,39 +2069,14 @@ function validarDatosHomologacion() {
 window.firmaCoordinadorData = null;
 window.firmaVicerrectorData = null;
 
-// Función para cargar firma del coordinador desde URL o localStorage (fallback)
+// Función para recuperar firma del coordinador desde localStorage si está disponible
 function cargarFirmaCoordinador() {
     try {
-        console.log("Intentando cargar firma del coordinador desde URL o localStorage");
-
-        // NUEVO: Primero intentamos cargar desde parámetros URL
-        const params = new URLSearchParams(window.location.search);
-        const firmaUrl = params.get('firma');
-
-        let firmaData = null;
-
-        if (firmaUrl) {
-            console.log("Firma del coordinador encontrada en URL");
-            // Decodificar la firma desde la URL
-            try {
-                firmaData = decodeURIComponent(firmaUrl);
-                console.log("Firma decodificada correctamente desde URL");
-            } catch (error) {
-                console.error("Error al decodificar firma desde URL:", error);
-            }
-        }
-
-        // Si no hay firma en URL, intentamos localStorage como fallback
-        if (!firmaData) {
-            console.log("Intentando cargar desde localStorage como fallback");
-            firmaData = localStorage.getItem('firmaCoordinadorData');
-            if (firmaData) {
-                console.log("Firma del coordinador encontrada en localStorage");
-            }
-        }
-
-        if (firmaData) {
-            window.firmaCoordinadorData = firmaData;
+        console.log("Intentando cargar firma del coordinador desde localStorage");
+        const firmaGuardada = localStorage.getItem('firmaCoordinadorData');
+        if (firmaGuardada) {
+            console.log("Firma del coordinador encontrada en localStorage");
+            window.firmaCoordinadorData = firmaGuardada;
 
             // Actualizar vista previa si estamos en la vista del coordinador
             const firmaPreview = document.getElementById('firma-preview');
@@ -2109,7 +2084,7 @@ function cargarFirmaCoordinador() {
                 firmaPreview.innerHTML = '';
 
                 const img = document.createElement('img');
-                img.src = firmaData;
+                img.src = firmaGuardada;
                 img.style.maxWidth = '100%';
                 img.style.maxHeight = '140px';
                 firmaPreview.appendChild(img);
@@ -2125,129 +2100,39 @@ function cargarFirmaCoordinador() {
                 firmaCoordinadorPreviewVice.innerHTML = '';
 
                 const img = document.createElement('img');
-                img.src = firmaData;
+                img.src = firmaGuardada;
                 img.style.maxWidth = '100%';
                 img.style.maxHeight = '140px';
                 firmaCoordinadorPreviewVice.appendChild(img);
 
-                // Ocultar el placeholder de carga y mostrar la imagen de firma
-                const placeholderVice = document.getElementById('firma-coordinador-placeholder-vice');
-                if (placeholderVice) placeholderVice.style.display = 'none';
-
+                // También actualizar la imagen si existe
                 const imgFirmaCoordinador = document.getElementById('img-firma-coordinador');
                 if (imgFirmaCoordinador) {
-                    imgFirmaCoordinador.src = firmaData;
+                    imgFirmaCoordinador.src = firmaGuardada;
                     imgFirmaCoordinador.style.display = 'block';
-                }
-            }
 
-            // Actualizar el estado de la firma del coordinador
-            actualizarEstadoFirmaCoordinador(true);
+                    // Ocultar placeholder si existe
+                    const placeholder = document.getElementById('firma-coordinador-placeholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+
+                // Actualizar el estado de la firma del coordinador
+                actualizarEstadoFirmaCoordinador(true);
+            }
 
             // Actualizar campo oculto si existe
             const campoOculto = document.getElementById('firma_coordinador_data');
-            if (campoOculto) campoOculto.value = firmaData;
-
-            // Guardar también en localStorage para respaldo
-            try {
-                localStorage.setItem('firmaCoordinadorData', firmaData);
-            } catch (error) {
-                console.warn('No se pudo guardar la firma en localStorage:', error);
-            }
+            if (campoOculto) campoOculto.value = firmaGuardada;
 
             return true;
         } else {
-            console.log("No se encontró firma del coordinador");
+            console.log("No se encontró firma del coordinador en localStorage");
         }
     } catch (error) {
         console.error('Error al cargar firma del coordinador:', error);
     }
     return false;
 }
-
-// Y ahora mejoramos la función confirmarYEnviarAVicerrector para asegurar su correcto funcionamiento
-function confirmarYEnviarAVicerrector(firmaData) {
-    // Mostrar modal de confirmación
-    if (confirm('¿Está seguro de que desea enviar la firma al vicerrector?')) {
-        console.log("Enviando firma a vista de vicerrector...");
-
-        try {
-            // Codificar la firma optimizada para URL
-            const firmaEncoded = encodeURIComponent(firmaData);
-
-            // Verificar si la URL no es demasiado larga
-            if (firmaEncoded.length > 1500) {
-                console.warn("La firma es muy grande para URL, intentando comprimir más");
-
-                // Si es demasiado grande, volvemos a optimizar con mayor compresión
-                optimizarImagen(firmaData, 300, 150, 0.5).then(firmaComprimida => {
-                    const urlBase = document.getElementById('btn-continuar').getAttribute('data-url') || 'vista-vicerrector.html';
-                    const urlCompleta = `${urlBase}?firma=${encodeURIComponent(firmaComprimida)}`;
-
-                    // Guardar también en localStorage como respaldo
-                    try {
-                        localStorage.setItem('firmaCoordinadorData', firmaComprimida);
-                        console.log("Firma comprimida guardada en localStorage");
-                    } catch (error) {
-                        console.warn("No se pudo guardar en localStorage, continuando de todos modos");
-                    }
-
-                    // Mostrar mensaje de redirección
-                    mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
-
-                    // Esperar un momento para que se vea la alerta
-                    setTimeout(() => {
-                        // Redirigir a la vista del vicerrector
-                        window.location.href = urlCompleta;
-                    }, 1000);
-                }).catch(error => {
-                    console.error("Error al comprimir imagen:", error);
-                    mostrarAlerta('Error al comprimir la imagen. Intente con una firma más pequeña.', 'danger');
-                });
-            } else {
-                // La URL no es demasiado larga, podemos usarla directamente
-                const urlBase = document.getElementById('btn-continuar').getAttribute('data-url') || 'vista-vicerrector.html';
-                const urlCompleta = `${urlBase}?firma=${firmaEncoded}`;
-
-                // Mostrar mensaje de redirección
-                mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
-
-                // Esperar un momento para que se vea la alerta
-                setTimeout(() => {
-                    // Redirigir a la vista del vicerrector
-                    window.location.href = urlCompleta;
-                }, 1000);
-            }
-        } catch (error) {
-            console.error("Error al enviar firma:", error);
-            mostrarAlerta('Error al enviar la firma. Intente de nuevo.', 'danger');
-        }
-    } else {
-        console.log("Operación cancelada por el usuario");
-    }
-}
-document.addEventListener('DOMContentLoaded', function() {
-    // Find the confirm button in the modal
-    const btnConfirmarPDF = document.getElementById('btn-confirmar-pdf');
-    if (btnConfirmarPDF) {
-        // Remove the inline onclick attribute if it exists
-        btnConfirmarPDF.removeAttribute('onclick');
-
-        // Add event listener that passes the firma data
-        btnConfirmarPDF.addEventListener('click', function() {
-            // Make sure we have firma data available
-            if (window.firmaCoordinadorData) {
-                confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
-            } else {
-                mostrarAlerta('No se encontró la firma del coordinador', 'danger');
-            }
-        });
-
-        console.log("Modal confirm button handler configured correctly");
-    } else {
-        console.log("Modal confirm button not found");
-    }
-});
 
 // Función para cargar firma del vicerrector desde localStorage
 function cargarFirmaVicerrector() {
@@ -2268,17 +2153,17 @@ function cargarFirmaVicerrector() {
                 img.style.maxWidth = '100%';
                 img.style.maxHeight = '140px';
                 firmaPreview.appendChild(img);
-            }
 
-            // También actualizar la imagen si existe
-            const imgFirmaVicerrector = document.getElementById('img-firma-vicerrector');
-            if (imgFirmaVicerrector) {
-                imgFirmaVicerrector.src = firmaGuardada;
-                imgFirmaVicerrector.style.display = 'block';
+                // También actualizar la imagen si existe
+                const imgFirmaVicerrector = document.getElementById('img-firma-vicerrector');
+                if (imgFirmaVicerrector) {
+                    imgFirmaVicerrector.src = firmaGuardada;
+                    imgFirmaVicerrector.style.display = 'block';
 
-                // Ocultar placeholder si existe
-                const placeholder = document.getElementById('firma-vicerrector-placeholder');
-                if (placeholder) placeholder.style.display = 'none';
+                    // Ocultar placeholder si existe
+                    const placeholder = document.getElementById('firma-vicerrector-placeholder');
+                    if (placeholder) placeholder.style.display = 'none';
+                }
             }
 
             // Actualizar campo oculto si existe
@@ -2300,59 +2185,12 @@ function cargarFirmaVicerrector() {
     return false;
 }
 
-// Función para optimizar imagen y reducir tamaño
-function optimizarImagen(dataUrl, maxWidth = 400, maxHeight = 200, calidad = 0.7) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = function() {
-            // Calcular nuevas dimensiones manteniendo relación de aspecto
-            let width = img.width;
-            let height = img.height;
-
-            if (width > maxWidth) {
-                height = Math.round(height * (maxWidth / width));
-                width = maxWidth;
-            }
-
-            if (height > maxHeight) {
-                width = Math.round(width * (maxHeight / height));
-                height = maxHeight;
-            }
-
-            // Crear canvas para redimensionar la imagen
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-
-            // Dibujar imagen redimensionada
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // Convertir a base64 con calidad reducida
-            const optimizedDataUrl = canvas.toDataURL('image/jpeg', calidad);
-
-            console.log(`Imagen optimizada: Original: ${Math.round(dataUrl.length/1024)}KB, Nueva: ${Math.round(optimizedDataUrl.length/1024)}KB`);
-
-            resolve(optimizedDataUrl);
-        };
-
-        img.onerror = function() {
-            reject(new Error('Error al cargar la imagen para optimizar'));
-        };
-
-        img.src = dataUrl;
-    });
-}
-
-// Función para actualizar el estado de la firma del coordinador
+// Función para actualizar el estado de la firma del coordinador en la vista del vicerrector
 function actualizarEstadoFirmaCoordinador(existe) {
     const statusCoordinador = document.getElementById('firma-coordinador-status');
     const mensajeCoordinador = document.getElementById('firma-coordinador-mensaje');
 
-    if (!statusCoordinador || !mensajeCoordinador) {
-        console.log("No se encontraron elementos para actualizar estado de firma coordinador");
-        return;
-    }
+    if (!statusCoordinador || !mensajeCoordinador) return;
 
     if (existe) {
         statusCoordinador.className = 'alert alert-success';
@@ -2375,8 +2213,9 @@ function actualizarEstadoFirmaCoordinador(existe) {
     }
 }
 
-// Mejoramos la función handleFirmaCoordinadorUpload para manejar correctamente la carga de firmas
-async function handleFirmaCoordinadorUpload(event) {
+
+// Función para manejar la subida de la firma del coordinador
+function handleFirmaCoordinadorUpload(event) {
     console.log("Función handleFirmaCoordinadorUpload iniciada");
     const file = event.target.files[0];
     if (!file) {
@@ -2402,24 +2241,14 @@ async function handleFirmaCoordinadorUpload(event) {
 
     // Leer y mostrar la vista previa
     const reader = new FileReader();
-    reader.onload = async function (e) {
+    reader.onload = function (e) {
         console.log("Archivo leído correctamente");
-
-        // Optimizar imagen para reducir tamaño
-        let firmaData = e.target.result;
-        try {
-            firmaData = await optimizarImagen(firmaData);
-        } catch (error) {
-            console.warn("No se pudo optimizar la imagen:", error);
-        }
-
-        // Mostrar en vista previa
         const firmaPreview = document.getElementById('firma-preview');
         if (firmaPreview) {
             firmaPreview.innerHTML = '';
 
             const img = document.createElement('img');
-            img.src = firmaData;
+            img.src = e.target.result;
             img.style.maxWidth = '100%';
             img.style.maxHeight = '140px';
             firmaPreview.appendChild(img);
@@ -2430,37 +2259,32 @@ async function handleFirmaCoordinadorUpload(event) {
         }
 
         // Almacenar los datos de la imagen para usar en el PDF
-        window.firmaCoordinadorData = firmaData;
+        window.firmaCoordinadorData = e.target.result;
         console.log("Datos de firma almacenados en variable global");
 
         // Actualizar campo oculto si existe
         const campoOculto = document.getElementById('firma_coordinador_data');
         if (campoOculto) {
-            campoOculto.value = firmaData;
+            campoOculto.value = e.target.result;
             console.log("Campo oculto actualizado");
         } else {
             console.log("Campo oculto no encontrado");
         }
 
-        // Guardar en localStorage como respaldo
+        // Guardar en localStorage para compartir con la vista del vicerrector
         try {
-            localStorage.setItem('firmaCoordinadorData', firmaData);
-            console.log("Firma guardada en localStorage como respaldo");
+            localStorage.setItem('firmaCoordinadorData', e.target.result);
+            console.log("Firma guardada en localStorage");
         } catch (error) {
-            console.warn('Error al guardar firma en localStorage (puede ser demasiado grande):', error);
+            console.error('Error al guardar firma en localStorage (puede ser demasiado grande):', error);
+            mostrarAlerta('Advertencia: No se pudo guardar la firma para compartir (imagen demasiado grande)', 'warning');
         }
 
-        // Habilitar botón de generar PDF
-        const btnGenerarPDF = document.getElementById('btn-generar-pdf');
-        if (btnGenerarPDF) {
-            btnGenerarPDF.disabled = false;
+        // Habilitar botón de generar PDF en vista coordinador
+        const btnGenerarPDFCoord = document.getElementById('btn-generar-pdf');
+        if (btnGenerarPDFCoord) {
+            btnGenerarPDFCoord.disabled = false;
             console.log("Botón de generar PDF habilitado");
-
-            // Añadir efecto visual para indicar que está activo
-            btnGenerarPDF.classList.add('btn-pulse');
-            setTimeout(() => {
-                btnGenerarPDF.classList.remove('btn-pulse');
-            }, 1000);
         }
 
         // Mostrar alerta de éxito
@@ -2475,9 +2299,8 @@ async function handleFirmaCoordinadorUpload(event) {
     reader.readAsDataURL(file);
 }
 
-
 // Función para manejar la subida de la firma del vicerrector
-async function handleFirmaVicerrectorUpload(event) {
+function handleFirmaVicerrectorUpload(event) {
     console.log("Función handleFirmaVicerrectorUpload iniciada");
     const file = event.target.files[0];
     if (!file) {
@@ -2503,23 +2326,14 @@ async function handleFirmaVicerrectorUpload(event) {
 
     // Leer y mostrar la vista previa
     const reader = new FileReader();
-    reader.onload = async function (e) {
+    reader.onload = function (e) {
         console.log("Archivo leído correctamente");
-
-        // Optimizar imagen para reducir tamaño
-        let firmaData = e.target.result;
-        try {
-            firmaData = await optimizarImagen(firmaData);
-        } catch (error) {
-            console.warn("No se pudo optimizar la imagen:", error);
-        }
-
         const firmaPreview = document.getElementById('firma-vicerrector-preview');
         if (firmaPreview) {
             firmaPreview.innerHTML = '';
 
             const img = document.createElement('img');
-            img.src = firmaData;
+            img.src = e.target.result;
             img.style.maxWidth = '100%';
             img.style.maxHeight = '140px';
             firmaPreview.appendChild(img);
@@ -2528,7 +2342,7 @@ async function handleFirmaVicerrectorUpload(event) {
         // Actualizar la imagen designada si existe
         const imgFirmaVicerrector = document.getElementById('img-firma-vicerrector');
         if (imgFirmaVicerrector) {
-            imgFirmaVicerrector.src = firmaData;
+            imgFirmaVicerrector.src = e.target.result;
             imgFirmaVicerrector.style.display = 'block';
 
             // Ocultar placeholder si existe
@@ -2537,19 +2351,19 @@ async function handleFirmaVicerrectorUpload(event) {
         }
 
         // Almacenar los datos de la imagen para usar en el PDF
-        window.firmaVicerrectorData = firmaData;
+        window.firmaVicerrectorData = e.target.result;
         console.log("Datos de firma vicerrector almacenados en variable global");
 
         // Actualizar campo oculto si existe
         const campoOculto = document.getElementById('firma_vicerrector_data');
         if (campoOculto) {
-            campoOculto.value = firmaData;
+            campoOculto.value = e.target.result;
             console.log("Campo oculto de vicerrector actualizado");
         }
 
         // Guardar en localStorage para futuras referencias
         try {
-            localStorage.setItem('firmaVicerrectorData', firmaData);
+            localStorage.setItem('firmaVicerrectorData', e.target.result);
             console.log("Firma de vicerrector guardada en localStorage");
         } catch (error) {
             console.error('Error al guardar firma del vicerrector en localStorage:', error);
@@ -2566,112 +2380,6 @@ async function handleFirmaVicerrectorUpload(event) {
 
     reader.readAsDataURL(file);
 }
-
-// Función para determinar en qué vista estamos
-function esVistaCoordinador() {
-    const resultado = document.getElementById('firma') !== null &&
-           document.getElementById('firma-vicerrector') === null;
-    console.log("¿Es vista coordinador?", resultado);
-    return resultado;
-}
-
-function esVistaVicerrector() {
-    const resultado = document.getElementById('firma-vicerrector') !== null;
-    console.log("¿Es vista vicerrector?", resultado);
-    return resultado;
-}
-
-// Función para mostrar alertas
-function mostrarAlerta(mensaje, tipo) {
-    const contenedorAlertas = document.getElementById('alertas') || document.createElement('div');
-    if (!document.getElementById('alertas')) {
-        contenedorAlertas.id = 'alertas';
-        contenedorAlertas.className = 'alertas-container';
-        document.body.appendChild(contenedorAlertas);
-    }
-
-    const alerta = document.createElement('div');
-    alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
-    alerta.innerHTML = `
-        ${mensaje}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    `;
-
-    contenedorAlertas.appendChild(alerta);
-
-    // Auto-cerrar después de 5 segundos
-    setTimeout(() => {
-        alerta.classList.remove('show');
-        setTimeout(() => {
-            alerta.remove();
-        }, 500);
-    }, 5000);
-}
-
-
-// Primero, vamos a mejorar la función initSignatureHandlers para garantizar que se configura correctamente el botón
-function initSignatureHandlers() {
-    console.log("Inicializando manejadores de firma...");
-
-    // Determinar en qué vista estamos
-    const esVistaCoord = esVistaCoordinador();
-    const esVistaVice = esVistaVicerrector();
-
-    console.log("Vista detectada - Coordinador:", esVistaCoord, "Vicerrector:", esVistaVice);
-
-    // Configurar manejadores para la vista del coordinador
-    if (esVistaCoord) {
-        // Configurar el botón de continuar para la vista del coordinador
-        const btnContinuar = document.getElementById('btn-continuar');
-        if (btnContinuar) {
-            btnContinuar.disabled = true; // Deshabilitar hasta que se cargue una firma
-
-            // Eliminar event listeners previos para evitar duplicados
-            const nuevoBoton = btnContinuar.cloneNode(true);
-            btnContinuar.parentNode.replaceChild(nuevoBoton, btnContinuar);
-
-            // Establecer el nuevo event listener
-            nuevoBoton.addEventListener('click', function() {
-                console.log("Botón continuar presionado");
-                // Verificar si tenemos la firma antes de continuar
-                if (window.firmaCoordinadorData) {
-                    confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
-                } else {
-                    mostrarAlerta('Debe cargar una firma antes de continuar', 'warning');
-                }
-            });
-
-            console.log("Botón continuar configurado correctamente");
-        }
-
-        const firmaCoordinadorInput = document.getElementById('firma');
-        if (firmaCoordinadorInput) {
-            console.log("Configurando input de firma del coordinador");
-            // Eliminar event listeners previos para evitar duplicados
-            firmaCoordinadorInput.removeEventListener('change', handleFirmaCoordinadorUpload);
-            // Añadir nuevo event listener
-            firmaCoordinadorInput.addEventListener('change', function(event) {
-                console.log("Evento change activado en firma coordinador");
-                handleFirmaCoordinadorUpload(event);
-            });
-
-            // Cargar firma del coordinador si ya existe
-            const firmaExiste = cargarFirmaCoordinador();
-
-            // Habilitar el botón de continuar si ya existe una firma
-            if (firmaExiste && btnContinuar) {
-                btnContinuar.disabled = false;
-            }
-        } else {
-            console.log("ALERTA: No se encontró el elemento 'firma'");
-        }
-    }
-
-    // El resto de la función se mantiene igual...
-}
-
 
 // Función para habilitar el botón de generar PDF
 function habilitarBotonGenerarPDF() {
@@ -2690,7 +2398,39 @@ function habilitarBotonGenerarPDF() {
     }
 }
 
-// Inicializar cuando el DOM esté listo
+
+// Función para determinar en qué vista estamos
+function esVistaCoordinador() {
+    const resultado = document.getElementById('firma') !== null &&
+           document.getElementById('firma-vicerrector') === null;
+    console.log("¿Es vista coordinador?", resultado);
+    return resultado;
+}
+
+function esVistaVicerrector() {
+    const resultado = document.getElementById('firma-vicerrector') !== null &&
+           document.getElementById('firma-coordinador-preview-vice') !== null;
+    console.log("¿Es vista vicerrector?", resultado);
+    return resultado;
+}
+
+// Función para confirmar y enviar a vicerrector (desde vista coordinador)
+function confirmarYEnviarAVicerrector() {
+    try {
+        $('#pdf-preview-modal').modal('hide');
+
+        mostrarAlerta('Documento generado correctamente. La firma ha sido enviada al Vicerrector para su aprobación final.', 'success');
+
+        // Aquí podrías activar alguna notificación o email al vicerrector
+        console.log('Firma del coordinador enviada a vicerrector');
+    } catch (error) {
+        console.error('Error al confirmar documento:', error);
+        mostrarAlerta('Error al procesar el documento', 'danger');
+    }
+}
+
+
+
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM cargado completamente");
@@ -2701,56 +2441,19 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log("Elemento 'firma_coordinador_data' existe:", document.getElementById('firma_coordinador_data') !== null);
     console.log("Elemento 'btn-generar-pdf' existe:", document.getElementById('btn-generar-pdf') !== null);
 
-    // Configurar el botón de generar PDF para abrir el modal
-    const btnGenerarPDF = document.getElementById('btn-generar-pdf');
-    if (btnGenerarPDF) {
-        btnGenerarPDF.addEventListener('click', function() {
-            // Mostrar el modal
-            $('#pdf-preview-modal').modal('show');
-            console.log("Modal de vista previa del PDF abierto");
+    // Forzar la inicialización de Bootstrap File Input si está disponible
+    if (typeof $.fn.fileinput !== 'undefined') {
+        console.log("Bootstrap File Input detectado, inicializando...");
+        $('input[type="file"]').fileinput({
+            showUpload: false,
+            showPreview: false,
+            showRemove: false,
+            maxFileSize: 5120, // 5MB
+            allowedFileExtensions: ["jpg", "jpeg", "png", "gif"]
         });
     }
 
-    // Configurar el input de firma del coordinador
-    const firmaCoordinadorInput = document.getElementById('firma');
-    if (firmaCoordinadorInput) {
-        console.log("Configurando input de firma del coordinador");
-        // Asegurarse de que el evento change esté configurado correctamente
-        firmaCoordinadorInput.removeEventListener('change', handleFirmaCoordinadorUpload);
-        firmaCoordinadorInput.addEventListener('change', function(event) {
-            console.log("Evento change activado en firma coordinador");
-            handleFirmaCoordinadorUpload(event);
-        });
-    }
-
-    // Configurar el botón de confirmar y enviar a vicerrector en el modal
-    const btnConfirmarPDF = document.getElementById('btn-confirmar-pdf');
-    if (btnConfirmarPDF) {
-        btnConfirmarPDF.removeAttribute('onclick'); // Eliminar cualquier onclick inline
-
-        btnConfirmarPDF.addEventListener('click', function() {
-            console.log("Botón confirmar PDF presionado");
-            // Verificar si tenemos la firma antes de continuar
-            if (window.firmaCoordinadorData) {
-                // Cerrar el modal antes de continuar
-                $('#pdf-preview-modal').modal('hide');
-                setTimeout(() => {
-                    confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
-                }, 500);
-            } else {
-                mostrarAlerta('No se encontró la firma del coordinador', 'danger');
-            }
-        });
-
-        console.log("Botón confirmar PDF configurado correctamente");
-    }
-
-    // Cargar firma del coordinador si ya existe
-    const firmaExiste = cargarFirmaCoordinador();
-    if (firmaExiste && btnGenerarPDF) {
-        btnGenerarPDF.disabled = false;
-        console.log("Botón generar PDF habilitado porque ya existe una firma");
-    }
+    initSignatureHandlers();
 
     // Añadir estilos CSS para efectos
     const style = document.createElement('style');
@@ -2763,159 +2466,74 @@ document.addEventListener('DOMContentLoaded', function () {
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
-        .alertas-container {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 9999;
-            max-width: 400px;
-        }
     `;
     document.head.appendChild(style);
 });
 
+// Definir la función initSignatureHandlers al principio del archivo
+function initSignatureHandlers() {
+    console.log("Inicializando manejadores de firma...");
 
+    // Configurar manejadores para la vista del coordinador
+    const firmaCoordinadorInput = document.getElementById('firma');
+    if (firmaCoordinadorInput) {
+        console.log("Configurando input de firma del coordinador");
+        // Eliminar event listeners previos para evitar duplicados
+        firmaCoordinadorInput.removeEventListener('change', handleFirmaCoordinadorUpload);
+        // Añadir nuevo event listener
+        firmaCoordinadorInput.addEventListener('change', function(event) {
+            console.log("Evento change activado en firma coordinador");
+            handleFirmaCoordinadorUpload(event);
+        });
 
-// Función de ayuda para obtener datos informativos sin usar :contains (que no es estándar)
-function obtenerDatoInformativo(etiqueta) {
-    // Buscar entre todos los elementos info-item
-    const infoItems = document.querySelectorAll('.info-item');
-    for (let i = 0; i < infoItems.length; i++) {
-        // Buscar si el texto del primer hijo contiene la etiqueta
-        const labelElem = infoItems[i].querySelector('strong, label, h4, h5, h6, span');
-        if (labelElem && labelElem.textContent.includes(etiqueta)) {
-            // Si encontramos la etiqueta, devolver el contenido del párrafo
-            const valueElem = infoItems[i].querySelector('p');
-            if (valueElem) {
-                return valueElem.textContent.trim();
-            }
-        }
+        // Cargar firma del coordinador si ya existe
+        cargarFirmaCoordinador();
+    } else {
+        console.log("ALERTA: No se encontró el elemento 'firma'");
     }
-    // Alternativa: buscar directamente en un elemento con ID específico
-    const elemConId = document.getElementById('dato-' + etiqueta.toLowerCase().replace(/\s+/g, '-'));
-    if (elemConId) {
-        return elemConId.textContent.trim();
+
+    // Configurar manejadores para la vista del vicerrector
+    const firmaVicerrectorInput = document.getElementById('firma-vicerrector');
+    if (firmaVicerrectorInput) {
+        console.log("Configurando input de firma del vicerrector");
+        firmaVicerrectorInput.removeEventListener('change', handleFirmaVicerrectorUpload);
+        firmaVicerrectorInput.addEventListener('change', function(event) {
+            console.log("Evento change activado en firma vicerrector");
+            handleFirmaVicerrectorUpload(event);
+        });
+
+        // Verificar si tenemos firma del coordinador
+        const firmaCoordExiste = cargarFirmaCoordinador();
+        actualizarEstadoFirmaCoordinador(firmaCoordExiste);
+
+        // Cargar firma del vicerrector si ya existe
+        cargarFirmaVicerrector();
     }
 
-    return null;
+    // Configurar botón de generar PDF
+    const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+    if (btnGenerarPDF) {
+        console.log("Configurando botón de generar PDF");
+        btnGenerarPDF.addEventListener('click', function() {
+            console.log("Botón generar PDF presionado");
+            // Determinar qué versión generar basado en la presencia de elementos
+            const esVistaVice = esVistaVicerrector();
+            generarPDF(esVistaVice);
+        });
+    } else {
+        console.log("ALERTA: No se encontró el botón 'btn-generar-pdf'");
+    }
+
+    console.log("Manejadores de firma inicializados correctamente.");
 }
 
-// Función corregida para mostrar alertas (previene recursión infinita)
-function mostrarAlerta(mensaje, tipo) {
-    console.log(`Alerta: ${mensaje} (${tipo})`);
 
-    // Verificar si ya existe un contenedor de alertas
-    let alertContainer = document.getElementById('alert-container');
 
-    // Si no existe, crear uno
-    if (!alertContainer) {
-        alertContainer = document.createElement('div');
-        alertContainer.id = 'alert-container';
-        alertContainer.style.position = 'fixed';
-        alertContainer.style.top = '20px';
-        alertContainer.style.right = '20px';
-        alertContainer.style.zIndex = '9999';
-        alertContainer.style.maxWidth = '350px';
-        document.body.appendChild(alertContainer);
-    }
 
-    // Crear la alerta
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
-    alertDiv.role = 'alert';
-
-    // Configurar el HTML de manera segura para evitar llamados recursivos
-    alertDiv.textContent = mensaje;
-
-    // Añadir botón de cierre
-    const closeButton = document.createElement('button');
-    closeButton.type = 'button';
-    closeButton.className = 'close';
-    closeButton.setAttribute('data-dismiss', 'alert');
-    closeButton.setAttribute('aria-label', 'Close');
-
-    const closeSpan = document.createElement('span');
-    closeSpan.setAttribute('aria-hidden', 'true');
-    closeSpan.innerHTML = '&times;';
-
-    closeButton.appendChild(closeSpan);
-    alertDiv.appendChild(closeButton);
-
-    // Agregar la alerta al contenedor
-    alertContainer.appendChild(alertDiv);
-
-    // Configurar auto-eliminación después de 5 segundos
-    setTimeout(() => {
-        if (alertDiv.parentNode) {
-            alertDiv.classList.remove('show');
-            setTimeout(() => {
-                if (alertDiv.parentNode) {
-                    alertDiv.parentNode.removeChild(alertDiv);
-                }
-            }, 300);
-        }
-    }, 5000);
-}
-
-// Función para confirmar y enviar la firma al vicerrector
-function confirmarYEnviarAVicerrector(firmaData) {
-    // Ya no necesitamos confirmar aquí porque ya estamos en el modal de confirmación
-    console.log("Enviando firma a vista de vicerrector...");
-
-    try {
-        // Codificar la firma optimizada para URL
-        const firmaEncoded = encodeURIComponent(firmaData);
-
-        // Verificar si la URL no es demasiado larga
-        if (firmaEncoded.length > 1500) {
-            console.warn("La firma es muy grande para URL, intentando comprimir más");
-
-            // Si es demasiado grande, volvemos a optimizar con mayor compresión
-            optimizarImagen(firmaData, 300, 150, 0.5).then(firmaComprimida => {
-                // Usar URL relativa predeterminada si no hay un botón continuar con data-url
-                const urlBase = 'vista-vicerrector.html';
-                const urlCompleta = `${urlBase}?firma=${encodeURIComponent(firmaComprimida)}`;
-
-                // Guardar también en localStorage como respaldo
-                try {
-                    localStorage.setItem('firmaCoordinadorData', firmaComprimida);
-                    console.log("Firma comprimida guardada en localStorage");
-                } catch (error) {
-                    console.warn("No se pudo guardar en localStorage, continuando de todos modos");
-                }
-
-                // Mostrar mensaje de redirección
-                mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
-
-                // Esperar un momento para que se vea la alerta
-                setTimeout(() => {
-                    // Redirigir a la vista del vicerrector
-                    window.location.href = urlCompleta;
-                }, 1000);
-            }).catch(error => {
-                console.error("Error al comprimir imagen:", error);
-                mostrarAlerta('Error al comprimir la imagen. Intente con una firma más pequeña.', 'danger');
-            });
-        } else {
-            // La URL no es demasiado larga, podemos usarla directamente
-            const urlBase = 'vista-vicerrector.html';
-            const urlCompleta = `${urlBase}?firma=${firmaEncoded}`;
-
-            // Mostrar mensaje de redirección
-            mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
-
-            // Esperar un momento para que se vea la alerta
-            setTimeout(() => {
-                // Redirigir a la vista del vicerrector
-                window.location.href = urlCompleta;
-            }, 1000);
-        }
-    } catch (error) {
-        console.error("Error al enviar firma:", error);
-        mostrarAlerta('Error al enviar la firma. Intente de nuevo.', 'danger');
-    }
-}
-// Función corregida para generar PDF
+/**
+ * Función mejorada para generar PDF basada en la vista actual
+ * @param {boolean} esVistaVicerrector - Indica si estamos en la vista del vicerrector
+ */
 function generarPDF(esVistaVicerrector) {
     console.log("Función generarPDF llamada, es vista vicerrector:", esVistaVicerrector);
 
@@ -2929,15 +2547,8 @@ function generarPDF(esVistaVicerrector) {
 
         // Verificar las firmas necesarias para cada vista
         if (!window.firmaCoordinadorData) {
-            // Intentar cargar de localStorage una última vez
-            const firmaCoordGuardada = localStorage.getItem('firmaCoordinadorData');
-            if (firmaCoordGuardada) {
-                window.firmaCoordinadorData = firmaCoordGuardada;
-                console.log("Firma del coordinador cargada desde localStorage justo antes de generar PDF");
-            } else {
-                mostrarAlerta('Error: No se ha cargado la firma del coordinador. Por favor, cargue la firma antes de continuar.', 'danger');
-                return;
-            }
+            mostrarAlerta('Error: No se ha cargado la firma del coordinador. Por favor, cargue la firma antes de continuar.', 'danger');
+            return;
         }
 
         if (esVistaVicerrector && !window.firmaVicerrectorData) {
@@ -2961,11 +2572,11 @@ function generarPDF(esVistaVicerrector) {
             }, 10000);
         }
 
-        // Obtener datos del DOM para el PDF - CORREGIDO para no usar :contains que no es estándar
-        const estudiante = obtenerDatoInformativo('Nombre') || 'Estudiante';
-        const identificacion = obtenerDatoInformativo('Identificación') || 'No disponible';
-        const universidad = obtenerDatoInformativo('Universidad de Origen') || 'Universidad Externa';
-        const programa = obtenerDatoInformativo('Programa') || 'Programa Actual';
+        // Obtener datos del DOM para el PDF
+        const estudiante = document.querySelector('.info-item:contains("Nombre") p')?.textContent.trim() || 'Estudiante';
+        const identificacion = document.querySelector('.info-item:contains("Identificación") p')?.textContent.trim() || 'No disponible';
+        const universidad = document.querySelector('.info-item:contains("Universidad de Origen") p')?.textContent.trim() || 'Universidad Externa';
+        const programa = document.querySelector('.info-item:contains("Programa") p')?.textContent.trim() || 'Programa Actual';
 
         // Obtener homologaciones de la tabla
         const homologaciones = [];
@@ -3012,6 +2623,7 @@ function generarPDF(esVistaVicerrector) {
         }
     }
 }
+
 // Función corregida para generar el PDF con los datos
 function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, esVistaVicerrector) {
     try {
@@ -3489,7 +3101,7 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
     }
 }
 
-// Función para mostrar el PDF en el modal y guardar SOLO la versión final
+// Función para mostrar el PDF en el modal
 function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
     try {
         // Crear base64 del PDF
@@ -3513,98 +3125,29 @@ function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
         } else {
             throw new Error('No se encontró el elemento pdf-preview-content');
         }
-
-        // SOLO SI ES LA VISTA DE VICERRECTOR (PDF FINAL) guardar en el backend
-        if (esVistaVicerrector) {
-            // Obtener el ID de homologación
-            let id = null;
-            if (typeof homologacionId !== 'undefined' && homologacionId) {
-                id = homologacionId;
-            } else {
-                id = cargarHomologacionId();
-            }
-
-            if (!id) {
-                console.error('No se pudo obtener el ID de homologación para guardar el PDF');
-                mostrarAlerta('No se pudo obtener el ID de homologación para guardar el PDF', 'warning');
-            } else {
-                // Normalizar el ID si es necesario
-                const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(id) : id;
-
-                // Crear archivo PDF para guardar
-                const pdfBlob = doc.output('blob');
-                const fecha = new Date().toISOString().split('T')[0];
-                const nombreArchivo = `resolucion_homologacion_FINAL_${apiHomologacionId}_${fecha}.pdf`;
-                const pdfFile = new File([pdfBlob], nombreArchivo, { type: 'application/pdf' });
-
-                // Subir el PDF al servidor
-                subirSoloPDFResolucion(apiHomologacionId, pdfFile)
-                    .then(data => {
-                        console.log('PDF FINAL subido exitosamente:', data);
-                        actualizarInterfazConPDF(data);
-                        mostrarAlerta('PDF con firma de Vicerrector guardado correctamente en el sistema', 'success');
-                    })
-                    .catch(error => {
-                        console.error('Error al subir PDF FINAL:', error);
-                        mostrarAlerta(`Error al guardar el PDF en el sistema: ${error.message}`, 'danger');
-                    });
-            }
-        } else {
-            console.log('Vista de coordinador: PDF mostrado pero NO guardado en el backend (se guardará en la fase final con vicerrector)');
-        }
-
-        // Configurar botón de confirmar
+// Configurar botón de confirmar
         const btnConfirmar = document.getElementById('btn-confirmar-pdf');
         if (btnConfirmar) {
             // Definir la acción según la vista
             if (esVistaVicerrector) {
                 btnConfirmar.onclick = function() {
-                    // Cerrar el modal
-                    $('#pdf-preview-modal').modal('hide');
+                    // Descargar PDF final
+                    descargaPDFFinal();
 
-                    // Descargar PDF final para el usuario
+                    // Descargar PDF
                     const nombreArchivo = `Homologacion_Final_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
                     doc.save(nombreArchivo);
-
-                    // Mostrar mensaje de éxito
-                    mostrarAlerta('Resolución de homologación finalizada y guardada correctamente', 'success');
                 };
             } else {
                 btnConfirmar.onclick = function() {
-                    // Cerrar el modal
-                    $('#pdf-preview-modal').modal('hide');
+                    // Enviar a vicerrector
+                    confirmarYEnviarAVicerrector();
 
-                    // Enviar a vicerrector si estamos en la vista de coordinador
-                    if (typeof confirmarYEnviarAVicerrector === 'function') {
-                        // Si la firma del coordinador existe, pasarla a la función
-                        if (window.firmaCoordinadorData) {
-                            confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
-                        } else {
-                            // Intentar generar una firma por defecto
-                            const firmaDefault = generarFirmaDefault ? generarFirmaDefault('coordinador') : null;
-                            confirmarYEnviarAVicerrector(firmaDefault);
-                        }
-                    } else {
-                        console.error('La función confirmarYEnviarAVicerrector no está disponible');
-                        mostrarAlerta('No se pudo enviar al vicerrector. La función no está disponible.', 'danger');
-                    }
-
-                    // Descargar PDF para el usuario
+                    // Descargar PDF
                     const nombreArchivo = `Homologacion_Coordinador_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
                     doc.save(nombreArchivo);
                 };
             }
-        }
-
-        // Botón para solo descargar sin confirmar
-        const btnDescargar = document.getElementById('btn-descargar-solo-pdf');
-        if (btnDescargar) {
-            btnDescargar.onclick = function() {
-                const prefijo = esVistaVicerrector ? 'Homologacion_Final' : 'Homologacion_Coordinador';
-                const nombreArchivo = `${prefijo}_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
-                doc.save(nombreArchivo);
-                mostrarAlerta('PDF descargado correctamente', 'success');
-            };
         }
 
         // Restaurar botón de generar PDF
@@ -3633,469 +3176,6 @@ function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
         }
     }
 }
-
-/**
- * Configura el botón de descargar PDF para guardar la ruta en la API
- */
-document.addEventListener('DOMContentLoaded', function() {
-    const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
-    if (btnDescargarPDF) {
-        btnDescargarPDF.addEventListener('click', descargarPDF);
-        console.log('Botón de descargar PDF configurado correctamente');
-    } else {
-        console.log('Botón de descargar PDF no encontrado en esta página');
-    }
-});
-
-
-
-
-/**
- * Sube solo el PDF de resolución al endpoint específico
- * @param {string} homologacionId - ID de la homologación
- * @param {File} pdfFile - El archivo PDF
- * @returns {Promise} - Promesa con el resultado de la operación
- */
-function subirSoloPDFResolucion(homologacionId, pdfFile) {
-    console.log('Iniciando subida de PDF de resolución...');
-
-    // Verificar que tengamos un ID válido
-    if (!homologacionId) {
-        homologacionId = cargarHomologacionId();
-        console.log('ID cargado con cargarHomologacionId:', homologacionId);
-    }
-
-    if (!homologacionId) {
-        return Promise.reject(new Error('ID de homologación no válido. Debe guardar la homologación antes de generar el PDF.'));
-    }
-
-    // Normalizar el ID para la API (si es necesario)
-    const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(homologacionId) : homologacionId;
-    console.log('ID normalizado para API:', apiHomologacionId);
-
-    // Verificar que tengamos un archivo válido
-    if (!pdfFile || !(pdfFile instanceof File)) {
-        return Promise.reject(new Error('Archivo PDF no válido'));
-    }
-
-    console.log('Subiendo PDF al servidor:', {
-        endpoint: `${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`,
-        fileName: pdfFile.name,
-        fileSize: pdfFile.size
-    });
-
-    // Crear FormData para el archivo
-    const formData = new FormData();
-    formData.append('ruta_pdf_resolucion', pdfFile);
-
-    // Obtener el token CSRF
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-
-    // Intentar con el endpoint específico para PDF primero
-    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            console.warn(`Endpoint específico falló: ${response.status}. Intentando método alternativo...`);
-            return response.text().then(text => {
-                console.error('Respuesta del servidor:', text);
-                // Intentar método alternativo
-                return intentarMetodoCompleto(apiHomologacionId, pdfFile);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Respuesta exitosa:', data);
-        return data;
-    });
-}
-
-/**
- * Método que implementa la misma lógica de guardarHomologaciones para subir el PDF
- * @param {string} homologacionId - ID de homologación
- * @param {File} pdfFile - Archivo PDF
- * @returns {Promise} - Promesa con el resultado
- */
-function intentarMetodoCompleto(homologacionId, pdfFile) {
-    console.log('Utilizando método completo para subir PDF...');
-
-    // Obtener datos actuales de homologaciones
-    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => {
-                throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (!data || !data.datos) {
-            throw new Error('No se pudieron obtener los datos de la homologación');
-        }
-
-        console.log('Datos obtenidos del servidor:', data.datos);
-
-        // Preparar un array válido de homologaciones basado en los datos existentes
-        let homologacionesArray = [];
-
-        if (data.datos.homologaciones && Array.isArray(data.datos.homologaciones)) {
-            homologacionesArray = data.datos.homologaciones.map(h => ({
-                asignatura_origen_id: h.asignatura_origen_id,
-                asignatura_destino_id: h.asignatura_destino_id || 1, // Asegurar que sea entero
-                nota_destino: h.nota_destino || "0",
-                comentarios: h.comentarios || ''
-            }));
-        } else if (data.datos.asignaturas_origen && data.datos.asignaturas_destino) {
-            homologacionesArray = data.datos.asignaturas_origen.map((asignatura, index) => {
-                const destino = data.datos.asignaturas_destino[index] || {};
-                return {
-                    asignatura_origen_id: asignatura.id,
-                    asignatura_destino_id: destino.id || 1, // Asegurar que sea entero
-                    nota_destino: destino.nota_destino || "0",
-                    comentarios: destino.comentarios || ''
-                };
-            });
-        }
-
-        // Si aún no tenemos homologaciones, crear una entrada mínima válida
-        if (homologacionesArray.length === 0) {
-            homologacionesArray = [{
-                asignatura_origen_id: 1,
-                asignatura_destino_id: 1, // Entero válido
-                nota_destino: "0",
-                comentarios: ''
-            }];
-        }
-
-        console.log('Homologaciones preparadas para enviar:', homologacionesArray);
-
-        // Crear FormData con los datos necesarios
-        const formData = new FormData();
-        formData.append('_method', 'PUT'); // Simular PUT para envío de archivos
-        formData.append('ruta_pdf_resolucion', pdfFile);
-
-        // Asegurar que homologaciones se envía correctamente como array
-        homologacionesArray.forEach((item, index) => {
-            Object.keys(item).forEach(key => {
-                formData.append(`homologaciones[${index}][${key}]`, item[key]);
-            });
-        });
-
-        // Verificar los datos del FormData (solo para debug)
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
-
-        // Enviar la solicitud con el archivo PDF y los datos existentes
-        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
-            method: 'POST', // Usando POST con _method=PUT
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-            },
-            body: formData
-        });
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => {
-                throw new Error(`Error al subir PDF: ${response.status} - ${text}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Crear un objeto de respuesta estandarizado
-        return {
-            mensaje: data.mensaje || 'PDF actualizado correctamente',
-            ruta_pdf_resolucion: data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion) || '',
-            url_pdf_resolucion: data.url_pdf_resolucion || (data.ruta_pdf_resolucion ? `/storage/${data.ruta_pdf_resolucion}` : '')
-        };
-    });
-}
-
-function descargarPDF() {
-    console.log('Iniciando generación de PDF de resolución...');
-
-    // Asegurarnos de tener el ID necesario
-    let id = null;
-
-    // Intentar obtener el ID de diferentes fuentes
-    if (typeof homologacionId !== 'undefined' && homologacionId) {
-        id = homologacionId;
-        console.log('Usando homologacionId global:', id);
-    } else {
-        id = cargarHomologacionId();
-        console.log('ID cargado con cargarHomologacionId:', id);
-    }
-
-    if (!id) {
-        console.error('No se pudo obtener el ID de homologación.');
-        alert('Error: Debe guardar la homologación antes de generar el PDF');
-        return;
-    }
-
-    // Normalizar el ID para la API (si es necesario)
-    const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(id) : id;
-    console.log('ID normalizado para API:', apiHomologacionId);
-
-    // Mostrar indicador de carga
-    const btnDescargar = document.getElementById('btn-descargar-pdf');
-    if (!btnDescargar) {
-        console.error('No se encontró el botón de descargar PDF');
-        return;
-    }
-
-    const textoOriginal = btnDescargar.innerHTML;
-    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
-    btnDescargar.disabled = true;
-
-    try {
-        // Obtener datos de homologación para generar el PDF
-        fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Datos para generación de PDF obtenidos:', data);
-
-            if (!data || !data.datos) {
-                throw new Error('No se pudieron obtener los datos de la homologación');
-            }
-
-            const homologacionData = data.datos;
-
-            // Preparar datos para la generación del PDF
-            const datosEstudiante = {
-                nombre: homologacionData.estudiante || 'Estudiante',
-                identificacion: homologacionData.numero_identificacion || 'No disponible'
-            };
-
-            const datosSolicitud = {
-                universidad_origen: homologacionData.universidad_origen || 'Universidad Externa',
-                programa_destino: homologacionData.programa_destino || 'Programa Actual'
-            };
-
-            // Preparar datos de homologación
-            const homologaciones = [];
-            if (homologacionData.asignaturas_origen && homologacionData.asignaturas_destino) {
-                homologacionData.asignaturas_origen.forEach((asignatura, index) => {
-                    const destino = homologacionData.asignaturas_destino[index] || {};
-
-                    homologaciones.push({
-                        asignatura_origen_nombre: asignatura.nombre || 'No disponible',
-                        codigo_destino: destino.codigo || 'N/A',
-                        asignatura_destino_nombre: destino.nombre || 'No disponible',
-                        semestre: destino.semestre || 'N/A',
-                        creditos: asignatura.creditos || destino.creditos || 'N/A',
-                        nota_destino: destino.nota_destino || 'N/A'
-                    });
-                });
-            }
-
-            const datosHomologacion = {
-                homologaciones: homologaciones
-            };
-
-            // Crear las firmas si no existen
-            if (!window.firmaCoordinadorData) {
-                window.firmaCoordinadorData = generarFirmaDefault('coordinador');
-                console.log('Se generó una firma por defecto para el coordinador');
-            }
-
-            // Verificar si generarPDFConDatos está disponible
-            if (typeof generarPDFConDatos === 'function') {
-                // Generar el PDF con los datos - NO se sobrescribe mostrarPDFEnModal aquí
-                console.log('Llamando a generarPDFConDatos...');
-                const resultadoGeneracion = generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, false);
-
-                if (!resultadoGeneracion) {
-                    throw new Error('No se pudo generar el PDF con datos');
-                }
-            } else {
-                throw new Error('Función generarPDFConDatos no disponible');
-            }
-        })
-        .catch(error => {
-            console.error('Error al generar o procesar el PDF:', error);
-            alert(`Error: ${error.message}`);
-
-            // Restaurar botón
-            if (btnDescargar) {
-                btnDescargar.innerHTML = textoOriginal;
-                btnDescargar.disabled = false;
-            }
-        });
-    } catch (error) {
-        console.error('Error en la función descargarPDF:', error);
-        alert(`Error al generar el PDF: ${error.message}`);
-
-        // Restaurar botón
-        if (btnDescargar) {
-            btnDescargar.innerHTML = textoOriginal;
-            btnDescargar.disabled = false;
-        }
-    }
-}
-
-/**
- * Actualiza la interfaz de usuario con la información del PDF
- * @param {Object} data - Datos de respuesta del servidor
- */
-function actualizarInterfazConPDF(data) {
-    try {
-        console.log('Actualizando interfaz con datos del PDF:', data);
-
-        // Actualizar link del PDF si existe en la interfaz
-        const pdfLink = document.getElementById('link-pdf-resolucion');
-        if (pdfLink) {
-            let rutaPDF = '';
-
-            if (data.url_pdf_resolucion) {
-                rutaPDF = data.url_pdf_resolucion;
-            } else if (data.ruta_pdf_resolucion) {
-                rutaPDF = `/storage/${data.ruta_pdf_resolucion}`;
-            } else if (data.datos && data.datos.ruta_pdf_resolucion) {
-                rutaPDF = `/storage/${data.datos.ruta_pdf_resolucion}`;
-            } else if (data.datos && data.datos.url_pdf_resolucion) {
-                rutaPDF = data.datos.url_pdf_resolucion;
-            }
-
-            if (rutaPDF) {
-                pdfLink.href = rutaPDF;
-                pdfLink.style.display = 'inline';
-
-                // Actualizar texto del enlace si tiene un span
-                const pdfLinkText = pdfLink.querySelector('span');
-                if (pdfLinkText) {
-                    pdfLinkText.textContent = 'Ver PDF de resolución';
-                }
-            }
-        }
-
-        // Actualizar campo oculto si existe
-        const pdfPathField = document.getElementById('ruta_pdf_resolucion');
-        const rutaPDF = data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion);
-        if (pdfPathField && rutaPDF) {
-            pdfPathField.value = rutaPDF;
-        }
-
-        // Actualizar cualquier elemento que muestre el nombre del archivo
-        const pdfFileName = document.getElementById('pdf-file-name');
-        if (pdfFileName && rutaPDF) {
-            const nombreArchivo = rutaPDF.split('/').pop();
-            pdfFileName.textContent = nombreArchivo;
-        }
-
-        // Actualizar estado visual en la interfaz
-        const estadoPDF = document.getElementById('estado-pdf');
-        if (estadoPDF) {
-            estadoPDF.innerHTML = '<span class="badge badge-success">PDF Cargado</span>';
-        }
-
-        // Mostrar contenedor de PDF si existe
-        const pdfContainer = document.getElementById('pdf-container');
-        if (pdfContainer) {
-            pdfContainer.style.display = 'block';
-        }
-    } catch (e) {
-        console.error('Error al actualizar interfaz con datos del PDF:', e);
-    }
-}
-
-/**
- * Función para definir alertaEnProceso si no existe
- */
-if (typeof alertaEnProceso !== 'function') {
-    function alertaEnProceso(mensaje) {
-        console.log('Alerta en proceso:', mensaje);
-        alert(mensaje);
-    }
-}
-
-/**
- * Función auxiliar para mostrar alertas
- */
-function mostrarAlerta(mensaje, tipo) {
-    console.log(`Alerta [${tipo}]: ${mensaje}`);
-
-    // Usar alertaEnProceso si está disponible
-    if (typeof alertaEnProceso === 'function') {
-        alertaEnProceso(mensaje);
-    } else {
-        alert(mensaje);
-    }
-
-    // Si existe un contenedor de alertas en el DOM, usarlo también
-    const alertContainer = document.getElementById('alert-container');
-    if (alertContainer) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            ${mensaje}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        `;
-        alertContainer.appendChild(alertDiv);
-
-        // Auto-eliminar después de 5 segundos
-        setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => alertDiv.remove(), 150);
-        }, 5000);
-    }
-}
-
-/**
- * Función para configurar el botón de PDF cuando el DOM está listo
- */
-function configurarBotonPDF() {
-    const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
-    if (btnDescargarPDF) {
-        btnDescargarPDF.addEventListener('click', descargarPDF);
-        console.log('Botón de descargar PDF configurado correctamente');
-    } else {
-        console.log('Botón de descargar PDF no encontrado en esta página');
-    }
-}
-
-// Inicializar cuando el DOM esté listo
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', configurarBotonPDF);
-} else {
-    configurarBotonPDF();
-}
-
-
-
-
-
 
 
 
@@ -4441,118 +3521,5 @@ document.getElementById('btn-confirmar-pdf').addEventListener('click', function 
 });
 
 
-function mostrarAlerta(mensaje, tipo) {
-    // Prevenir recursión
-    if (alertaEnProceso) {
-        console.error("Prevención de recursión en mostrarAlerta");
-        return;
-    }
 
-    alertaEnProceso = true;
-
-    try {
-        console.log("Mostrando alerta:", mensaje, tipo);
-
-        // Método 1: Usar Bootstrap nativo si está disponible
-        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-            // Crear un toast de Bootstrap 5
-            const toastEl = document.createElement('div');
-            toastEl.className = `toast align-items-center text-white bg-${tipo} border-0`;
-            toastEl.setAttribute('role', 'alert');
-            toastEl.setAttribute('aria-live', 'assertive');
-            toastEl.setAttribute('aria-atomic', 'true');
-
-            toastEl.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${mensaje}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
-
-            document.body.appendChild(toastEl);
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
-
-            // Eliminar después de que se oculte
-            toastEl.addEventListener('hidden.bs.toast', () => {
-                document.body.removeChild(toastEl);
-            });
-        }
-        // Método 2: Enfoque simple, crea un div de alerta básico
-        else {
-            // Usa un ID único para el contenedor de alertas
-            let contenedor = document.getElementById('sistema-alertas');
-            if (!contenedor) {
-                contenedor = document.createElement('div');
-                contenedor.id = 'sistema-alertas';
-                contenedor.style.position = 'fixed';
-                contenedor.style.top = '20px';
-                contenedor.style.right = '20px';
-                contenedor.style.zIndex = '9999';
-                contenedor.style.maxWidth = '300px';
-                document.body.appendChild(contenedor);
-            }
-
-            // Crear elemento de alerta con estilo inline para evitar dependencias
-            const alertaEl = document.createElement('div');
-            alertaEl.style.padding = '15px';
-            alertaEl.style.marginBottom = '10px';
-            alertaEl.style.border = '1px solid transparent';
-            alertaEl.style.borderRadius = '4px';
-            alertaEl.style.opacity = '0';
-            alertaEl.style.transition = 'opacity 0.3s ease-in-out';
-
-            // Establecer colores según el tipo
-            switch (tipo) {
-                case 'success':
-                    alertaEl.style.backgroundColor = '#d4edda';
-                    alertaEl.style.borderColor = '#c3e6cb';
-                    alertaEl.style.color = '#155724';
-                    break;
-                case 'danger':
-                    alertaEl.style.backgroundColor = '#f8d7da';
-                    alertaEl.style.borderColor = '#f5c6cb';
-                    alertaEl.style.color = '#721c24';
-                    break;
-                case 'warning':
-                    alertaEl.style.backgroundColor = '#fff3cd';
-                    alertaEl.style.borderColor = '#ffeeba';
-                    alertaEl.style.color = '#856404';
-                    break;
-                case 'info':
-                default:
-                    alertaEl.style.backgroundColor = '#d1ecf1';
-                    alertaEl.style.borderColor = '#bee5eb';
-                    alertaEl.style.color = '#0c5460';
-                    break;
-            }
-
-            alertaEl.textContent = mensaje;
-            contenedor.appendChild(alertaEl);
-
-            // Hacer visible con un pequeño retraso para que la transición funcione
-            setTimeout(() => {
-                alertaEl.style.opacity = '1';
-            }, 10);
-
-            // Auto-eliminar después de 5 segundos
-            setTimeout(() => {
-                alertaEl.style.opacity = '0';
-                setTimeout(() => {
-                    if (alertaEl.parentNode) {
-                        alertaEl.parentNode.removeChild(alertaEl);
-                    }
-                }, 300);
-            }, 5000);
-        }
-    } catch (e) {
-        // Capturar cualquier error sin llamar a mostrarAlerta para evitar recursión
-        console.error('Error en mostrarAlerta:', e);
-    } finally {
-        // Siempre restablecer la bandera
-        setTimeout(() => {
-            alertaEnProceso = false;
-        }, 100);
-    }
-}
 // DESDE AQUI INICIA
