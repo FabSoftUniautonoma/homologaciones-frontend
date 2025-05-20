@@ -207,7 +207,7 @@
                                                 class="btn btn-sm btn-primary" title="Ver información">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
-                                            <a href="{{ route('admin.homologaciones.vice.procesohomologacion', $solicitud['numero_radicado']) }}"
+                                            <a href="{{ route('admin.homologaciones.vice.procesohomologacion.vicerrectoria', $solicitud['numero_radicado']) }}"
                                                 class="btn btn-sm btn-primary" title="Procesar homologación">
                                                 <i class="fas fa-clipboard-check"></i>
                                             </a>
@@ -218,17 +218,7 @@
                                             </a>
                                         @endif
 
-                                        <a href="{{ route('admin.homologaciones.vice.documentos', $solicitud['numero_radicado']) }}"
-                                            class="btn btn-sm btn-secondary" title="Ver documentos">
-                                            <i class="fas fa-file-alt"></i>
-                                        </a>
-
-                                        @if (isset($solicitud['estado']) && $solicitud['estado'] == 'Aprobado' && isset($solicitud['pdf_resolucion']))
-                                            <a href="{{ route('admin.homologaciones.vice.descargar', $solicitud['pdf_resolucion']) }}"
-                                                class="btn btn-sm btn-success" title="Descargar acta">
-                                                <i class="fas fa-file-pdf"></i>
-                                            </a>
-                                        @endif
+                                    
                                     </td>
                                 </tr>
                             @empty
