@@ -141,6 +141,7 @@
             </div>
         </div>
     </div>
+    
 
     <script src="{{ asset('js/gestionhomologacioncoordinacion.js') }}"></script>
 @endsection
