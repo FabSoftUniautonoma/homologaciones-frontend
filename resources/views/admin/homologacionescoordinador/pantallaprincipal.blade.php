@@ -309,7 +309,7 @@
             function showAlert(message, type = 'info') {
                 const alertContainer = document.getElementById('system-alerts');
                 const alertDiv = document.createElement('div');
-                alertDiv.className = alert alert-${type} alert-dismissible fade show;
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
                 alertDiv.innerHTML = `
                 ${message}
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -393,7 +393,7 @@
 
                 if (ultimasDia.length > 0) {
                     notificaciones.push({
-                        mensaje: ${ultimasDia.length} nueva${ultimasDia.length > 1 ? 's' : ''} solicitud${ultimasDia.length > 1 ? 'es' : ''} en las últimas 24 horas,
+                        mensaje: `${ultimasDia.length} nueva${ultimasDia.length > 1 ? 's' : ''} solicitud${ultimasDia.length > 1 ? 'es' : ''} en las últimas 24 horas`,
                         tipo: 'new',
                         fecha: new Date()
                     });
@@ -412,7 +412,7 @@
 
                 if (pendientesDemoradas.length > 0) {
                     notificaciones.push({
-                        mensaje: ${pendientesDemoradas.length} solicitud${pendientesDemoradas.length > 1 ? 'es' : ''} pendiente${pendientesDemoradas.length > 1 ? 's' : ''} por más de 7 días,
+                        mensaje: `${pendientesDemoradas.length} solicitud${pendientesDemoradas.length > 1 ? 'es' : ''} pendiente${pendientesDemoradas.length > 1 ? 's' : ''} por más de 7 días`,
                         tipo: 'warning',
                         fecha: new Date()
                     });
@@ -425,7 +425,7 @@
 
                 aprobadasRecientes.forEach(solicitud => {
                     notificaciones.push({
-                        mensaje: Solicitud ${solicitud.numero_radicado} de ${solicitud.primer_nombre} ${solicitud.primer_apellido} aprobada,
+                        mensaje: `Solicitud ${solicitud.numero_radicado} de ${solicitud.primer_nombre} ${solicitud.primer_apellido} aprobada`,
                         tipo: 'success',
                         fecha: new Date(solicitud.fecha_solicitud)
                     });
@@ -438,7 +438,7 @@
 
                 rechazadasRecientes.forEach(solicitud => {
                     notificaciones.push({
-                        mensaje: Solicitud ${solicitud.numero_radicado} de ${solicitud.primer_nombre} ${solicitud.primer_apellido} rechazada,
+                        mensaje: `Solicitud ${solicitud.numero_radicado} de ${solicitud.primer_nombre} ${solicitud.primer_apellido} rechazada`,
                         tipo: 'danger',
                         fecha: new Date(solicitud.fecha_solicitud)
                     });
@@ -450,7 +450,7 @@
                 } else {
                     notificaciones.forEach(notificacion => {
                         const notificacionElement = document.createElement('div');
-                        notificacionElement.className = notification-item p-3 ${notificacion.tipo};
+                        notificacionElement.className = `notification-item p-3 ${notificacion.tipo}`;
 
                         const fechaFormateada = notificacion.fecha.toLocaleString('es-CO', {
                             day: '2-digit',
@@ -508,7 +508,7 @@
                                 colorEstado = 'primary';
                         }
 
-                        solicitudElement.className = notification-item p-3;
+                        solicitudElement.className = `notification-item p-3`;
 
                         const fechaFormateada = new Date(solicitud.fecha_solicitud).toLocaleString(
                         'es-CO', {
