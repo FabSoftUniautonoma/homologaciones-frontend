@@ -1,322 +1,1539 @@
 @extends('admin.layouts.appadmin')
 
 @section('content')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-
-<div class="container-fluid py-4">
-    <div class="title-section mx-auto" style="max-width: 800px;">
-        <h1 class="fw-bold text-center" style="color: #1a3a6c; border-bottom: 3px solid #ccd2dd; padding-bottom: 12px; margin-bottom: 8px;">
-            Crear Nuevo Usuario
-        </h1>
-        <p class="text-muted lead text-center">Complete el formulario para crear un nuevo usuario</p>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <form id="formCrearUsuario">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="primer_nombre" class="form-label">Primer Nombre *</label>
-                        <input type="text" class="form-control" id="primer_nombre" name="primer_nombre" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="segundo_nombre" class="form-label">Segundo Nombre</label>
-                        <input type="text" class="form-control" id="segundo_nombre" name="segundo_nombre">
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="primer_apellido" class="form-label">Primer Apellido *</label>
-                        <input type="text" class="form-control" id="primer_apellido" name="primer_apellido" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="segundo_apellido" class="form-label">Segundo Apellido</label>
-                        <input type="text" class="form-control" id="segundo_apellido" name="segundo_apellido">
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="correo" class="form-label">Correo Electrónico *</label>
-                        <input type="email" class="form-control" id="correo" name="correo" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="telefono" class="form-label">Teléfono</label>
-                        <input type="tel" class="form-control" id="telefono" name="telefono">
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="tipo_identificacion" class="form-label">Tipo de Identificación *</label>
-                        <select class="form-select" id="tipo_identificacion" name="tipo_identificacion" required>
-                            <option value="">Seleccione...</option>
-                            <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
-                            <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
-                            <option value="Cédula de Extranjería">Cédula de Extranjería</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="numero_identificacion" class="form-label">Número de Identificación *</label>
-                        <input type="text" class="form-control" id="numero_identificacion" name="numero_identificacion" required>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="institucion_origen_id" class="form-label">Institución de Origen</label>
-                        <select class="form-select" id="institucion_origen_id" name="institucion_origen_id">
-                            <option value="">Seleccione...</option>
-                            <!-- Las opciones se cargarán desde JavaScript -->
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="facultad_id" class="form-label">Facultad</label>
-                        <select class="form-select" id="facultad_id" name="facultad_id">
-                            <option value="">Seleccione...</option>
-                            <!-- Las opciones se cargarán desde JavaScript -->
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="direccion" class="form-label">Dirección</label>
-                    <input type="text" class="form-control" id="direccion" name="direccion">
-                </div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="pais_id" class="form-label">País</label>
-                        <select class="form-select" id="pais_id" name="pais_id">
-                            <option value="">Seleccione...</option>
-                            <!-- Las opciones se cargarán desde JavaScript -->
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="departamento_id" class="form-label">Departamento</label>
-                        <select class="form-select" id="departamento_id" name="departamento_id">
-                            <option value="">Seleccione...</option>
-                            <!-- Las opciones se cargarán desde JavaScript -->
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="municipio_id" class="form-label">Municipio</label>
-                        <select class="form-select" id="municipio_id" name="municipio_id">
-                            <option value="">Seleccione...</option>
-                            <!-- Las opciones se cargarán desde JavaScript -->
-                        </select>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label for="rol_id" class="form-label">Rol *</label>
-                    <select class="form-select" id="rol_id" name="rol_id" required>
-                        <option value="">Seleccione...</option>
-                        <!-- Las opciones se cargarán desde JavaScript -->
-                    </select>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="/admin/usuarios" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Volver
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Guardar Usuario
-                    </button>
-                </div>
-            </form>
+<!-- Header institucional -->
+<!-- Header institucional -->
+<div class="container-fluid py-3 mb-4" style="background-color: #003366; font-family: 'Source Sans Pro', sans-serif;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center text-md-start">
+          <class="img-fluid" style="max-height: 60px;">
+            </div>
+            <div class="col-md-8 text-center">
+                <h1 class="display-5 fw-bold mb-0" style="color: white !important;">Sistema de homologaciones</h1>
+                <p class="lead mb-0" style="color: white !important;">Gestión de usuarios</p>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // URL base de la API
-    const API_URL = 'http://127.0.0.1:8000/api';
 
-    // Cargar datos para los select
-    cargarInstituciones();
-    cargarFacultades();
-    cargarPaises();
-    cargarRoles();
+<div class="container py-4">
+    <!-- Wizard Steps Circulares - Institucional -->
+    <div class="mb-4">
+        <div class="steps-container">
+            <div class="steps-wrapper">
+                <div class="step active" id="step-personal-indicator">
+                    <div class="step-circle">
+                        <i class="step-icon fas fa-user"></i>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step-label">Información Personal</div>
+                </div>
+                <div class="step" id="step-institucional-indicator">
+                    <div class="step-circle">
+                        <i class="step-icon fas fa-university"></i>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step-label">Información Institucional</div>
+                </div>
+                <div class="step" id="step-acceso-indicator">
+                    <div class="step-circle">
+                        <i class="step-icon fas fa-lock"></i>
+                    </div>
+                    <div class="step-label">Datos de Acceso</div>
+                </div>
+            </div>
+            <div class="steps-progress">
+                <div class="steps-progress-bar"></div>
+            </div>
+        </div>
+    </div>
 
-    // Manejar envío del formulario
-    document.getElementById('formCrearUsuario').addEventListener('submit', function(e) {
-        e.preventDefault();
-        crearUsuario();
-    });
+    <!-- Contenido del Formulario -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary text-white rounded-circle p-3 me-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0">Nuevo Usuario</h4>
+                            <p class="text-muted mb-0">Complete el formulario para registrar un nuevo usuario</p>
+                        </div>
+                    </div>
+                </div>
 
-    // Eventos para cargar departamentos y municipios
-    document.getElementById('pais_id').addEventListener('change', function() {
-        cargarDepartamentos(this.value);
-    });
+                <div class="card-body">
+                    <form id="formNuevoUsuario">
+                        <!-- SECCIÓN 1: INFORMACIÓN PERSONAL -->
+                        <div class="form-section" id="personal-section">
+                            <div class="alert alert-light border-start border-4 border-primary mb-4">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-info-circle text-primary fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Información Personal</h5>
+                                        <p class="mb-0">Complete la información personal del usuario</p>
+                                    </div>
+                                </div>
+                            </div>
 
-    document.getElementById('departamento_id').addEventListener('change', function() {
-        cargarMunicipios(this.value);
-    });
+                            <div class="row g-3">
+                                <!-- Nombres -->
+                                <div class="col-md-6">
+                                    <label for="primer_nombre" class="form-label">Primer Nombre <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-user text-primary"></i></span>
+                                        <input type="text" class="form-control" id="primer_nombre" name="primer_nombre" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="segundo_nombre" class="form-label">Segundo Nombre</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-user text-secondary"></i></span>
+                                        <input type="text" class="form-control" id="segundo_nombre" name="segundo_nombre">
+                                    </div>
+                                </div>
 
-    function crearUsuario() {
-        // Obtener todos los datos del formulario
-        const formData = new FormData(document.getElementById('formCrearUsuario'));
-        const userData = {};
+                                <!-- Apellidos -->
+                                <div class="col-md-6">
+                                    <label for="primer_apellido" class="form-label">Primer Apellido <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-user text-primary"></i></span>
+                                        <input type="text" class="form-control" id="primer_apellido" name="primer_apellido" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="segundo_apellido" class="form-label">Segundo Apellido</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-user text-secondary"></i></span>
+                                        <input type="text" class="form-control" id="segundo_apellido" name="segundo_apellido">
+                                    </div>
+                                </div>
 
-        // Convertir FormData a objeto JSON
-        for (let [key, value] of formData.entries()) {
-            // Convertir strings vacíos a null para campos opcionales
-            userData[key] = value === '' ? null : value;
+                                <!-- Identificación -->
+                                <div class="col-md-6">
+                                    <label for="tipo_identificacion" class="form-label">Tipo de Identificación <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-id-card text-primary"></i></span>
+                                        <select class="form-select" id="tipo_identificacion" name="tipo_identificacion" required>
+                                            <option value="">Seleccione...</option>
+                                            <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
+                                            <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
+                                            <option value="Cédula de Extranjería">Cédula de Extranjería</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="numero_identificacion" class="form-label">Número de Identificación <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-hashtag text-primary"></i></span>
+                                        <input type="text" class="form-control" id="numero_identificacion" name="numero_identificacion" required>
+                                    </div>
+                                    <div id="identificacion-existe" class="text-danger mt-1" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i> Esta identificación ya está registrada
+                                    </div>
+                                </div>
+
+                                <!-- Contacto -->
+                                <div class="col-md-6">
+                                    <label for="telefono" class="form-label">Teléfono</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-phone text-secondary"></i></span>
+                                        <input type="text" class="form-control" id="telefono" name="telefono">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="direccion" class="form-label">Dirección</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-home text-secondary"></i></span>
+                                        <input type="text" class="form-control" id="direccion" name="direccion">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" id="btn-next-institucional" class="btn btn-primary">
+                                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 2: INFORMACIÓN INSTITUCIONAL -->
+                        <div class="form-section" id="institucional-section" style="display: none;">
+                            <div class="alert alert-light border-start border-4 border-info mb-4">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-info-circle text-info fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Información Institucional</h5>
+                                        <p class="mb-0">Complete la información institucional del usuario</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Ubicación -->
+                                <div class="col-md-4">
+                                    <label for="pais_id" class="form-label">País</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-globe-americas text-info"></i></span>
+                                        <select class="form-select" id="pais_id" name="pais_id">
+                                            <option value="">Seleccione...</option>
+                                            <!-- Se cargará dinámicamente -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="departamento_id" class="form-label">Departamento</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-map text-info"></i></span>
+                                        <select class="form-select" id="departamento_id" name="departamento_id" disabled>
+                                            <option value="">Seleccione un país primero</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="municipio_id" class="form-label">Municipio</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-city text-info"></i></span>
+                                        <select class="form-select" id="municipio_id" name="municipio_id" disabled>
+                                            <option value="">Seleccione un departamento primero</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Institución -->
+                                <div class="col-md-6">
+                                    <label for="institucion_origen_id" class="form-label">Institución</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-university text-info"></i></span>
+                                        <select class="form-select" id="institucion_origen_id" name="institucion_origen_id">
+                                            <option value="">Seleccione...</option>
+                                            <!-- Se cargará dinámicamente -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="facultad_id" class="form-label">Facultad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-graduation-cap text-info"></i></span>
+                                        <select class="form-select" id="facultad_id" name="facultad_id">
+                                            <option value="">Seleccione...</option>
+                                            <!-- Se cargará dinámicamente -->
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Selección de Rol -->
+                                <div class="col-12 mt-3">
+                                    <label class="form-label mb-3">
+                                        <i class="fas fa-user-tag me-1 text-info"></i>
+                                        Seleccione el Rol del Usuario <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="role-card" data-role="1">
+                                                <div class="role-icon admin-role">
+                                                    <i class="fas fa-user-shield"></i>
+                                                </div>
+                                                <div class="role-info">
+                                                    <h5 class="mb-1">Administrador</h5>
+                                                    <p class="mb-0 text-muted small">Control total del sistema</p>
+                                                </div>
+                                                <div class="role-check">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="role-card" data-role="2">
+                                                <div class="role-icon user-role">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <div class="role-info">
+                                                    <h5 class="mb-1">Usuario</h5>
+                                                    <p class="mb-0 text-muted small">Acceso básico al sistema</p>
+                                                </div>
+                                                <div class="role-check">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="role-card" data-role="3">
+                                                <div class="role-icon manager-role">
+                                                    <i class="fas fa-user-tie"></i>
+                                                </div>
+                                                <div class="role-info">
+                                                    <h5 class="mb-1">Vicerrector</h5>
+                                                    <p class="mb-0 text-muted small">Gestión académica</p>
+                                                </div>
+                                                <div class="role-check">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="rol_id" name="rol_id" required>
+                                    <div class="invalid-feedback d-block text-center mt-2" id="rol-feedback" style="display: none !important;">
+                                        <i class="fas fa-exclamation-triangle me-1"></i> Por favor seleccione un rol.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" id="btn-prev-personal" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                                </button>
+                                <button type="button" id="btn-next-acceso" class="btn btn-primary">
+                                    Siguiente <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 3: DATOS DE ACCESO -->
+                        <div class="form-section" id="acceso-section" style="display: none;">
+                            <div class="alert alert-light border-start border-4 border-success mb-4">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-info-circle text-success fa-lg"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Datos de Acceso</h5>
+                                        <p class="mb-0">Configure las credenciales de acceso del usuario</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Correo -->
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-envelope text-success"></i></span>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div id="email-existe" class="text-danger mt-1" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i> Este correo ya está registrado
+                                    </div>
+                                </div>
+
+                                <!-- Contraseñas -->
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-lock text-success"></i></span>
+                                        <input type="password" class="form-control" id="password" name="password" required minlength="8">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Mínimo 8 caracteres</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="password_confirmation" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-lock text-success"></i></span>
+                                        <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" required minlength="8">
+                                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password_confirmation">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Estado del usuario -->
+                                <div class="col-12 mt-3">
+                                    <div class="card border shadow-sm">
+                                        <div class="card-body">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="activo" name="activo" checked>
+                                                <label class="form-check-label" for="activo">
+                                                    <span id="estado-label" class="fw-bold text-success">
+                                                        <i class="fas fa-toggle-on me-2"></i> Usuario Activo
+                                                    </span>
+                                                    <div class="text-muted mt-1 small">
+                                                        Si está activo, el usuario podrá acceder al sistema inmediatamente.
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" id="btn-prev-institucional" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i> Anterior
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i> Guardar Usuario
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de navegación inferior -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url('/usuarios') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Volver a la lista
+                        </a>
+                        <div class="progress rounded-pill" style="height: 8px; width: 60%;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                                 role="progressbar" style="width: 33%;"
+                                 aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span id="progress-text" class="badge bg-primary rounded-pill px-3 py-2">
+                            <i class="fas fa-tasks me-2"></i> Paso 1 de 3
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos personalizados -->
+<style>
+    /* Estilos base */
+    body {
+        background-color: #f8f9fa;
+    }
+
+    /* Steps circulares */
+    .steps-container {
+        position: relative;
+        padding: 0 0 30px;
+    }
+
+    .steps-wrapper {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+    }
+
+    .steps-progress {
+        position: absolute;
+        top: 40px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background-color: #e9ecef;
+        z-index: 0;
+    }
+
+    .steps-progress-bar {
+        height: 100%;
+        background-color: #0d6efd;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: 33.33%;
+    }
+
+    .step-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        border: 3px solid #dee2e6;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-circle {
+        border-color: #0d6efd;
+        background-color: #e7f1ff;
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+    }
+
+    .step.completed .step-circle {
+        border-color: #198754;
+        background-color: #d1e7dd;
+    }
+
+    .step-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #6c757d;
+        line-height: 1;
+        position: absolute;
+        top: 15px;
+    }
+
+    .step-icon {
+        font-size: 1.8rem;
+        color: #6c757d;
+        margin-top: 15px;
+    }
+
+    .step.active .step-number,
+    .step.active .step-icon {
+        color: #0d6efd;
+    }
+
+    .step.completed .step-number,
+    .step.completed .step-icon {
+        color: #198754;
+    }
+
+    .step-label {
+        font-size: 0.95rem;
+        color: #6c757d;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .step.active .step-label {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+    .step.completed .step-label {
+        color: #198754;
+    }
+
+    /* Role Cards institucionales */
+    .role-card {
+        display: flex;
+        align-items: center;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        height: 100%;
+        background-color: #fff;
+    }
+
+    .role-card:hover {
+        border-color: #adb5bd;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+
+    .role-card.selected {
+        border-color: #0d6efd;
+        background-color: #f8f9ff;
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.15);
+    }
+
+    .role-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+        flex-shrink: 0;
+        margin-right: 15px;
+    }
+
+    .admin-role {
+        background-color: #6610f2;
+    }
+
+    .user-role {
+        background-color: #0d6efd;
+    }
+
+    .manager-role {
+        background-color: #fd7e14;
+    }
+
+    .role-info {
+        flex-grow: 1;
+    }
+
+    .role-check {
+        color: #0d6efd;
+        font-size: 1.25rem;
+        opacity: 0;
+        transition: all 0.2s ease;
+    }
+
+    .role-card.selected .role-check {
+        opacity: 1;
+    }
+
+    /* Animaciones simples pero elegantes */
+    .form-section {
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .step-circle {
+            width: 60px;
+            height: 60px;
         }
 
-        // Enviar petición a la API
+        .step-number {
+            font-size: 1.2rem;
+            top: 10px;
+        }
+
+        .step-icon {
+            font-size: 1.3rem;
+            margin-top: 12px;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+        }
+
+        .role-card {
+            margin-bottom: 15px;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Constantes
+    const API_URL = 'https://homologacionesback.educarenemociones.com/api';
+
+    // Referencias a elementos DOM
+    const formNuevoUsuario = document.getElementById('formNuevoUsuario');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progress-text');
+    const stepsProgressBar = document.querySelector('.steps-progress-bar');
+
+    // Secciones del formulario
+    const sections = {
+        personal: document.getElementById('personal-section'),
+        institucional: document.getElementById('institucional-section'),
+        acceso: document.getElementById('acceso-section')
+    };
+
+    // Elementos de pasos circulares
+    const stepItems = {
+        personal: document.getElementById('step-personal-indicator'),
+        institucional: document.getElementById('step-institucional-indicator'),
+        acceso: document.getElementById('step-acceso-indicator')
+    };
+
+    // Elementos de navegación
+    const btnNextInstitucional = document.getElementById('btn-next-institucional');
+    const btnPrevPersonal = document.getElementById('btn-prev-personal');
+    const btnNextAcceso = document.getElementById('btn-next-acceso');
+    const btnPrevInstitucional = document.getElementById('btn-prev-institucional');
+
+    // Campos del formulario
+    const rolIdInput = document.getElementById('rol_id');
+    const roleCards = document.querySelectorAll('.role-card');
+    const numeroIdentificacion = document.getElementById('numero_identificacion');
+    const email = document.getElementById('email');
+
+    // Selects encadenados
+    const paisSelect = document.getElementById('pais_id');
+    const departamentoSelect = document.getElementById('departamento_id');
+    const municipioSelect = document.getElementById('municipio_id');
+    const institucionSelect = document.getElementById('institucion_origen_id');
+    const facultadSelect = document.getElementById('facultad_id');
+
+    // Estado del usuario
+    const estadoSwitch = document.getElementById('activo');
+    const estadoLabel = document.getElementById('estado-label');
+
+    // Inicialización
+    inicializar();
+
+    function inicializar() {
+        // Cargar datos iniciales
+        cargarPaisesEstaticos(); // Datos estáticos para países
+        cargarInstitucionesDesdeAPI(); // Datos de API para instituciones
+
+        // Configurar eventos
+        configurarEventos();
+
+        // Configurar navegación de pasos
+        configurarNavegacionPasos();
+
+        // Configurar estado de usuario
+        configurarEstadoUsuario();
+
+        // Configurar toggle de contraseñas
+        configurarTogglePassword();
+    }
+
+    // DATOS ESTÁTICOS
+    function cargarPaisesEstaticos() {
+        // Solo incluimos Colombia y Otro
+        const paisesEstaticos = [
+            { id: '1', nombre: 'Colombia' },
+            { id: '2', nombre: 'Otro' }
+        ];
+
+        // Resetear y cargar el select
+        paisSelect.innerHTML = '';
+
+        // Opción predeterminada
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Seleccione un país...';
+        paisSelect.appendChild(defaultOption);
+
+        // Agregar los países estáticos
+        paisesEstaticos.forEach(pais => {
+            const option = document.createElement('option');
+            option.value = pais.id;
+            option.textContent = pais.nombre;
+            paisSelect.appendChild(option);
+        });
+
+        paisSelect.disabled = false;
+        console.log('Países cargados estáticamente (Colombia y Otro)');
+    }
+
+    function cargarDepartamentosEstaticos() {
+        // Lista de departamentos de Colombia
+        const departamentosEstaticos = [
+            { id: '1', nombre: 'Antioquia' },
+            { id: '2', nombre: 'Atlántico' },
+            { id: '3', nombre: 'Bogotá D.C.' },
+            { id: '4', nombre: 'Bolívar' },
+            { id: '5', nombre: 'Boyacá' },
+            { id: '6', nombre: 'Caldas' },
+            { id: '7', nombre: 'Caquetá' },
+            { id: '8', nombre: 'Cauca' },
+            { id: '9', nombre: 'Cesar' },
+            { id: '10', nombre: 'Córdoba' },
+            { id: '11', nombre: 'Cundinamarca' },
+            { id: '12', nombre: 'Chocó' },
+            { id: '13', nombre: 'Huila' },
+            { id: '14', nombre: 'La Guajira' },
+            { id: '15', nombre: 'Magdalena' },
+            { id: '16', nombre: 'Meta' },
+            { id: '17', nombre: 'Nariño' },
+            { id: '18', nombre: 'Norte de Santander' },
+            { id: '19', nombre: 'Quindío' },
+            { id: '20', nombre: 'Risaralda' },
+            { id: '21', nombre: 'Santander' },
+            { id: '22', nombre: 'Sucre' },
+            { id: '23', nombre: 'Tolima' },
+            { id: '24', nombre: 'Valle del Cauca' },
+            { id: '25', nombre: 'Arauca' },
+            { id: '26', nombre: 'Casanare' },
+            { id: '27', nombre: 'Putumayo' },
+            { id: '28', nombre: 'San Andrés y Providencia' },
+            { id: '29', nombre: 'Amazonas' },
+            { id: '30', nombre: 'Guainía' },
+            { id: '31', nombre: 'Guaviare' },
+            { id: '32', nombre: 'Vaupés' },
+            { id: '33', nombre: 'Vichada' }
+        ];
+
+        // Resetear y cargar el select
+        departamentoSelect.innerHTML = '';
+
+        // Opción predeterminada
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Seleccione un departamento...';
+        departamentoSelect.appendChild(defaultOption);
+
+        // Agregar los departamentos
+        departamentosEstaticos.forEach(depto => {
+            const option = document.createElement('option');
+            option.value = depto.id;
+            option.textContent = depto.nombre;
+            departamentoSelect.appendChild(option);
+        });
+
+        departamentoSelect.disabled = false;
+        console.log('Departamentos de Colombia cargados estáticamente');
+    }
+
+    function cargarMunicipiosEstaticos(departamentoId) {
+        // Mapa de municipios por departamento
+        const municipiosPorDepartamento = {
+            // Antioquia
+            '1': [
+                { id: '1', nombre: 'Medellín' },
+                { id: '2', nombre: 'Bello' },
+                { id: '3', nombre: 'Envigado' },
+                { id: '4', nombre: 'Itagüí' },
+                { id: '5', nombre: 'Rionegro' }
+            ],
+            // Atlántico
+            '2': [
+                { id: '6', nombre: 'Barranquilla' },
+                { id: '7', nombre: 'Soledad' },
+                { id: '8', nombre: 'Malambo' }
+            ],
+            // Bogotá D.C.
+            '3': [
+                { id: '9', nombre: 'Bogotá' }
+            ],
+            // Valle del Cauca
+            '24': [
+                { id: '10', nombre: 'Cali' },
+                { id: '11', nombre: 'Buenaventura' },
+                { id: '12', nombre: 'Palmira' },
+                { id: '13', nombre: 'Tuluá' },
+                { id: '14', nombre: 'Yumbo' }
+            ],
+            // Cauca
+            '8': [
+                { id: '15', nombre: 'Popayán' },
+                { id: '16', nombre: 'Santander de Quilichao' },
+                { id: '17', nombre: 'Puerto Tejada' },
+                { id: '18', nombre: 'Patía' }
+            ]
+        };
+
+        // Resetear el select
+        municipioSelect.innerHTML = '';
+
+        // Opción predeterminada
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Seleccione un municipio...';
+        municipioSelect.appendChild(defaultOption);
+
+        // Si tenemos municipios para el departamento seleccionado
+        if (municipiosPorDepartamento[departamentoId]) {
+            municipiosPorDepartamento[departamentoId].forEach(municipio => {
+                const option = document.createElement('option');
+                option.value = municipio.id;
+                option.textContent = municipio.nombre;
+                municipioSelect.appendChild(option);
+            });
+        } else {
+            // Si no hay municipios definidos para este departamento
+            const option = document.createElement('option');
+            option.value = departamentoId + '01';
+            option.textContent = 'Principal';
+            municipioSelect.appendChild(option);
+        }
+
+        municipioSelect.disabled = false;
+        console.log('Municipios cargados estáticamente para departamento: ' + departamentoId);
+    }
+
+    // CARGA DESDE API
+    function cargarInstitucionesDesdeAPI() {
+        institucionSelect.innerHTML = '<option value="">Cargando instituciones...</option>';
+        institucionSelect.disabled = true;
+
+        // Petición a la API
+        fetch(`${API_URL}/instituciones`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener instituciones');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Instituciones cargadas desde API:', data);
+
+                institucionSelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Seleccione una institución...';
+                institucionSelect.appendChild(defaultOption);
+
+                // Agregar las instituciones recibidas de la API
+                const instituciones = Array.isArray(data) ? data : (data.data || []);
+                instituciones.forEach(institucion => {
+                    const option = document.createElement('option');
+                    option.value = institucion.id || institucion.id_institucion;
+                    option.textContent = institucion.nombre;
+                    institucionSelect.appendChild(option);
+                });
+
+                institucionSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error al cargar instituciones:', error);
+
+                // En caso de error
+                institucionSelect.innerHTML = '<option value="">Error al cargar instituciones</option>';
+                institucionSelect.disabled = true;
+
+                mostrarNotificacion('error', 'Error', 'No se pudieron cargar las instituciones desde la API.');
+            });
+    }
+
+    function cargarFacultades(institucionId) {
+        facultadSelect.innerHTML = '<option value="">Cargando facultades...</option>';
+        facultadSelect.disabled = true;
+
+        // Petición a la API
+        fetch(`${API_URL}/facultades?institucion_id=${institucionId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener facultades');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Facultades cargadas desde API:', data);
+
+                facultadSelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Seleccione una facultad...';
+                facultadSelect.appendChild(defaultOption);
+
+                // Agregar las facultades recibidas de la API
+                const facultades = Array.isArray(data) ? data : (data.data || []);
+                facultades.forEach(facultad => {
+                    const option = document.createElement('option');
+                    option.value = facultad.id || facultad.id_facultad;
+                    option.textContent = facultad.nombre;
+                    facultadSelect.appendChild(option);
+                });
+
+                facultadSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error al cargar facultades:', error);
+
+                // En caso de error
+                facultadSelect.innerHTML = '<option value="">Error al cargar facultades</option>';
+                facultadSelect.disabled = true;
+
+                mostrarNotificacion('error', 'Error', 'No se pudieron cargar las facultades desde la API.');
+            });
+    }
+
+    // Gestión de país "Otro"
+    function mostrarCampoPaisPersonalizado() {
+        // Deshabilitar departamentos y municipios
+        departamentoSelect.innerHTML = '<option value="">No aplica para país extranjero</option>';
+        departamentoSelect.disabled = true;
+        municipioSelect.innerHTML = '<option value="">No aplica para país extranjero</option>';
+        municipioSelect.disabled = true;
+
+        // Crear campo de texto para país personalizado si no existe
+        if (!document.getElementById('pais_otro_container')) {
+            const inputContainer = document.createElement('div');
+            inputContainer.className = 'col-md-12 mt-3';
+            inputContainer.id = 'pais_otro_container';
+
+            inputContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Ha seleccionado "Otro" como país. Por favor ingrese el nombre del país.
+                </div>
+                <label for="pais_otro" class="form-label">Nombre del país <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="fas fa-globe-americas text-info"></i></span>
+                    <input type="text" class="form-control" id="pais_otro" name="pais_otro" placeholder="Ingrese el nombre del país">
+                </div>
+            `;
+
+            // Insertar después del select de países
+            const paisContainer = paisSelect.closest('.col-md-4');
+            paisContainer.parentNode.insertBefore(inputContainer, paisContainer.nextSibling);
+        } else {
+            document.getElementById('pais_otro_container').style.display = 'block';
+        }
+    }
+
+    function ocultarCampoPaisPersonalizado() {
+        const paisOtroContainer = document.getElementById('pais_otro_container');
+        if (paisOtroContainer) {
+            paisOtroContainer.style.display = 'none';
+        }
+    }
+
+    function configurarEventos() {
+        // Botones de navegación
+        btnNextInstitucional.addEventListener('click', function() {
+            if (validarSeccionPersonal()) {
+                mostrarSeccion('institucional');
+            }
+        });
+
+        btnPrevPersonal.addEventListener('click', function() {
+            mostrarSeccion('personal');
+        });
+
+        btnNextAcceso.addEventListener('click', function() {
+            if (validarSeccionInstitucional()) {
+                mostrarSeccion('acceso');
+            }
+        });
+
+        btnPrevInstitucional.addEventListener('click', function() {
+            mostrarSeccion('institucional');
+        });
+
+        // Selección de rol
+        roleCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Eliminar selección anterior
+                roleCards.forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                // Aplicar selección actual
+                this.classList.add('selected');
+
+                // Guardar valor
+                rolIdInput.value = this.getAttribute('data-role');
+                document.getElementById('rol-feedback').style.display = 'none';
+            });
+        });
+
+        // Validación de campos únicos
+        numeroIdentificacion.addEventListener('blur', function() {
+            if (this.value.trim() !== '') {
+                verificarIdentificacionExistente(this.value);
+            }
+        });
+
+        email.addEventListener('blur', function() {
+            if (this.value.trim() !== '') {
+                verificarEmailExistente(this.value);
+            }
+        });
+
+        // Evento del select de países
+        paisSelect.addEventListener('change', function() {
+            if (this.value === '1') { // Colombia
+                cargarDepartamentosEstaticos();
+                ocultarCampoPaisPersonalizado();
+            } else if (this.value === '2') { // Otro
+                mostrarCampoPaisPersonalizado();
+            } else { // Sin selección
+                departamentoSelect.innerHTML = '<option value="">Seleccione un país primero</option>';
+                departamentoSelect.disabled = true;
+                municipioSelect.innerHTML = '<option value="">Seleccione un departamento primero</option>';
+                municipioSelect.disabled = true;
+                ocultarCampoPaisPersonalizado();
+            }
+        });
+
+        // Evento para departamentos
+        departamentoSelect.addEventListener('change', function() {
+            if (this.value) {
+                cargarMunicipiosEstaticos(this.value);
+            } else {
+                municipioSelect.innerHTML = '<option value="">Seleccione un departamento primero</option>';
+                municipioSelect.disabled = true;
+            }
+        });
+
+        // Evento para instituciones
+        institucionSelect.addEventListener('change', function() {
+            if (this.value) {
+                cargarFacultades(this.value);
+            } else {
+                facultadSelect.innerHTML = '<option value="">Seleccione una institución primero</option>';
+                facultadSelect.disabled = true;
+            }
+        });
+
+        // Envío del formulario
+        formNuevoUsuario.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validarFormulario()) {
+                guardarUsuario();
+            }
+        });
+    }
+
+    // Configurar navegación de pasos
+    function configurarNavegacionPasos() {
+        stepItems.personal.addEventListener('click', function() {
+            if (this.classList.contains('completed') || this.classList.contains('active')) {
+                mostrarSeccion('personal');
+            }
+        });
+
+        stepItems.institucional.addEventListener('click', function() {
+            if (this.classList.contains('completed') || stepItems.personal.classList.contains('completed')) {
+                if (validarSeccionPersonal()) {
+                    mostrarSeccion('institucional');
+                }
+            } else {
+                // Notificar que debe completar el paso anterior
+                Swal.fire({
+                    title: 'Información requerida',
+                    text: 'Debe completar la información personal primero',
+                    icon: 'info',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        });
+
+        stepItems.acceso.addEventListener('click', function() {
+            if (this.classList.contains('completed') || stepItems.institucional.classList.contains('completed')) {
+                if (validarSeccionPersonal() && validarSeccionInstitucional()) {
+                    mostrarSeccion('acceso');
+                }
+            } else {
+                // Notificar que debe completar los pasos anteriores
+                Swal.fire({
+                    title: 'Información requerida',
+                    text: 'Debe completar los pasos anteriores primero',
+                    icon: 'info',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+        });
+    }
+
+    // Configurar toggle de contraseñas
+    function configurarTogglePassword() {
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const target = document.getElementById(targetId);
+
+                if (target.type === 'password') {
+                    target.type = 'text';
+                    this.querySelector('i').classList.remove('fa-eye');
+                    this.querySelector('i').classList.add('fa-eye-slash');
+                } else {
+                    target.type = 'password';
+                    this.querySelector('i').classList.remove('fa-eye-slash');
+                    this.querySelector('i').classList.add('fa-eye');
+                }
+            });
+        });
+    }
+
+    // Configurar estado de usuario
+    function configurarEstadoUsuario() {
+        estadoSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                estadoLabel.innerHTML = '<i class="fas fa-toggle-on me-2"></i> Usuario Activo';
+                estadoLabel.classList.remove('text-danger');
+                estadoLabel.classList.add('text-success');
+            } else {
+                estadoLabel.innerHTML = '<i class="fas fa-toggle-off me-2"></i> Usuario Inactivo';
+                estadoLabel.classList.remove('text-success');
+                estadoLabel.classList.add('text-danger');
+            }
+        });
+    }
+
+    // Función para mostrar una sección específica
+    function mostrarSeccion(seccion) {
+        // Ocultar todas las secciones
+        for (const key in sections) {
+            sections[key].style.display = 'none';
+        }
+
+        // Mostrar la sección seleccionada
+        sections[seccion].style.display = 'block';
+
+        // Actualizar pasos circulares
+        actualizarPasosCirculares(seccion);
+
+        // Actualizar la barra de progreso
+        actualizarProgreso(seccion);
+    }
+
+    // Actualizar pasos circulares
+    function actualizarPasosCirculares(seccionActiva) {
+        // Restablecer todos los pasos
+        for (const key in stepItems) {
+            stepItems[key].classList.remove('active', 'completed');
+        }
+
+        // Marcar el paso actual como activo
+        stepItems[seccionActiva].classList.add('active');
+
+        // Marcar los pasos completados
+        if (seccionActiva === 'institucional' || seccionActiva === 'acceso') {
+            stepItems.personal.classList.add('completed');
+        }
+
+        if (seccionActiva === 'acceso') {
+            stepItems.institucional.classList.add('completed');
+        }
+
+        // Actualizar la barra de progreso de los steps
+        if (seccionActiva === 'institucional') {
+            stepsProgressBar.style.width = '50%';
+        } else if (seccionActiva === 'acceso') {
+            stepsProgressBar.style.width = '100%';
+        } else {
+            stepsProgressBar.style.width = '0%';
+        }
+    }
+
+    // Actualizar la barra de progreso
+    function actualizarProgreso(seccion) {
+        let width, text;
+
+        switch(seccion) {
+            case 'personal':
+                width = '33%';
+                text = '<i class="fas fa-tasks me-2"></i> Paso 1 de 3';
+                break;
+            case 'institucional':
+                width = '66%';
+                text = '<i class="fas fa-tasks me-2"></i> Paso 2 de 3';
+                break;
+            case 'acceso':
+                width = '100%';
+                text = '<i class="fas fa-tasks me-2"></i> Paso 3 de 3';
+                break;
+        }
+
+        // Animar la barra de progreso
+        progressBar.style.transition = 'width 0.3s ease';
+        progressBar.style.width = width;
+        progressText.innerHTML = text;
+    }
+
+    // Validación de sección personal
+    function validarSeccionPersonal() {
+        // Obtener campos obligatorios
+        const primerNombre = document.getElementById('primer_nombre').value;
+        const primerApellido = document.getElementById('primer_apellido').value;
+        const tipoIdentificacion = document.getElementById('tipo_identificacion').value;
+        const numeroIdentificacion = document.getElementById('numero_identificacion').value;
+
+        // Validar campos
+        if (!primerNombre || !primerApellido || !tipoIdentificacion || !numeroIdentificacion) {
+            Swal.fire({
+                title: 'Campos obligatorios',
+                text: 'Debe completar todos los campos obligatorios',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Verificar si hay error de identificación existente
+        if (document.getElementById('identificacion-existe').style.display === 'block') {
+            Swal.fire({
+                title: 'Identificación existente',
+                text: 'La identificación ingresada ya está registrada en el sistema',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        return true;
+    }
+
+    // Validación de sección institucional
+    function validarSeccionInstitucional() {
+        // Validar selección de rol
+        const rolId = document.getElementById('rol_id').value;
+
+        if (!rolId) {
+            document.getElementById('rol-feedback').style.display = 'block';
+
+            Swal.fire({
+                title: 'Rol requerido',
+                text: 'Debe seleccionar un rol para el usuario',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    // Validar formulario completo
+    function validarFormulario() {
+        // Validar secciones previas
+        if (!validarSeccionPersonal() || !validarSeccionInstitucional()) {
+            return false;
+        }
+
+        // Validar campos de acceso
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const passwordConfirmation = document.getElementById('password_confirmation').value;
+
+        // Validar correo
+        if (!email) {
+            Swal.fire({
+                title: 'Correo requerido',
+                text: 'Debe ingresar un correo electrónico',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Validar formato de correo
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Swal.fire({
+                title: 'Correo inválido',
+                text: 'Ingrese un formato de correo electrónico válido',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Verificar si hay error de email existente
+        if (document.getElementById('email-existe').style.display === 'block') {
+            Swal.fire({
+                title: 'Correo existente',
+                text: 'El correo electrónico ingresado ya está registrado en el sistema',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Validar contraseña
+        if (!password || password.length < 8) {
+            Swal.fire({
+                title: 'Contraseña inválida',
+                text: 'La contraseña debe tener al menos 8 caracteres',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Validar confirmación
+        if (password !== passwordConfirmation) {
+            Swal.fire({
+                title: 'Las contraseñas no coinciden',
+                text: 'La confirmación de contraseña debe coincidir con la contraseña ingresada',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return false;
+        }
+
+        // Validar país "Otro"
+        if (paisSelect.value === '2') {
+            const paisOtro = document.getElementById('pais_otro');
+            if (!paisOtro || !paisOtro.value.trim()) {
+                Swal.fire({
+                    title: 'País requerido',
+                    text: 'Debe ingresar el nombre del país',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Verificar identificación existente a través de la API
+    function verificarIdentificacionExistente(numeroIdentificacion) {
+        fetch(`${API_URL}/usuarios/verificar-identificacion/${numeroIdentificacion}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la verificación');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const mensajeError = document.getElementById('identificacion-existe');
+
+                if (data.existe) {
+                    mensajeError.style.display = 'block';
+                    document.getElementById('numero_identificacion').classList.add('is-invalid');
+                } else {
+                    mensajeError.style.display = 'none';
+                    document.getElementById('numero_identificacion').classList.remove('is-invalid');
+                }
+            })
+            .catch(error => {
+                console.error('Error al verificar identificación:', error);
+                // No mostrar error al usuario, solo registrar en consola
+            });
+    }
+
+    // Verificar email existente a través de la API
+    function verificarEmailExistente(email) {
+        fetch(`${API_URL}/usuarios/verificar-email/${email}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la verificación');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const mensajeError = document.getElementById('email-existe');
+
+                if (data.existe) {
+                    mensajeError.style.display = 'block';
+                    document.getElementById('email').classList.add('is-invalid');
+                } else {
+                    mensajeError.style.display = 'none';
+                    document.getElementById('email').classList.remove('is-invalid');
+                }
+            })
+            .catch(error => {
+                console.error('Error al verificar email:', error);
+                // No mostrar error al usuario, solo registrar en consola
+            });
+    }
+
+    // Mostrar notificación
+    function mostrarNotificacion(tipo, titulo, mensaje) {
+        Swal.fire({
+            icon: tipo,
+            title: titulo,
+            text: mensaje,
+            confirmButtonText: 'Entendido'
+        });
+    }
+
+    // Guardar usuario a través de la API
+    function guardarUsuario() {
+        // Mostrar loader
+        Swal.fire({
+            title: 'Guardando usuario',
+            text: 'Procesando la información...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Obtener datos del formulario
+        const formData = new FormData(formNuevoUsuario);
+
+        // Convertir FormData a objeto para enviar como JSON
+        const usuario = {};
+        formData.forEach((value, key) => {
+            usuario[key] = value;
+        });
+
+        // Ajustar valores booleanos
+        usuario.activo = formData.get('activo') === 'on';
+
+        // Manejar país "Otro"
+        if (paisSelect.value === '2') {
+            const paisOtro = document.getElementById('pais_otro');
+            if (paisOtro && paisOtro.value.trim()) {
+                usuario.pais_nombre = paisOtro.value.trim();
+            }
+        } else if (paisSelect.value === '1') {
+            usuario.pais_nombre = 'Colombia';
+        }
+
+        // Asegurar que se incluya la información de departamento y municipio
+        if (departamentoSelect.value) {
+            usuario.departamento_id = departamentoSelect.value;
+            usuario.departamento_nombre = departamentoSelect.options[departamentoSelect.selectedIndex].text;
+        }
+
+        if (municipioSelect.value) {
+            usuario.municipio_id = municipioSelect.value;
+            usuario.municipio_nombre = municipioSelect.options[municipioSelect.selectedIndex].text;
+        }
+
+        // Incluir información adicional de selects
+        if (institucionSelect.value) {
+            usuario.institucion_nombre = institucionSelect.options[institucionSelect.selectedIndex].text;
+        }
+
+        if (facultadSelect.value) {
+            usuario.facultad_nombre = facultadSelect.options[facultadSelect.selectedIndex].text;
+        }
+
+        if (rolIdInput.value) {
+            const rolCard = document.querySelector(`.role-card[data-role="${rolIdInput.value}"]`);
+            if (rolCard) {
+                const rolNombre = rolCard.querySelector('h5').textContent;
+                usuario.rol_nombre = rolNombre;
+            }
+        }
+
+        console.log('Datos a enviar:', usuario);
+
+        // Realizar la petición POST a la API
         fetch(`${API_URL}/usuarios`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'Accept': 'application/json'
             },
-            body: JSON.stringify(userData)
+            body: JSON.stringify(usuario)
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || 'Error al guardar el usuario');
+                });
             }
             return response.json();
         })
         .then(data => {
+            // Cerrar el loader
+            Swal.close();
+
+            // Mostrar mensaje de éxito
             Swal.fire({
+                title: 'Usuario guardado',
+                text: 'El usuario ha sido registrado exitosamente',
                 icon: 'success',
-                title: 'Éxito',
-                text: data.mensaje || 'Usuario creado correctamente',
-                timer: 2000,
-                timerProgressBar: true
-            }).then(() => {
-                window.location.href = '/admin/usuarios';
+                confirmButtonText: 'Aceptar'
+            }).then((result) => {
+                // Redirigir a la lista de usuarios
+                if (result.isConfirmed) {
+                    window.location.href = '/usuarios';
+                }
             });
         })
         .catch(error => {
             console.error('Error:', error);
+
+            // Cerrar el loader y mostrar error
             Swal.fire({
-                icon: 'error',
                 title: 'Error',
-                text: 'No se pudo crear el usuario. Por favor, verifica los datos e intenta nuevamente.'
+                text: error.message || 'No se pudo guardar el usuario. Por favor, intente nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Entendido'
             });
-        });
-    }
-
-    // Funciones para cargar los datos en los selects
-    function cargarInstituciones() {
-        // Aquí implementarías la llamada a la API para obtener instituciones
-        // Por ahora, simulamos algunos datos
-        const instituciones = [
-            { id: 1, nombre: 'Universidad Nacional' },
-            { id: 2, nombre: 'Universidad de Antioquia' },
-            { id: 3, nombre: 'Universidad de los Andes' }
-        ];
-
-        const select = document.getElementById('institucion_origen_id');
-        instituciones.forEach(institucion => {
-            const option = document.createElement('option');
-            option.value = institucion.id;
-            option.textContent = institucion.nombre;
-            select.appendChild(option);
-        });
-    }
-
-    function cargarFacultades() {
-        // Implementar llamada a API para facultades
-        const facultades = [
-            { id: 1, nombre: 'Ingeniería' },
-            { id: 2, nombre: 'Medicina' },
-            { id: 3, nombre: 'Ciencias Sociales' }
-        ];
-
-        const select = document.getElementById('facultad_id');
-        facultades.forEach(facultad => {
-            const option = document.createElement('option');
-            option.value = facultad.id;
-            option.textContent = facultad.nombre;
-            select.appendChild(option);
-        });
-    }
-
-    function cargarPaises() {
-        // Implementar llamada a API para países
-        const paises = [
-            { id: 1, nombre: 'Colombia' },
-            { id: 2, nombre: 'Ecuador' },
-            { id: 3, nombre: 'México' }
-        ];
-
-        const select = document.getElementById('pais_id');
-        paises.forEach(pais => {
-            const option = document.createElement('option');
-            option.value = pais.id;
-            option.textContent = pais.nombre;
-            select.appendChild(option);
-        });
-    }
-
-    function cargarDepartamentos(paisId) {
-        if (!paisId) return;
-
-        // Implementar llamada a API para departamentos
-        const departamentos = [
-            { id: 1, nombre: 'Antioquia', pais_id: 1 },
-            { id: 2, nombre: 'Cundinamarca', pais_id: 1 },
-            { id: 3, nombre: 'Valle del Cauca', pais_id: 1 }
-        ];
-
-        const select = document.getElementById('departamento_id');
-        select.innerHTML = '<option value="">Seleccione...</option>';
-
-        departamentos.filter(d => d.pais_id == paisId).forEach(departamento => {
-            const option = document.createElement('option');
-            option.value = departamento.id;
-            option.textContent = departamento.nombre;
-            select.appendChild(option);
-        });
-    }
-
-    function cargarMunicipios(departamentoId) {
-        if (!departamentoId) return;
-
-        // Implementar llamada a API para municipios
-        const municipios = [
-            { id: 1, nombre: 'Medellín', departamento_id: 1 },
-            { id: 2, nombre: 'Envigado', departamento_id: 1 },
-            { id: 3, nombre: 'Bogotá', departamento_id: 2 }
-        ];
-
-        const select = document.getElementById('municipio_id');
-        select.innerHTML = '<option value="">Seleccione...</option>';
-
-        municipios.filter(m => m.departamento_id == departamentoId).forEach(municipio => {
-            const option = document.createElement('option');
-            option.value = municipio.id;
-            option.textContent = municipio.nombre;
-            select.appendChild(option);
-        });
-    }
-
-    function cargarRoles() {
-        // Implementar llamada a API para roles
-        const roles = [
-            { id: 1, nombre: 'Usuario' },
-            { id: 2, nombre: 'Vicerrector' },
-            { id: 3, nombre: 'Administrador' }
-        ];
-
-        const select = document.getElementById('rol_id');
-        roles.forEach(rol => {
-            const option = document.createElement('option');
-            option.value = rol.id;
-            option.textContent = rol.nombre;
-            select.appendChild(option);
         });
     }
 });
 </script>
 @endsection
+
+
+

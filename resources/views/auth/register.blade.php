@@ -1,3 +1,4 @@
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,6 +10,10 @@
     <style>
         /* Variables de color */
         :root {
+========
+/* Variables de color */
+         :root {
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
             --azul-oscuro: #19407b;
             --azul-medio: #0075bf;
             --azul-claro: #08dcff;
@@ -219,6 +224,7 @@
             }
         }
 
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
         /* Botón de inicio */
         .home-btn {
             position: absolute;
@@ -242,6 +248,8 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
+========
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
         /* Formulario */
         .form-container {
             padding: 30px;
@@ -310,8 +318,31 @@
             transition: all 0.3s ease;
         }
 
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
         /* Botón de registro */
         button[type="submit"] {
+========
+        /* Password toggle */
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+        }
+
+        .toggle-password:hover {
+            color: var(--azul-medio);
+        }
+
+        /* Botón de login */
+        .login-btn {
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
             width: 100%;
             padding: 14px;
             background: linear-gradient(to right, var(--azul-medio), var(--azul-claro));
@@ -327,7 +358,11 @@
             overflow: hidden;
         }
 
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
         button[type="submit"]::before {
+========
+        .login-btn::before {
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
             content: '';
             position: absolute;
             top: 0;
@@ -338,17 +373,47 @@
             transition: all 0.6s ease;
         }
 
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
         button[type="submit"]:hover::before {
             left: 100%;
         }
 
         button[type="submit"]:hover {
+========
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:hover {
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
             transform: translateY(-3px);
             box-shadow: 0 7px 20px rgba(0, 117, 191, 0.5);
         }
 
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
         button[type="submit"]:active {
+========
+        .login-btn:active {
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
             transform: translateY(0);
+        }
+
+        /* Remember me */
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .remember-me input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .remember-me label {
+            color: #555;
+            font-size: 14px;
         }
 
         /* Enlaces de ayuda */
@@ -370,7 +435,11 @@
         }
 
         /* Mensaje de error */
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
         .alert {
+========
+        .error-message, .alert.error-message {
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
             background-color: rgba(255, 77, 77, 0.1);
             border-left: 3px solid var(--rojo-error);
             color: var(--rojo-error);
@@ -383,9 +452,20 @@
         }
 
         .alert.success {
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
             background-color: rgba(76, 175, 80, 0.1);
             border-left: 3px solid #4CAF50;
             color: #4CAF50;
+========
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 3px solid #28a745;
+            color: #155724;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: none;
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css
         }
 
         @keyframes shake {
@@ -408,29 +488,6 @@
             border-top: 1px solid var(--borde);
             font-size: 12px;
             color: #777;
-        }
-
-        /* Custom SweetAlert */
-        .swal2-popup {
-            border-radius: 15px;
-        }
-
-        .swal2-icon {
-            border-width: 3px;
-        }
-
-        .swal2-title {
-            color: var(--azul-oscuro);
-        }
-
-        .swal2-html-container {
-            font-size: 1em;
-        }
-
-        .swal2-confirm {
-            background: linear-gradient(to right, var(--azul-medio), var(--azul-claro)) !important;
-            border-radius: 8px !important;
-            box-shadow: 0 5px 15px rgba(0, 117, 191, 0.4) !important;
         }
 
         /* Responsivo */
@@ -459,6 +516,7 @@
                 justify-content: center;
             }
         }
+<<<<<<<< HEAD:resources/views/auth/register.blade.php
     </style>
 </head>
 <body>
@@ -628,3 +686,5 @@
     </script>
 </body>
 </html>
+========
+>>>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb:public/css/login.css

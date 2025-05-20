@@ -1883,7 +1883,7 @@
 
 
 
-              
+
 
                 <li class="nav-item" data-aos="fade-right" data-aos-delay="600">
                     <a href="{{ route('logout') }}" style="padding: 12px 10px;"

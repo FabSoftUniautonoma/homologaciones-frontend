@@ -5,16 +5,12 @@ use App\Http\Controllers\HomologacionViceController;
 use App\Http\Controllers\PDFController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomologacionController;
-use App\Http\Controllers\InstitucionesController;
-use App\Http\Controllers\ProgramasController;
-use App\Http\Controllers\AsignaturasController;
-use App\Http\Controllers\PaisesControllerApi;
-
-
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SolicitudHomologacionController;
 
 /*
 |--------------------------------------------------------------------------
-| RUTAS PRINCIPALES
+| RUTA RAÍZ
 |--------------------------------------------------------------------------
 */
 
@@ -35,6 +31,18 @@ Route::post('/logout', function () {
 })->name('logout');
 
 
+Route::prefix('auth')->group(function () {
+    Route::get('/login', function () {
+        return view('admin.auth.login');
+    })->name('login');
+
+    Route::get('/register', function () {
+        return view('admin.auth.register');
+    })->name('register');
+});
+
+
+//Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 /*
 |--------------------------------------------------------------------------
 | RUTAS PARA ASPIRANTES / ESTUDIANTES
