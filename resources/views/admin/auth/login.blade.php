@@ -29,7 +29,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-                <img src="/api/placeholder/180/60" alt="Universidad Autónoma del Cauca">
+               <img src="{{ asset('img/quimed.png') }}"  alt="Universidad Autónoma del Cauca">
             </div>
         </div>
 
@@ -92,7 +92,7 @@
 
     <script>
         // Inicializar servicio de autenticación
-        const authService = new AuthService('http://127.0.0.1:8000/api');
+        const authService = new AuthService('https://homologacionesback.educarenemociones.com/api');
 
         // Referencias a elementos del DOM
         const loginForm = document.getElementById('login-form');

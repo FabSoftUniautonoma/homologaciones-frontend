@@ -4,7 +4,7 @@
  */
 class AuthService {
     constructor(baseUrl) {
-        this.baseUrl = baseUrl || 'http://127.0.0.1:8000/api'; // URL relativa para API en el mismo proyecto Laravel
+        this.baseUrl = baseUrl || 'https://homologacionesback.educarenemociones.com/api'; // URL relativa para API en el mismo proyecto Laravel
         this.tokenKey = 'auth_token';
         this.userKey = 'user_data';
         this.profileStatusKey = 'profile_status'; // Nueva clave para almacenar estado del perfil
@@ -226,7 +226,7 @@ class AuthService {
     // Verificar token con el backend
     static async verifyToken(token) {
         try {
-            const response = await fetch('http://127.0.0.1:8000/api/auth/user-profile', {
+            const response = await fetch('https://homologacionesback.educarenemociones.com/api/auth/user-profile', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,

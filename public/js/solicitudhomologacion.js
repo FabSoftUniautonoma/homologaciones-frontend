@@ -1121,7 +1121,7 @@ function cargarProgramasDestino() {
     programaDestinoSelect.innerHTML = '<option value="">Seleccione un programa de destino</option>';
 
     // Utilizar el endpoint correcto y agregar parámetros de depuración
-    fetch('http://127.0.0.1:8000/api/programas?institucion=Autonoma')
+    fetch('https://homologacionesback.educarenemociones.com/api/programas?institucion=Autonoma')
         .then(response => {
             console.log('Status de respuesta:', response.status);
             return response.json();

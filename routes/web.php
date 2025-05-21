@@ -224,6 +224,7 @@ Route::prefix('homologaciones-vicerrectoria')
 |--------------------------------------------------------------------------
 */
 
+
 // Documentos y PDFs
 Route::get('/homologacion/{id}/documentos', [HomologacionController::class, 'verDocumentos'])
     ->name('homologacion.documentos');

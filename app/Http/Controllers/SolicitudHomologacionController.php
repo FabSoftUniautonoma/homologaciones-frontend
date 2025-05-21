@@ -13,7 +13,7 @@ class SolicitudHomologacionController extends Controller
 
     public function __construct()
     {
-        $this->apiUrl = 'http://127.0.0.1:8000/api';
+        $this->apiUrl = 'https://homologacionesback.educarenemociones.com/api';
     }
 
     protected function fetchProgramas()

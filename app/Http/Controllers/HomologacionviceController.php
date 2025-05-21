@@ -17,7 +17,7 @@ class HomologacionViceController extends Controller
      */
     private function getBaseUrl()
     {
-        return rtrim(env('BASE_URL_BACKEND', 'https://homologacionesback.educarenemociones.com'), '/') . '/api/';
+        return rtrim(env('BASE_URL_BACKEND', 'http://127.0.0.1:8000'), '/') . '/api/';
     }
 
     /**
@@ -355,7 +355,7 @@ public function verDocumentos($id) {
             $asignaturasDestino = [];
 
             // Llamar a la API para obtener las asignaturas del programa
-            $response = Http::get('https://homologacionesback.educarenemociones.com/api/asignaturas/programa/' . $programaId);
+            $response = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/' . $programaId);
 
             if ($response->successful()) {
                 // Normalizar la estructura de datos
