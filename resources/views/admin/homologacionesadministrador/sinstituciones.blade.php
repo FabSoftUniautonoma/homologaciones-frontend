@@ -1,1666 +1,2686 @@
 @extends('admin.layouts.appadmin')
 
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Header Mejorado -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-lg bg-gradient-primary border-0 animate__animated animate__fadeIn">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-white text-primary rounded-circle shadow me-3">
-                            <i class="fas fa-graduation-cap fa-2x p-2"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-white mb-0 fw-bold">Gestión Académica</h2>
-                            <p class="text-white-50 mb-0">Administración de instituciones, programas y asignaturas</p>
-                        </div>
-                    </div>
+<div class="container-fluid p-0">
+    <!-- Header institucional -->
+    <div class="header-banner" style="background-color: #003366">
+        <div class="container-fluid">
+            <div class="row align-items-center py-3">
+                <div class="col-md-2 text-center text-md-start">
+                    <!-- Espacio para logo -->
+                </div>
+                <div class="col-md-8 text-center">
+                    <h1 class="header-title">Sistema de homologaciones</h1>
+                    <p class="header-subtitle">Gestión de Instituciones, Programas y Asignaturas</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Contenido Principal con Estructura Mejorada -->
-    <div class="row g-4">
-        <!-- Panel de Instituciones -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInLeft">
-                <div class="card-header bg-gradient-primary text-white p-3">
+    <!-- Contenedor principal con tres columnas -->
+    <div class="row g-0">
+        <!-- Panel de instituciones -->
+        <div class="col-md-4 panel-column">
+            <div class="card panel-card h-100">
+                <div class="card-header panel-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-university me-2"></i>
-                            <h5 class="mb-0">Instituciones</h5>
-                        </div>
-                        <span class="badge bg-white text-primary rounded-pill px-3" id="contador-instituciones">0</span>
-                    </div>
-                </div>
-                <div class="input-group p-2 bg-light">
-                    <span class="input-group-text border-0 bg-transparent">
-                        <i class="fas fa-search text-muted"></i>
-                    </span>
-                    <input type="text" class="form-control border-0 bg-transparent" id="buscar-institucion" placeholder="Buscar institución...">
-                </div>
-                <div class="list-group list-group-flush custom-scrollbar" id="instituciones-lista" style="max-height: 450px; overflow-y: auto;">
-                    <div class="text-center p-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Cargando instituciones...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Cargando instituciones...</p>
-                    </div>
-                </div>
-                <div class="card-footer bg-light p-3">
-                    <button class="btn btn-primary w-100 rounded-pill" onclick="mostrarModalNuevaInstitucion()">
-                        <i class="fas fa-plus-circle me-2"></i> Nueva Institución
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Panel de Programas -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeIn" style="animation-delay: 0.2s">
-                <div class="card-header bg-gradient-success text-white p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-book me-2"></i>
-                            <h5 class="mb-0">Programas</h5>
-                        </div>
-                        <span class="badge bg-white text-success rounded-pill px-3" id="contador-programas">0</span>
-                    </div>
-                    <p id="institucion-seleccionada" class="text-white-50 mb-0 small mt-1 text-truncate"></p>
-                </div>
-                <div class="input-group p-2 bg-light" id="buscar-programa-container" style="display: none;">
-                    <span class="input-group-text border-0 bg-transparent">
-                        <i class="fas fa-search text-muted"></i>
-                    </span>
-                    <input type="text" class="form-control border-0 bg-transparent" id="buscar-programa" placeholder="Buscar programa...">
-                </div>
-                <div class="list-group list-group-flush custom-scrollbar" id="programas-lista" style="max-height: 450px; overflow-y: auto;">
-                    <div class="text-center p-4">
-                        <p class="text-muted">Seleccione una institución para ver sus programas</p>
-                        <i class="fas fa-hand-point-left fa-2x text-muted"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-light p-3">
-                    <button class="btn btn-success w-100 rounded-pill" id="btn-nuevo-programa" onclick="mostrarModalNuevoPrograma()" disabled>
-                        <i class="fas fa-plus-circle me-2"></i> Nuevo Programa
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Panel de Asignaturas -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInRight" style="animation-delay: 0.4s">
-                <div class="card-header bg-gradient-info text-white p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-clipboard-list me-2"></i>
-                            <h5 class="mb-0">Asignaturas</h5>
-                        </div>
-                        <span class="badge bg-white text-info rounded-pill px-3" id="contador-asignaturas">0</span>
-                    </div>
-                    <p id="programa-seleccionado" class="text-white-50 mb-0 small mt-1 text-truncate"></p>
-                </div>
-                <div class="input-group p-2 bg-light" id="buscar-asignatura-container" style="display: none;">
-                    <span class="input-group-text border-0 bg-transparent">
-                        <i class="fas fa-search text-muted"></i>
-                    </span>
-                    <input type="text" class="form-control border-0 bg-transparent" id="buscar-asignatura" placeholder="Buscar asignatura...">
-                </div>
-                <div class="list-group list-group-flush custom-scrollbar" id="asignaturas-lista" style="max-height: 450px; overflow-y: auto;">
-                    <div class="text-center p-4">
-                        <p class="text-muted">Seleccione un programa para ver sus asignaturas</p>
-                        <i class="fas fa-hand-point-left fa-2x text-muted"></i>
-                    </div>
-                </div>
-                <div class="card-footer bg-light p-3">
-                    <button class="btn btn-info text-white w-100 rounded-pill" id="btn-nueva-asignatura" onclick="mostrarModalNuevaAsignatura()" disabled>
-                        <i class="fas fa-plus-circle me-2"></i> Nueva Asignatura
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Detalles de Asignatura Mejorados -->
-    <div class="row mt-4" id="detalles-asignatura-container" style="display: none;">
-        <div class="col-12">
-            <div class="card shadow-lg border-0 animate__animated animate__fadeInUp">
-                <div class="card-header bg-gradient-warning p-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-shape bg-white text-warning rounded-circle shadow me-3">
-                                <i class="fas fa-book-open fa-lg p-2"></i>
-                            </div>
-                            <div>
-                                <h5 class="mb-0 text-white">Detalles de la Asignatura</h5>
-                                <p id="asignatura-seleccionada" class="mb-0 text-white-50 small"></p>
-                            </div>
-                        </div>
+                        <h5 class="panel-title">
+                            <i class="fas fa-university me-2"></i>Instituciones
+                        </h5>
                         <div>
-                            <button class="btn btn-sm btn-dark me-2" id="btn-editar-asignatura">
-                                <i class="fas fa-edit me-1"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-light" onclick="cerrarDetallesAsignatura()">
-                                <i class="fas fa-times"></i>
+                            <span id="contador-instituciones" class="badge counter-badge me-2">0</span>
+                            <button class="btn btn-sm btn-success" id="btn-nueva-institucion">
+                                <i class="fas fa-plus-circle"></i>
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Pestañas mejoradas -->
                 <div class="card-body p-0">
-                    <ul class="nav nav-pills nav-fill p-3" id="asignaturaTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active d-flex align-items-center justify-content-center" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
-                                <i class="fas fa-info-circle me-2"></i> Información General
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex align-items-center justify-content-center" id="contenido-tab" data-bs-toggle="tab" data-bs-target="#contenido" type="button" role="tab">
-                                <i class="fas fa-list-alt me-2"></i> Contenido Programático
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link d-flex align-items-center justify-content-center" id="competencias-tab" data-bs-toggle="tab" data-bs-target="#competencias" type="button" role="tab">
-                                <i class="fas fa-award me-2"></i> Competencias
-                            </button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content p-4" id="asignaturaTabsContent">
-                        <!-- Pestaña de Información General -->
-                        <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
-                            <!-- Contenido dinámico -->
+                    <div class="search-container">
+                        <div class="input-group">
+                            <span class="input-group-text search-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control search-input" id="buscadorInstituciones" placeholder="Buscar institución...">
                         </div>
+                    </div>
 
-                        <!-- Pestaña de Contenido Programático Mejorada -->
-                        <div class="tab-pane fade" id="contenido" role="tabpanel" aria-labelledby="contenido-tab">
-                            <div id="contenido-programatico-container">
-                                <!-- Loader animado mejorado -->
-                                <div id="contenido-loader" class="text-center my-5">
-                                    <div class="spinner-grow text-primary" role="status">
-                                        <span class="visually-hidden">Cargando...</span>
+                    <div id="estado-carga-instituciones" class="loading-container">
+                        <div class="spinner-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="loading-text">Cargando instituciones...</p>
+                        </div>
+                    </div>
+
+                    <div class="list-container" id="instituciones-container">
+                        <div class="list-group list-group-flush" id="listaInstituciones">
+                            <!-- Aquí se cargarán las instituciones -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de programas -->
+        <div class="col-md-4 panel-column">
+            <div class="card panel-card h-100">
+                <div class="card-header panel-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="panel-title">
+                            <i class="fas fa-graduation-cap me-2"></i>Programas
+                        </h5>
+                        <div>
+                            <span id="contador-programas" class="badge counter-badge me-2">0</span>
+                            <button class="btn btn-sm btn-success" id="btn-nuevo-programa" disabled>
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="search-container">
+                        <div class="input-group">
+                            <span class="input-group-text search-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control search-input" id="buscadorProgramas" placeholder="Buscar programa...">
+                        </div>
+                    </div>
+
+                    <div id="estado-carga-programas" class="loading-container" style="display: none;">
+                        <div class="spinner-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="loading-text">Cargando programas...</p>
+                        </div>
+                    </div>
+
+                    <div class="list-container" id="programas-container">
+                        <div class="list-group list-group-flush" id="listaProgramas">
+                            <div class="empty-state">
+                                <i class="fas fa-university fa-3x empty-icon"></i>
+                                <p class="empty-text">Seleccione una institución para ver sus programas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de asignaturas -->
+        <div class="col-md-4 panel-column">
+            <div class="card panel-card h-100">
+                <div class="card-header panel-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="panel-title">
+                            <i class="fas fa-book me-2"></i>Asignaturas
+                        </h5>
+                        <div>
+                            <span id="contador-asignaturas" class="badge counter-badge me-2">0</span>
+                            <button class="btn btn-sm btn-success" id="btn-nueva-asignatura" disabled>
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="search-container">
+                        <div class="input-group">
+                            <span class="input-group-text search-icon">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control search-input" id="buscadorAsignaturas" placeholder="Buscar asignatura...">
+                        </div>
+                    </div>
+
+                    <div id="estado-carga-asignaturas" class="loading-container" style="display: none;">
+                        <div class="spinner-container">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="loading-text">Cargando asignaturas...</p>
+                        </div>
+                    </div>
+
+                    <div class="list-container" id="asignaturas-container">
+                        <div class="list-group list-group-flush" id="listaAsignaturas">
+                            <div class="empty-state">
+                                <i class="fas fa-book fa-3x empty-icon"></i>
+                                <p class="empty-text">Seleccione un programa para ver sus asignaturas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar información completa de la asignatura -->
+<div class="modal fade" id="modalAsignatura" tabindex="-1" aria-labelledby="modalAsignaturaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAsignaturaLabel">
+                    <i class="fas fa-book-open me-2"></i>
+                    <span id="modalTituloAsignatura">Información de Asignatura</span>
+                </h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Tabs de navegación -->
+                <ul class="nav nav-tabs" id="asignaturaTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="informacion-tab" data-toggle="tab" href="#informacion" role="tab">
+                            <i class="fas fa-info-circle me-2"></i>Información
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="contenido-tab" data-toggle="tab" href="#contenido" role="tab">
+                            <i class="fas fa-list-alt me-2"></i>Contenido
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Contenido de las pestañas -->
+                <div class="tab-content mt-4" id="asignaturaTabsContent">
+                    <!-- Pestaña de información general -->
+                    <div class="tab-pane fade show active" id="informacion" role="tabpanel">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-card-body">
+                                        <div class="info-card-content">
+                                            <div class="info-card-title">Código</div>
+                                            <div class="info-card-value" id="codigoAsignatura">-</div>
+                                        </div>
+                                        <div class="info-card-icon">
+                                            <i class="fas fa-hashtag"></i>
+                                        </div>
                                     </div>
-                                    <p class="mt-3">Cargando contenido programático...</p>
                                 </div>
+                            </div>
 
-                                <!-- Contenido dinámico -->
-                                <div id="contenido-programatico-lista" class="row">
-                                    <!-- Aquí se cargarán las tarjetas de contenidos -->
+                            <div class="col-md-4">
+                                <div class="info-card success">
+                                    <div class="info-card-body">
+                                        <div class="info-card-content">
+                                            <div class="info-card-title">Créditos</div>
+                                            <div class="info-card-value" id="creditosAsignatura">-</div>
+                                        </div>
+                                        <div class="info-card-icon">
+                                            <i class="fas fa-graduation-cap"></i>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <!-- Botón para añadir nuevo contenido -->
-                                <div class="text-center mt-4">
-                                    <button class="btn btn-primary rounded-pill" onclick="mostrarModalNuevoContenido()">
-                                        <i class="fas fa-plus-circle me-2"></i> Añadir Nuevo Contenido
-                                    </button>
+                            <div class="col-md-4">
+                                <div class="info-card info">
+                                    <div class="info-card-body">
+                                        <div class="info-card-content">
+                                            <div class="info-card-title">Semestre</div>
+                                            <div class="info-card-value" id="semestreAsignatura">-</div>
+                                        </div>
+                                        <div class="info-card-icon">
+                                            <i class="fas fa-calendar"></i>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Pestaña de Competencias -->
-                        <div class="tab-pane fade" id="competencias" role="tabpanel" aria-labelledby="competencias-tab">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i> Esta sección mostrará las competencias asociadas a la asignatura.
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="details-card">
+                                    <div class="details-card-header">
+                                        <h6 class="details-card-title">Detalles de la Asignatura</h6>
+                                    </div>
+                                    <div class="details-card-body">
+                                        <table class="details-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td><i class="fas fa-bookmark text-primary me-2"></i>Tipo:</td>
+                                                    <td id="tipoAsignatura">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-chalkboard text-primary me-2"></i>Modalidad:</td>
+                                                    <td id="modalidadAsignatura">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-clock text-primary me-2"></i>Horas SENA:</td>
+                                                    <td id="horasSenaAsignatura">-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="details-card">
+                                    <div class="details-card-header">
+                                        <h6 class="details-card-title">Información Académica</h6>
+                                    </div>
+                                    <div class="details-card-body">
+                                        <table class="details-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td><i class="fas fa-tasks text-primary me-2"></i>Metodología:</td>
+                                                    <td id="metodologiaAsignatura">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-university text-primary me-2"></i>Institución:</td>
+                                                    <td id="institucionAsignatura">-</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><i class="fas fa-graduation-cap text-primary me-2"></i>Programa:</td>
+                                                    <td id="programaAsignatura">-</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Modal para Contenido Programático Mejorado -->
-<div class="modal fade" id="contenidoProgramaticoModal" tabindex="-1" aria-labelledby="contenidoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-gradient-primary text-white">
-                <h5 class="modal-title" id="contenidoModalLabel">
-                    <i class="fas fa-book me-2"></i>
-                    Detalles del Contenido Programático
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4" id="contenido-programatico-detalle">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Cargando...</span>
+                    <!-- Pestaña de contenido programático -->
+                    <div class="tab-pane fade" id="contenido" role="tabpanel">
+                        <div id="cargandoContenido" class="loading-container-centered">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando contenidos...</span>
+                            </div>
+                            <p class="mt-3 text-primary">Cargando contenido programático...</p>
+                        </div>
+
+                        <div id="contenidosProgramaticos">
+                            <!-- Aquí se cargarán los contenidos programáticos -->
+                        </div>
+
+                        <div id="mensajeSinContenido" class="alert alert-info alert-modern" style="display: none;">
+                            <div class="alert-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="alert-content">
+                                <h5 class="alert-heading">Sin contenidos programáticos</h5>
+                                <p class="mb-0">Esta asignatura no tiene contenidos programáticos registrados.</p>
+                                <button class="btn btn-secondary btn-sm mt-3 btn-reintentar">
+                                    <i class="fas fa-sync-alt me-2"></i> Reintentar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btn-editar-contenido">
-                    <i class="fas fa-edit me-1"></i> Editar Contenido
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cerrar
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Formulario Modal para Nuevo/Editar Contenido -->
-<div class="modal fade" id="formContenidoModal" tabindex="-1" aria-labelledby="formContenidoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-gradient-success text-white">
-                <h5 class="modal-title" id="formContenidoModalLabel">
-                    <i class="fas fa-plus-circle me-2"></i>
-                    Nuevo Contenido Programático
+<!-- Modal para contenido programático directo -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<div class="modal fade" id="modalContenidoDirecto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content shadow-lg animate__animated animate__fadeInUp">
+            <div class="modal-header bg-info text-white align-items-center">
+                <h5 class="modal-title d-flex align-items-center" id="tituloContenidoDirecto">
+                    <i class="fas fa-list-alt me-2"></i> Contenido Programático
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body p-4">
-                <form id="contenidoForm">
-                    <input type="hidden" id="contenido_id" name="contenido_id">
-                    <input type="hidden" id="asignatura_id" name="asignatura_id">
-
-                    <div class="mb-3">
-                        <label for="tema" class="form-label">Tema</label>
-                        <input type="text" class="form-control" id="tema" name="tema" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="resultados_aprendizaje" class="form-label">Resultados de Aprendizaje</label>
-                        <textarea class="form-control" id="resultados_aprendizaje" name="resultados_aprendizaje" rows="3" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="descripcion" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="5" required></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="guardarContenido">
-                    <i class="fas fa-save me-1"></i> Guardar Contenido
-                </button>
+            <div class="modal-body p-4" id="contenidoDirectoBody">
+                <!-- Aquí se cargan los contenidos -->
             </div>
         </div>
     </div>
 </div>
-
-<!-- Notificación Toast Mejorada -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
-    <div id="notificacionToast" class="toast shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <div class="rounded me-2 bg-primary" style="width: 20px; height: 20px;"></div>
-            <strong class="me-auto" id="toast-titulo">Notificación</strong>
-            <small>Ahora</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toast-mensaje"></div>
-    </div>
-</div>
-
-<!-- Estilos CSS mejorados -->
 <style>
-    /* Estilos para la barra de desplazamiento personalizada */
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #a1a1a1;
-    }
-
-    /* Estilos para tarjetas con efecto hover */
-    .list-group-item-action {
-        transition: all 0.2s ease;
-    }
-
-    .list-group-item-action:hover {
-        transform: translateY(-2px);
-        background-color: #f8f9fa;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-        z-index: 1;
-    }
-
-    /* Estilos para los gradientes */
-    .bg-gradient-primary {
-        background: linear-gradient(45deg, #4e73df, #6610f2);
-    }
-
-    .bg-gradient-success {
-        background: linear-gradient(45deg, #1cc88a, #20c997);
-    }
-
-    .bg-gradient-info {
-        background: linear-gradient(45deg, #36b9cc, #17a2b8);
-    }
-
-    .bg-gradient-warning {
-        background: linear-gradient(45deg, #f6c23e, #fd7e14);
-    }
-
-    /* Estilos para las tarjetas de contenido programático */
-    .contenido-card {
-        transition: all 0.3s ease;
-        border-radius: 10px;
-        overflow: hidden;
-        height: 100%;
-    }
-
-    .contenido-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
-
-    /* Animaciones para pestañas */
-    .tab-pane {
-        animation: fadeEffect 0.5s;
-    }
-
-    @keyframes fadeEffect {
-        from {opacity: 0;}
-        to {opacity: 1;}
-    }
-
-    /* Iconos en las pestañas */
-    .nav-pills .nav-link {
-        border-radius: 50rem;
-        margin: 0 5px;
-        padding: 0.5rem 1rem;
-        transition: all 0.2s;
-    }
-
-    .nav-pills .nav-link.active {
-        background-color: #4e73df;
-        box-shadow: 0 4px 8px rgba(78, 115, 223, 0.25);
-        transform: translateY(-2px);
-    }
+#contenidoDirectoBody .contenido-card {
+    border-left: 4px solid #2c8ab6;
+    background: #f7fbfc;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+    transition: box-shadow 0.2s;
+}
+#contenidoDirectoBody .contenido-card:hover {
+    box-shadow: 0 4px 16px rgba(44,62,80,0.13);
+}
+#contenidoDirectoBody .card-header {
+    background: #e3f2fd;
+    border-bottom: 1px solid #b3e5fc;
+    border-radius: 0.5rem 0.5rem 0 0;
+    font-weight: 600;
+    color: #2c8ab6;
+}
+#contenidoDirectoBody .card-body {
+    background: #fff;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
 </style>
 
-<!-- Scripts JS mejorados -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<!-- Notificaciones Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
 
+<!-- Estilos mejorados con colores neutros -->
+<style>
+:root {
+    --primary: #607d8b;
+    --primary-hover: #546e7a;
+    --primary-light: #eceff1;
+    --secondary: #78909c;
+    --success: #66bb6a;
+    --info: #3f58aa;
+    --warning: #ffa726;
+    --danger: #ef5350;
+    --light: #f5f5f5;
+    --dark: #37474f;
+    --white: #ffffff;
+    --border-color: #e0e0e0;
+    --sidebar-bg: #455a64;
+    --sidebar-hover: #37474f;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s ease;
+    --border-radius: 0.375rem;
+}
+
+/* Reset y estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f9f9f9;
+    color: var(--dark);
+    line-height: 1.5;
+}
+
+/* Header */
+.header-banner {
+    padding: 1.25rem 0;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+    color: var(--white);
+    font-weight: 600;
+    font-size: 1.75rem;
+    margin: 0;
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    margin: 0.5rem 0 0;
+}
+
+/* Layout de paneles */
+.container-fluid {
+    padding: 0;
+}
+
+.row {
+    --bs-gutter-x: 0.75rem;
+}
+
+.panel-column {
+    padding: 0.5rem;
+}
+
+.panel-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    background-color: var(--white);
+    height: calc(100vh - 130px);
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    background-color: var(--white);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-title {
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.counter-badge {
+    background-color: var(--primary);
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.3em 0.6em;
+    border-radius: 9999px;
+}
+
+/* Búsqueda */
+.search-container {
+    padding: 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-icon {
+    background-color: var(--light);
+    border: none;
+    color: var(--primary);
+}
+
+.search-input {
+    border: 1px solid var(--border-color);
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    background-color: var(--light);
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(96, 125, 139, 0.1);
+}
+
+/* Contenedor de listas */
+.list-container {
+    overflow-y: auto;
+    height: 100%;
+    padding: 0.25rem 0;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.85rem 1rem;
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.list-group-item:hover {
+    background-color: var(--primary-light);
+}
+
+.list-group-item.active {
+    background-color: var(--primary-light);
+    border-color: var(--border-color);
+    color: var(--dark);
+}
+
+.list-group-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: var(--primary);
+}
+
+/* Botones dentro de los ítems de lista */
+.item-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-item-action {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    margin-left: 0.5rem;
+}
+
+/* Estados vacíos */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    color: #bdbdbd;
+    margin-bottom: 1rem;
+}
+
+.empty-text {
+    color: #757575;
+    font-size: 0.95rem;
+}
+
+/* Loaders */
+.loading-container {
+    padding: 2rem;
+    text-align: center;
+}
+
+.loading-container-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loading-text {
+    margin-top: 1rem;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+/* Tarjetas informativas */
+.info-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid var(--primary);
+    transition: var(--transition);
+    height: 100%;
+}
+
+.info-card.success {
+    border-left-color: var(--success);
+}
+
+.info-card.info {
+    border-left-color: var(--info);
+}
+
+.info-card-body {
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.info-card-content {
+    flex-grow: 1;
+}
+
+.info-card-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.info-card-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.info-card-icon {
+    font-size: 1.5rem;
+    color: #bdbdbd;
+    padding-left: 1rem;
+}
+
+/* Tarjetas de detalles */
+.details-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    height: 100%;
+}
+
+.details-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(96, 125, 139, 0.05);
+}
+
+.details-card-title {
+    color: var(--primary);
+    font-weight: 500;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.details-card-body {
+    padding: 1rem 1.25rem;
+}
+
+.details-table {
+    width: 100%;
+}
+
+.details-table td {
+    padding: 0.5rem 0;
+    vertical-align: top;
+}
+
+.details-table td:first-child {
+    width: 40%;
+    font-weight: 500;
+    color: var(--secondary);
+}
+
+.details-table td:last-child {
+    font-weight: 500;
+}
+
+/* Modal */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background-color: var(--primary);
+    color: var(--white);
+    border-bottom: none;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+}
+
+.modal-title {
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-close {
+    color: var(--white);
+    opacity: 0.8;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Pestañas */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--secondary);
+    border: none;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+    margin-right: 0.5rem;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary);
+    border-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary);
+    background-color: transparent;
+    border-bottom: 3px solid var(--primary);
+}
+
+/* Contenido programático */
+.contenido-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.75rem;
+    border-left: 4px solid var(--info);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.contenido-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.contenido-card .card-header {
+    background-color: rgba(79, 195, 247, 0.08);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(79, 195, 247, 0.15);
+}
+
+.contenido-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Alertas modernas */
+.alert-modern {
+    display: flex;
+    align-items: flex-start;
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.25rem;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    margin-right: 1.25rem;
+    color: var(--info);
+}
+
+.alert-content {
+    flex-grow: 1;
+}
+
+.alert-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botones */
+.btn {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background-color: #546e7a;
+    border-color: #546e7a;
+}
+
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background-color: #4caf50;
+    border-color: #4caf50;
+}
+
+.btn-info {
+    background-color: var(--info);
+    border-color: var(--info);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #29b6f6;
+    border-color: #29b6f6;
+    color: white;
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 1060;
+}
+
+.toast {
+    background-color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    margin-bottom: 0.75rem;
+}
+
+.toast-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1rem;
+}
+
+.toast-body {
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Scrollbars personalizados */
+.list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.list-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+    background-color: rgba(120, 144, 156, 0.3);
+    border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(120, 144, 156, 0.5);
+}
+
+/* Adaptaciones responsive */
+@media (max-width: 992px) {
+    .panel-column {
+        margin-bottom: 1rem;
+    }
+
+    .panel-card {
+        height: 450px;
+    }
+
+    .modal-dialog {
+        margin: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .panel-card {
+        height: 400px;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .row {
+        --bs-gutter-x: 0.5rem;
+    }
+}
+
+/* CSS personalizado para botones laterales y botón de contenido */
+<style>
+.btn-lateral {
+    padding: 0.18rem 0.55rem;
+    font-size: 0.85rem;
+    border-radius: 0.25rem;
+    background-color: #90a4ae !important; /* azul suave */
+    color: #fff !important;
+    border: none;
+    margin-left: 0.5rem;
+    transition: background 0.2s;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+}
+.btn-lateral:hover {
+    background-color: #78909c !important;
+}
+.btn-contenido-suave {
+    padding: 0.15rem 0.7rem;
+    font-size: 0.82rem;
+    border-radius: 0.25rem;
+    background-color: #b0bec5 !important; /* azul aún más suave */
+    color: #263238 !important;
+    border: none;
+    transition: background 0.2s;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+}
+.btn-contenido-suave:hover {
+    background-color: #90a4ae !important;
+    color: #fff !important;
+}
+</style>
+<!-- MODIFICAR RENDER DE BOTONES EN JS:
+//
+// Para el botón lateral de institución:
+// <button type="button" class="btn btn-lateral btn-item-action btn-programas-institucion">
+//   <i class="fas fa-graduation-cap me-1"></i> Programas
+// </button>
+//
+// Para el botón lateral de programa:
+// <button type="button" class="btn btn-lateral btn-item-action btn-asignaturas-programa">
+//   <i class="fas fa-book me-1"></i> Asignaturas
+// </button>
+//
+// Para el botón de contenido:
+// <button type="button" class="btn btn-contenido-suave btn-item-action btn-contenido-asignatura">
+//   <i class="fas fa-book-open me-1"></i> Contenido
+// </button>
+-->
+
+<!-- MODAL DINÁMICO Y MODERNO PARA CONTENIDO PROGRAMÁTICO -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<div class="modal fade" id="modalContenidoDirecto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content shadow-lg animate__animated animate__fadeInUp">
+            <div class="modal-header bg-info text-white align-items-center">
+                <h5 class="modal-title d-flex align-items-center" id="tituloContenidoDirecto">
+                    <i class="fas fa-list-alt me-2"></i> Contenido Programático
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4" id="contenidoDirectoBody">
+                <!-- Aquí se cargan los contenidos -->
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+#contenidoDirectoBody .contenido-card {
+    border-left: 4px solid #4fc3f7;
+    background: #f7fbfc;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 4px rgba(44,62,80,0.07);
+    transition: box-shadow 0.2s;
+}
+#contenidoDirectoBody .contenido-card:hover {
+    box-shadow: 0 4px 16px rgba(44,62,80,0.13);
+}
+#contenidoDirectoBody .card-header {
+    background: #e3f2fd;
+    border-bottom: 1px solid #b3e5fc;
+    border-radius: 0.5rem 0.5rem 0 0;
+    font-weight: 600;
+    color: #1976d2;
+}
+#contenidoDirectoBody .card-body {
+    background: #fff;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+</style>
+
+<!-- Notificaciones Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container"></div>
+
+<!-- Estilos mejorados con colores neutros -->
+<style>
+:root {
+    --primary: #607d8b;
+    --primary-hover: #546e7a;
+    --primary-light: #eceff1;
+    --secondary: #78909c;
+    --success: #66bb6a;
+    --info: #4fc3f7;
+    --warning: #ffa726;
+    --danger: #ef5350;
+    --light: #f5f5f5;
+    --dark: #37474f;
+    --white: #ffffff;
+    --border-color: #e0e0e0;
+    --sidebar-bg: #455a64;
+    --sidebar-hover: #37474f;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s ease;
+    --border-radius: 0.375rem;
+}
+
+/* Reset y estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f9f9f9;
+    color: var(--dark);
+    line-height: 1.5;
+}
+
+/* Header */
+.header-banner {
+    padding: 1.25rem 0;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+    color: var(--white);
+    font-weight: 600;
+    font-size: 1.75rem;
+    margin: 0;
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    margin: 0.5rem 0 0;
+}
+
+/* Layout de paneles */
+.container-fluid {
+    padding: 0;
+}
+
+.row {
+    --bs-gutter-x: 0.75rem;
+}
+
+.panel-column {
+    padding: 0.5rem;
+}
+
+.panel-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    background-color: var(--white);
+    height: calc(100vh - 130px);
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-header {
+    background-color: var(--white);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.panel-title {
+    color: var(--primary);
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.counter-badge {
+    background-color: var(--primary);
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.3em 0.6em;
+    border-radius: 9999px;
+}
+
+/* Búsqueda */
+.search-container {
+    padding: 0.85rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-icon {
+    background-color: var(--light);
+    border: none;
+    color: var(--primary);
+}
+
+.search-input {
+    border: 1px solid var(--border-color);
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    background-color: var(--light);
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(96, 125, 139, 0.1);
+}
+
+/* Contenedor de listas */
+.list-container {
+    overflow-y: auto;
+    height: 100%;
+    padding: 0.25rem 0;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.85rem 1rem;
+    transition: var(--transition);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.list-group-item:hover {
+    background-color: var(--primary-light);
+}
+
+.list-group-item.active {
+    background-color: var(--primary-light);
+    border-color: var(--border-color);
+    color: var(--dark);
+}
+
+.list-group-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: var(--primary);
+}
+
+/* Botones dentro de los ítems de lista */
+.item-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-item-action {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    margin-left: 0.5rem;
+}
+
+/* Estados vacíos */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    color: #bdbdbd;
+    margin-bottom: 1rem;
+}
+
+.empty-text {
+    color: #757575;
+    font-size: 0.95rem;
+}
+
+/* Loaders */
+.loading-container {
+    padding: 2rem;
+    text-align: center;
+}
+
+.loading-container-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loading-text {
+    margin-top: 1rem;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+/* Tarjetas informativas */
+.info-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid var(--primary);
+    transition: var(--transition);
+    height: 100%;
+}
+
+.info-card.success {
+    border-left-color: var(--success);
+}
+
+.info-card.info {
+    border-left-color: var(--info);
+}
+
+.info-card-body {
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.info-card-content {
+    flex-grow: 1;
+}
+
+.info-card-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.info-card-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.info-card-icon {
+    font-size: 1.5rem;
+    color: #bdbdbd;
+    padding-left: 1rem;
+}
+
+/* Tarjetas de detalles */
+.details-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
+    height: 100%;
+}
+
+.details-card-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: rgba(96, 125, 139, 0.05);
+}
+
+.details-card-title {
+    color: var(--primary);
+    font-weight: 500;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.details-card-body {
+    padding: 1rem 1.25rem;
+}
+
+.details-table {
+    width: 100%;
+}
+
+.details-table td {
+    padding: 0.5rem 0;
+    vertical-align: top;
+}
+
+.details-table td:first-child {
+    width: 40%;
+    font-weight: 500;
+    color: var(--secondary);
+}
+
+.details-table td:last-child {
+    font-weight: 500;
+}
+
+/* Modal */
+.modal-content {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background-color: var(--primary);
+    color: var(--white);
+    border-bottom: none;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    padding: 1rem 1.5rem;
+}
+
+.modal-title {
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    max-height: 75vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-close {
+    color: var(--white);
+    opacity: 0.8;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Pestañas */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--secondary);
+    border: none;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+    margin-right: 0.5rem;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary);
+    border-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary);
+    background-color: transparent;
+    border-bottom: 3px solid var(--primary);
+}
+
+/* Contenido programático */
+.contenido-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.75rem;
+    border-left: 4px solid var(--info);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.contenido-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.contenido-card .card-header {
+    background-color: rgba(79, 195, 247, 0.08);
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(79, 195, 247, 0.15);
+}
+
+.contenido-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Alertas modernas */
+.alert-modern {
+    display: flex;
+    align-items: flex-start;
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.25rem;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    margin-right: 1.25rem;
+    color: var(--info);
+}
+
+.alert-content {
+    flex-grow: 1;
+}
+
+.alert-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Botones */
+.btn {
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background-color: #546e7a;
+    border-color: #546e7a;
+}
+
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background-color: #4caf50;
+    border-color: #4caf50;
+}
+
+.btn-info {
+    background-color: var(--info);
+    border-color: var(--info);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #29b6f6;
+    border-color: #29b6f6;
+    color: white;
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 1060;
+}
+
+.toast {
+    background-color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    margin-bottom: 0.75rem;
+}
+
+.toast-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 1rem;
+}
+
+.toast-body {
+    padding: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Scrollbars personalizados */
+.list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.list-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.list-container::-webkit-scrollbar-thumb {
+    background-color: rgba(120, 144, 156, 0.3);
+    border-radius: 4px;
+}
+
+.list-container::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(120, 144, 156, 0.5);
+}
+
+/* Adaptaciones responsive */
+@media (max-width: 992px) {
+    .panel-column {
+        margin-bottom: 1rem;
+    }
+
+    .panel-card {
+        height: 450px;
+    }
+
+    .modal-dialog {
+        margin: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .panel-card {
+        height: 400px;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .row {
+        --bs-gutter-x: 0.5rem;
+    }
+}
+</style>
+
+<!-- Scripts para manejo de datos -->
 <script>
-// Variables para almacenar datos
+// Variables globales
+const API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
 let instituciones = [];
 let programas = [];
 let asignaturas = [];
-let contenidosProgramaticos = [];
 let institucionSeleccionadaId = null;
 let programaSeleccionadoId = null;
 let asignaturaSeleccionadaId = null;
-let contenidoSeleccionadoId = null;
+let institucionSeleccionada = null;
+let programaSeleccionado = null;
+let asignaturaSeleccionada = null;
 
-// Configuración base para peticiones
-const apiConfig = {
-    baseUrl: 'https://homologacionesback.educarenemociones.com/api',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-    }
-};
+// Función para realizar solicitudes con reintentos
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+    let retries = 0;
 
-// Inicialización cuando el documento está listo
-document.addEventListener('DOMContentLoaded', function() {
-    // Añadir animaciones a los contenedores principales
-    document.querySelectorAll('.animate__animated').forEach(element => {
-        element.classList.add('animate__fadeIn');
-    });
+    const fetchOptions = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+        },
+        timeout: 30000,
+        ...options
+    };
 
-    // Cargar todas las instituciones al inicio
-    cargarInstituciones();
+    while (retries <= maxRetries) {
+        try {
+            console.log(`Intento #${retries + 1} para ${url}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    // Configurar buscadores
-    configurarBuscadores();
+            const response = await fetch(url, {
+                ...fetchOptions,
+                signal: controller.signal
+            });
 
-    // Configurar evento para cargar contenido programático al cambiar a la pestaña
-    document.getElementById('contenido-tab').addEventListener('click', function() {
-        if (asignaturaSeleccionadaId) {
-            cargarContenidoProgramatico(asignaturaSeleccionadaId);
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.warn(`Intento ${retries + 1}/${maxRetries + 1} fallido para ${url}:`, error);
+            retries++;
+
+            if (retries > maxRetries) {
+                throw error;
+            }
+
+            // Esperar un tiempo incremental antes de reintentar
+            const delay = 1000 * retries * (0.8 + Math.random() * 0.4);
+            console.log(`Esperando ${delay}ms antes del siguiente intento...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
+    }
+}
+
+// Función para mostrar o ocultar elementos
+function mostrarOcultarElemento(id, visible) {
+    const elemento = document.getElementById(id);
+    if (elemento) {
+        elemento.style.display = visible ? 'block' : 'none';
+    } else {
+        console.warn(`Elemento con ID '${id}' no encontrado`);
+    }
+}
+
+// Función para mostrar notificaciones
+function mostrarNotificacion(mensaje, tipo = 'success') {
+    // Crear contenedor si no existe
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+
+    // Crear ID único para este toast
+    const toastId = 'toast-' + Date.now();
+
+    // Crear elemento toast
+    const toastHTML = `
+        <div id="${toastId}" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2 text-${tipo}"></i>
+                <strong class="me-auto">Notificación</strong>
+                <button type="button" class="btn-close" data-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                ${mensaje}
+            </div>
+        </div>
+    `;
+
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        const toast = document.getElementById(toastId);
+        if (toast) {
+            toast.remove();
+        }
+    }, 5000);
+}
+
+// Función para cargar instituciones
+async function cargarInstituciones() {
+    mostrarOcultarElemento('estado-carga-instituciones', true);
+
+    const listaInstituciones = document.getElementById('listaInstituciones');
+    if (listaInstituciones) {
+        listaInstituciones.innerHTML = '';
+    }
+
+    try {
+        const data = await fetchWithRetry(`${API_BASE_URL}/instituciones`);
+
+        if (Array.isArray(data)) {
+            instituciones = data;
+        } else if (data && typeof data === 'object') {
+            // Intentar encontrar el array en las propiedades del objeto
+            const posiblesPropiedades = ['datos', 'data', 'instituciones', 'results'];
+            for (const prop of posiblesPropiedades) {
+                if (Array.isArray(data[prop])) {
+                    instituciones = data[prop];
+                    break;
+                }
+            }
+        }
+
+        // Actualizar contador
+        const contadorInstituciones = document.getElementById('contador-instituciones');
+        if (contadorInstituciones) {
+            contadorInstituciones.textContent = instituciones.length;
+        }
+
+        renderizarInstituciones();
+        mostrarNotificacion('Instituciones cargadas correctamente');
+    } catch (error) {
+        console.error('Error al cargar instituciones:', error);
+        if (listaInstituciones) {
+            listaInstituciones.innerHTML = `
+                <div class="alert alert-danger m-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No se pudieron cargar las instituciones. Por favor, intente nuevamente más tarde.
+                </div>
+            `;
+        }
+        mostrarNotificacion('No se pudieron cargar las instituciones', 'danger');
+    } finally {
+        mostrarOcultarElemento('estado-carga-instituciones', false);
+    }
+}
+
+// Función para renderizar instituciones
+function renderizarInstituciones() {
+    const listaInstituciones = document.getElementById('listaInstituciones');
+
+    if (instituciones.length === 0) {
+        listaInstituciones.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-university fa-3x empty-icon"></i>
+                <p class="empty-text">No se encontraron instituciones registradas.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Ordenar alfabéticamente por nombre
+    instituciones.sort((a, b) => {
+        return (a.nombre || '').localeCompare(b.nombre || '');
     });
 
-    // Configurar eventos para modales de contenido
-    document.getElementById('guardarContenido')?.addEventListener('click', guardarContenidoProgramatico);
-    document.getElementById('btn-editar-contenido')?.addEventListener('click', editarContenidoSeleccionado);
-});
+    listaInstituciones.innerHTML = '';
 
-// Configurar buscadores
-function configurarBuscadores() {
-    // Buscador de instituciones
-    document.getElementById('buscar-institucion').addEventListener('keyup', function() {
-        const busqueda = this.value.toLowerCase();
-        filtrarLista('instituciones-lista', busqueda);
-    });
+    // Crear elementos para cada institución
+    instituciones.forEach(institucion => {
+        // Identificar el ID de la institución
+        const institucionId = institucion.id_institucion || institucion.id;
 
-    // Buscador de programas
-    document.getElementById('buscar-programa').addEventListener('keyup', function() {
-        const busqueda = this.value.toLowerCase();
-        filtrarLista('programas-lista', busqueda);
-    });
+        // Verificar si tenemos un ID válido
+        if (!institucionId) {
+            console.warn('Institución sin ID:', institucion);
+            return; // Saltar esta institución
+        }
 
-    // Buscador de asignaturas
-    document.getElementById('buscar-asignatura').addEventListener('keyup', function() {
-        const busqueda = this.value.toLowerCase();
-        filtrarLista('asignaturas-lista', busqueda);
+        // Crear elemento para la institución
+        const institucionElement = document.createElement('a');
+        institucionElement.href = '#';
+        institucionElement.className = 'list-group-item list-group-item-action';
+        institucionElement.dataset.id = institucionId;
+
+        // Determinar valores con fallbacks
+        const nombre = institucion.nombre || 'Sin nombre';
+        const tipo = institucion.tipo || 'Universidad';
+        const municipio = institucion.municipio || 'No especificado';
+        const codigoIes = institucion.codigo_ies || 'N/A';
+
+        // Crear contenido del elemento
+        institucionElement.innerHTML = `
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 fw-bold">${nombre}</h6>
+                    <div class="small">
+                        <span class="text-primary">${tipo}</span>
+                        ${municipio ? `<span class="text-muted ms-2"><i class="fas fa-map-marker-alt"></i> ${municipio}</span>` : ''}
+                    </div>
+                </div>
+                <span class="badge bg-secondary rounded-pill">${codigoIes}</span>
+            </div>
+            <div class="item-actions">
+                <button type="button" class="btn btn-lateral btn-item-action btn-programas-institucion">
+                    <i class="fas fa-graduation-cap me-1"></i> Programas
+                </button>
+            </div>
+        `;
+
+        // Configurar evento click para el botón de programas
+        institucionElement.querySelector('.btn-programas-institucion').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Quitar selección anterior
+            document.querySelectorAll('#listaInstituciones .active').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Marcar como seleccionada
+            institucionElement.classList.add('active');
+
+            // Guardar referencia a la institución seleccionada
+            institucionSeleccionada = institucion;
+
+            // Habilitar botón de agregar programa
+            document.getElementById('btn-nuevo-programa').disabled = false;
+
+            // Cargar programas de esta institución
+            seleccionarInstitucion(institucionId);
+        });
+
+        // Configurar evento click para el elemento completo
+        institucionElement.addEventListener('click', function(e) {
+            if (!e.target.closest('.btn')) {
+                e.preventDefault();
+
+                // Quitar selección anterior
+                document.querySelectorAll('#listaInstituciones .active').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Marcar como seleccionada
+                this.classList.add('active');
+
+                // Guardar referencia a la institución seleccionada
+                institucionSeleccionada = institucion;
+
+                // Habilitar botón de agregar programa
+                document.getElementById('btn-nuevo-programa').disabled = false;
+
+                // Cargar programas de esta institución
+                seleccionarInstitucion(institucionId);
+            }
+        });
+
+        listaInstituciones.appendChild(institucionElement);
     });
 }
 
-// Función para filtrar listas
-function filtrarLista(idLista, texto) {
-    const items = document.querySelectorAll(`#${idLista} .list-group-item-action`);
-    let coincidencias = 0;
+// Función para seleccionar una institución y cargar sus programas
+function seleccionarInstitucion(id) {
+    institucionSeleccionadaId = id;
+    programaSeleccionadoId = null;
+    asignaturaSeleccionadaId = null;
 
-    items.forEach(item => {
+    // Limpiar selecciones anteriores
+    document.querySelectorAll('#listaProgramas .active').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    document.querySelectorAll('#listaAsignaturas .active').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Resetear asignaturas
+    document.getElementById('listaAsignaturas').innerHTML = `
+        <div class="empty-state">
+            <i class="fas fa-book fa-3x empty-icon"></i>
+            <p class="empty-text">Seleccione un programa para ver sus asignaturas</p>
+        </div>
+    `;
+
+    document.getElementById('contador-asignaturas').textContent = '0';
+
+    // Deshabilitar botón de nueva asignatura
+    document.getElementById('btn-nueva-asignatura').disabled = true;
+
+    // Cargar programas para esta institución
+    cargarProgramas(id);
+}
+
+// Función para cargar programas por institución
+async function cargarProgramas(institucionId) {
+    mostrarOcultarElemento('estado-carga-programas', true);
+
+    const listaProgramas = document.getElementById('listaProgramas');
+    listaProgramas.innerHTML = '';
+
+    try {
+        // Intentar cargar programas desde el backend
+        const data = await fetchWithRetry(`${API_BASE_URL}/programas`);
+
+        // Procesar datos
+        let allProgramas = [];
+        if (Array.isArray(data)) {
+            allProgramas = data;
+        } else if (data && typeof data === 'object') {
+            // Buscar en propiedades comunes
+            const posiblesPropiedades = ['datos', 'data', 'programas', 'results'];
+            for (const prop of posiblesPropiedades) {
+                if (Array.isArray(data[prop])) {
+                    allProgramas = data[prop];
+                    break;
+                }
+            }
+        }
+
+        // Filtrar programas por institución
+        const institucion = instituciones.find(i => i.id_institucion == institucionId || i.id == institucionId);
+        programas = allProgramas.filter(p =>
+            p.id_institucion == institucionId ||
+            (institucion && p.institucion === institucion.nombre)
+        );
+
+        // Actualizar contador
+        document.getElementById('contador-programas').textContent = programas.length;
+
+        renderizarProgramas();
+    } catch (error) {
+        console.error('Error al cargar programas:', error);
+        listaProgramas.innerHTML = `
+            <div class="alert alert-danger m-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No se pudieron cargar los programas. Por favor, intente nuevamente más tarde.
+            </div>
+        `;
+        mostrarNotificacion('No se pudieron cargar los programas', 'danger');
+    } finally {
+        mostrarOcultarElemento('estado-carga-programas', false);
+    }
+}
+
+// Función para renderizar programas
+function renderizarProgramas() {
+    const listaProgramas = document.getElementById('listaProgramas');
+
+    if (programas.length === 0) {
+        listaProgramas.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-graduation-cap fa-3x empty-icon"></i>
+                <p class="empty-text">No se encontraron programas para esta institución.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Ordenar alfabéticamente
+    programas.sort((a, b) => {
+        return (a.programa || a.nombre || '').localeCompare(b.programa || b.nombre || '');
+    });
+
+    listaProgramas.innerHTML = '';
+
+    // Crear elementos para cada programa
+    programas.forEach(programa => {
+        // Identificar el ID del programa
+        const programaId = programa.id_programa || programa.id;
+
+        // Verificar si tenemos un ID válido
+        if (!programaId) {
+            console.warn('Programa sin ID:', programa);
+            return; // Saltar este programa
+        }
+
+        // Crear elemento para el programa
+        const programaElement = document.createElement('a');
+        programaElement.href = '#';
+        programaElement.className = 'list-group-item list-group-item-action';
+        programaElement.dataset.id = programaId;
+
+        // Determinar valores con fallbacks
+        const nombre = programa.programa || programa.nombre || 'Sin nombre';
+        const nivel = programa.nivel_formacion || programa.tipo_formacion || 'No especificado';
+        const metodologia = programa.metodologia || 'No especificada';
+        const snies = programa.codigo_snies || programa.snies || 'N/A';
+
+        // Crear contenido del elemento
+        programaElement.innerHTML = `
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1 fw-bold">${nombre}</h6>
+                    <div class="small">
+                        <span class="text-primary">${nivel}</span>
+                        <span class="text-muted ms-2"><i class="fas fa-chalkboard"></i> ${metodologia}</span>
+                    </div>
+                </div>
+                <span class="badge bg-secondary rounded-pill">SNIES: ${snies}</span>
+            </div>
+            <div class="item-actions">
+                <button type="button" class="btn btn-lateral btn-item-action btn-asignaturas-programa">
+                    <i class="fas fa-book me-1"></i> Asignaturas
+                </button>
+            </div>
+        `;
+
+        // Configurar evento click para el botón de asignaturas
+        programaElement.querySelector('.btn-asignaturas-programa').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Quitar selección anterior
+            document.querySelectorAll('#listaProgramas .active').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Marcar como seleccionada
+            programaElement.classList.add('active');
+
+            // Guardar referencia al programa seleccionado
+            programaSeleccionado = programa;
+
+            // Habilitar botón de nueva asignatura
+            document.getElementById('btn-nueva-asignatura').disabled = false;
+
+            // Cargar asignaturas de este programa
+            seleccionarPrograma(programaId);
+        });
+
+        // Configurar evento click para el elemento completo
+        programaElement.addEventListener('click', function(e) {
+            if (!e.target.closest('.btn')) {
+                e.preventDefault();
+
+                // Quitar selección anterior
+                document.querySelectorAll('#listaProgramas .active').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Marcar como seleccionada
+                this.classList.add('active');
+
+                // Guardar referencia al programa seleccionado
+                programaSeleccionado = programa;
+
+                // Habilitar botón de nueva asignatura
+                document.getElementById('btn-nueva-asignatura').disabled = false;
+
+                // Cargar asignaturas de este programa
+                seleccionarPrograma(programaId);
+            }
+        });
+
+        listaProgramas.appendChild(programaElement);
+    });
+}
+
+// Función para seleccionar un programa y cargar sus asignaturas
+function seleccionarPrograma(id) {
+    programaSeleccionadoId = id;
+    asignaturaSeleccionadaId = null;
+
+    // Resetear selección de asignaturas
+    document.querySelectorAll('#listaAsignaturas .active').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Cargar asignaturas para este programa
+    cargarAsignaturas(id);
+}
+
+// Función para cargar asignaturas por programa
+async function cargarAsignaturas(programaId) {
+    mostrarOcultarElemento('estado-carga-asignaturas', true);
+
+    const listaAsignaturas = document.getElementById('listaAsignaturas');
+    listaAsignaturas.innerHTML = '';
+
+    try {
+        // Intentar cargar asignaturas desde el backend
+        const data = await fetchWithRetry(`${API_BASE_URL}/asignaturas`);
+
+        // Procesar datos
+        let allAsignaturas = [];
+        if (Array.isArray(data)) {
+            allAsignaturas = data;
+        } else if (data && typeof data === 'object') {
+            // Buscar en propiedades comunes
+            const posiblesPropiedades = ['datos', 'data', 'asignaturas', 'results'];
+            for (const prop of posiblesPropiedades) {
+                if (Array.isArray(data[prop])) {
+                    allAsignaturas = data[prop];
+                    break;
+                }
+            }
+        }
+
+        // Filtrar asignaturas por programa
+        const programa = programas.find(p => p.id_programa == programaId || p.id == programaId);
+        asignaturas = allAsignaturas.filter(a =>
+            a.id_programa == programaId ||
+            (programa && a.programa === programa.programa)
+        );
+
+        // Actualizar contador
+        document.getElementById('contador-asignaturas').textContent = asignaturas.length;
+
+        renderizarAsignaturas();
+    } catch (error) {
+        console.error('Error al cargar asignaturas:', error);
+        listaAsignaturas.innerHTML = `
+            <div class="alert alert-danger m-3">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No se pudieron cargar las asignaturas. Por favor, intente nuevamente más tarde.
+            </div>
+        `;
+        mostrarNotificacion('No se pudieron cargar las asignaturas', 'danger');
+    } finally {
+        mostrarOcultarElemento('estado-carga-asignaturas', false);
+    }
+}
+
+// Función para renderizar asignaturas
+function renderizarAsignaturas() {
+    const listaAsignaturas = document.getElementById('listaAsignaturas');
+
+    if (asignaturas.length === 0) {
+        listaAsignaturas.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-book fa-3x empty-icon"></i>
+                <p class="empty-text">No se encontraron asignaturas para este programa.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Ordenar por semestre y nombre
+    asignaturas.sort((a, b) => {
+        const semestreA = parseInt(a.semestre || '0');
+        const semestreB = parseInt(b.semestre || '0');
+
+        if (semestreA !== semestreB) {
+            return semestreA - semestreB;
+        }
+
+        return (a.nombre || '').localeCompare(b.nombre || '');
+    });
+
+    // Agrupar por semestre
+    const asignaturasPorSemestre = {};
+    asignaturas.forEach(asignatura => {
+        const semestre = asignatura.semestre || 'No especificado';
+        if (!asignaturasPorSemestre[semestre]) {
+            asignaturasPorSemestre[semestre] = [];
+        }
+        asignaturasPorSemestre[semestre].push(asignatura);
+    });
+
+    listaAsignaturas.innerHTML = '';
+
+    // Crear elementos para cada semestre y sus asignaturas
+    Object.keys(asignaturasPorSemestre).sort((a, b) => {
+        // Ordenar semestres numéricamente
+        if (a === 'No especificado') return 1;
+        if (b === 'No especificado') return -1;
+        return parseInt(a) - parseInt(b);
+    }).forEach(semestre => {
+        // Crear encabezado de semestre
+        const semestreHeader = document.createElement('div');
+        semestreHeader.className = 'list-group-item bg-light text-primary fw-bold semester-header';
+        semestreHeader.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Semestre ${semestre}
+                </div>
+                <span class="badge bg-secondary rounded-pill">${asignaturasPorSemestre[semestre].length}</span>
+            </div>
+        `;
+        listaAsignaturas.appendChild(semestreHeader);
+
+        // Crear elementos para cada asignatura de este semestre
+        asignaturasPorSemestre[semestre].forEach(asignatura => {
+            // Identificar el ID de la asignatura
+            const asignaturaId = asignatura.id_asignatura || asignatura.id;
+
+            // Verificar si tenemos un ID válido
+            if (!asignaturaId) {
+                console.warn('Asignatura sin ID:', asignatura);
+                return; // Saltar esta asignatura
+            }
+
+            // Crear elemento para la asignatura
+            const asignaturaElement = document.createElement('a');
+            asignaturaElement.href = '#';
+            asignaturaElement.className = 'list-group-item list-group-item-action';
+            asignaturaElement.dataset.id = asignaturaId;
+
+            // Determinar valores con fallbacks
+            const nombre = asignatura.nombre || 'Sin nombre';
+            const codigo = asignatura.codigo_asignatura || asignatura.codigo || 'No especificado';
+            const tipo = asignatura.tipo || 'Obligatoria';
+            const creditos = asignatura.creditos || '0';
+
+            // Crear contenido del elemento
+            asignaturaElement.innerHTML = `
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1 fw-bold">${nombre}</h6>
+                        <div class="small">
+                            <span class="text-primary"><i class="fas fa-hashtag"></i> ${codigo}</span>
+                            <span class="text-muted ms-2"><i class="fas fa-bookmark"></i> ${tipo}</span>
+                        </div>
+                    </div>
+                    <span class="badge bg-info rounded-pill">${creditos} créditos</span>
+                </div>
+                <div class="item-actions">
+                    <button type="button" class="btn btn-contenido-suave btn-item-action btn-contenido-asignatura">
+                        <i class="fas fa-book-open me-1"></i> Contenido
+                    </button>
+                </div>
+            `;
+
+            // Configurar evento click para el botón de ver contenido
+            asignaturaElement.querySelector('.btn-contenido-asignatura').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Quitar selección anterior
+                document.querySelectorAll('#listaAsignaturas .active').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Marcar como seleccionada
+                asignaturaElement.classList.add('active');
+
+                // Guardar referencia a la asignatura seleccionada
+                asignaturaSeleccionada = asignatura;
+                asignaturaSeleccionadaId = asignaturaId;
+
+                // Cargar directamente el contenido programático sin abrir modal
+                cargarContenidoProgramatico(asignaturaId, true);
+            });
+
+            // Configurar evento click para el elemento completo
+            asignaturaElement.addEventListener('click', function(e) {
+                if (!e.target.closest('.btn')) {
+                    e.preventDefault();
+
+                    // Quitar selección anterior
+                    document.querySelectorAll('#listaAsignaturas .active').forEach(item => {
+                        item.classList.remove('active');
+                    });
+
+                    // Marcar como seleccionada
+                    this.classList.add('active');
+
+                    // Guardar referencia a la asignatura seleccionada
+                    asignaturaSeleccionada = asignatura;
+                    asignaturaSeleccionadaId = asignaturaId;
+
+                    // Abrir modal con información detallada
+                    mostrarDetallesAsignatura(asignaturaId, asignatura);
+                }
+            });
+
+            listaAsignaturas.appendChild(asignaturaElement);
+        });
+    });
+}
+
+// Función para mostrar los detalles de la asignatura en el modal
+function mostrarDetallesAsignatura(id, asignatura) {
+    // Actualizar título del modal
+    document.getElementById('modalTituloAsignatura').textContent = asignatura.nombre || 'Información de Asignatura';
+
+    // Cargar información general
+    document.getElementById('codigoAsignatura').textContent = asignatura.codigo_asignatura || asignatura.codigo || 'No especificado';
+    document.getElementById('creditosAsignatura').textContent = asignatura.creditos || 'No especificado';
+    document.getElementById('semestreAsignatura').textContent = asignatura.semestre || 'No especificado';
+    document.getElementById('tipoAsignatura').textContent = asignatura.tipo || 'No especificado';
+    document.getElementById('modalidadAsignatura').textContent = asignatura.modalidad || 'Presencial';
+    document.getElementById('horasSenaAsignatura').textContent = asignatura.horas_sena || 'No especificado';
+    document.getElementById('metodologiaAsignatura').textContent = asignatura.metodologia || 'No especificado';
+
+    // Información adicional
+    document.getElementById('institucionAsignatura').textContent = institucionSeleccionada ? (institucionSeleccionada.nombre || 'No especificado') : 'No especificado';
+    document.getElementById('programaAsignatura').textContent = programaSeleccionado ? (programaSeleccionado.programa || programaSeleccionado.nombre || 'No especificado') : 'No especificado';
+
+    // Preparar la pestaña de contenido programático
+    document.getElementById('contenidosProgramaticos').innerHTML = '';
+    mostrarOcultarElemento('cargandoContenido', true);
+    mostrarOcultarElemento('mensajeSinContenido', false);
+
+    // Mostrar el modal usando jQuery
+    $('#modalAsignatura').modal('show');
+
+    // Ir a la pestaña de información general primero usando jQuery
+    $('#asignaturaTabs a[href="#informacion"]').tab('show');
+}
+
+// Función para cargar el contenido programático de una asignatura
+async function cargarContenidoProgramatico(asignaturaId, cargaDirecta = false) {
+    console.log(`Cargando contenido programático para asignatura ID: ${asignaturaId}`);
+
+    // Si es carga directa, mostramos en un modal aparte o en una alerta
+    if (cargaDirecta) {
+        mostrarNotificacion('Cargando contenido programático...', 'info');
+    } else {
+        // Mostrar estado de carga en el modal
+        mostrarOcultarElemento('cargandoContenido', true);
+        mostrarOcultarElemento('mensajeSinContenido', false);
+        document.getElementById('contenidosProgramaticos').innerHTML = '';
+    }
+
+    try {
+        // Realizar solicitud fetch con la URL correcta
+        const url = `${API_BASE_URL}/contenidos-programaticos/asignatura/${asignaturaId}`;
+        console.log(`Solicitando datos a: ${url}`);
+
+        const data = await fetchWithRetry(url);
+        console.log("Respuesta de API:", data);
+
+        // Extraer contenidos
+        let contenidos = [];
+        if (data && data.datos && Array.isArray(data.datos)) {
+            contenidos = data.datos;
+        } else if (Array.isArray(data)) {
+            contenidos = data;
+        }
+
+        console.log(`Contenidos encontrados: ${contenidos.length}`);
+
+        // Si es carga directa, mostramos en un modal aparte
+        if (cargaDirecta) {
+            mostrarModalContenidoDirecto(contenidos, asignaturaSeleccionada);
+            return;
+        }
+
+        // Ocultar cargador
+        mostrarOcultarElemento('cargandoContenido', false);
+
+        // Si no hay contenidos
+        if (!contenidos || contenidos.length === 0) {
+            mostrarOcultarElemento('mensajeSinContenido', true);
+            return;
+        }
+
+        // Crear HTML para contenidos
+        let html = '<div class="row g-3">';
+
+        // Crear elementos para cada contenido
+        contenidos.forEach((contenido, index) => {
+            const tema = contenido.tema || contenido.nombre || contenido.titulo || 'Sin título';
+            const resultados = contenido.resultados_aprendizaje || contenido.resultados || 'No especificado';
+            const descripcion = contenido.descripcion || contenido.detalle || contenido.contenidos || 'No especificado';
+
+            html += `
+                <div class="col-md-12">
+                    <div class="contenido-card">
+                        <div class="card-header">
+                            <h5 class="m-0 fw-bold">
+                             <i class="fas fa-book-open me-2"></i>${tema}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-primary fw-bold mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>Resultados de Aprendizaje
+                                </h6>
+                                <div class="ps-3 border-start border-primary py-2">
+                                    ${resultados}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h6 class="text-primary fw-bold mb-2">
+                                    <i class="fas fa-info-circle me-2"></i>Descripción del Contenido
+                                </h6>
+                                <div class="ps-3 border-start border-info py-2">
+                                    ${descripcion}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        document.getElementById('contenidosProgramaticos').innerHTML = html;
+        console.log("Contenidos programáticos renderizados correctamente");
+
+    } catch (error) {
+        console.error("Error al cargar contenidos:", error);
+
+        // Si es carga directa, mostrar notificación de error
+        if (cargaDirecta) {
+            mostrarNotificacion(`Error al cargar el contenido programático: ${error.message}`, 'danger');
+            return;
+        }
+
+        // Ocultar cargador
+        mostrarOcultarElemento('cargandoContenido', false);
+
+        // Mostrar mensaje de error
+        document.getElementById('contenidosProgramaticos').innerHTML = `
+            <div class="alert alert-danger alert-modern">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-heading">Error al cargar contenidos</h5>
+                    <p class="mb-0">${error.message}</p>
+                    <button class="btn btn-secondary btn-sm mt-3 btn-reintentar" data-id="${asignaturaId}">
+                        <i class="fas fa-sync-alt me-2"></i> Reintentar
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// Función para mostrar contenido programático directo en un modal
+function mostrarModalContenidoDirecto(contenidos, asignatura) {
+    // Actualizar título del modal
+    const modalTitle = document.getElementById('tituloContenidoDirecto');
+    if (modalTitle) {
+        modalTitle.textContent = `Contenido Programático: ${asignatura.nombre || 'Asignatura'}`;
+    }
+
+    // Obtener el contenedor del cuerpo del modal
+    const modalBody = document.getElementById('contenidoDirectoBody');
+
+    if (!modalBody) {
+        console.error('No se encontró el contenedor del cuerpo del modal');
+        return;
+    }
+
+    // Limpiar contenido anterior
+    modalBody.innerHTML = '';
+
+    // Si no hay contenidos
+    if (!contenidos || contenidos.length === 0) {
+        modalBody.innerHTML = `
+            <div class="alert alert-info alert-modern">
+                <div class="alert-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="alert-content">
+                    <h5 class="alert-heading">Sin contenidos programáticos</h5>
+                    <p class="mb-0">Esta asignatura no tiene contenidos programáticos registrados.</p>
+                </div>
+            </div>
+        `;
+    } else {
+        // Añadir contenidos al modal
+        contenidos.forEach((contenido, index) => {
+            const tema = contenido.tema || contenido.nombre || contenido.titulo || 'Sin título';
+            const resultados = contenido.resultados_aprendizaje || contenido.resultados || 'No especificado';
+            const descripcion = contenido.descripcion || contenido.detalle || contenido.contenidos || 'No especificado';
+
+            const contenidoElement = document.createElement('div');
+            contenidoElement.className = 'contenido-card mb-4';
+            contenidoElement.innerHTML = `
+                <div class="card-header">
+                    <h5 class="m-0 fw-bold">
+                        <i class="fas fa-book-open me-2"></i>${tema}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold mb-3">
+                            <i class="fas fa-check-circle me-2"></i>Resultados de Aprendizaje
+                        </h6>
+                        <div class="ps-3 border-start border-primary py-3">
+                            ${resultados}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h6 class="text-primary fw-bold mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Descripción del Contenido
+                        </h6>
+                        <div class="ps-3 border-start border-info py-3">
+                            ${descripcion}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modalBody.appendChild(contenidoElement);
+        });
+    }
+
+    // Mostrar el modal
+    $('#modalContenidoDirecto').modal('show');
+}
+
+// Función para filtrar instituciones según texto de búsqueda
+function filtrarInstituciones(texto) {
+    const termino = texto.toLowerCase().trim();
+    let contadorVisibles = 0;
+
+    document.querySelectorAll('#listaInstituciones a').forEach(item => {
         const contenido = item.textContent.toLowerCase();
-        if (contenido.includes(texto)) {
-            item.style.display = '';
-            coincidencias++;
+        if (contenido.includes(termino)) {
+            item.style.display = 'block';
+            contadorVisibles++;
         } else {
             item.style.display = 'none';
         }
     });
 
-    // Mostrar mensaje si no hay coincidencias
-    const listaElement = document.getElementById(idLista);
-    let mensajeNoResultados = listaElement.querySelector('.no-resultados');
+    // Actualizar contador con resultados filtrados
+    document.getElementById('contador-instituciones').textContent = contadorVisibles;
+}
 
-    if (coincidencias === 0 && texto !== '') {
-        if (!mensajeNoResultados) {
-            mensajeNoResultados = document.createElement('div');
-            mensajeNoResultados.className = 'no-resultados text-center p-3';
-            mensajeNoResultados.innerHTML = `
-                <div class="alert alert-light border">
-                    <i class="fas fa-search-minus me-2"></i>
-                    No se encontraron resultados para "<strong>${texto}</strong>"
-                </div>
-            `;
-            listaElement.appendChild(mensajeNoResultados);
+// Función para filtrar programas según texto de búsqueda
+function filtrarProgramas(texto) {
+    const termino = texto.toLowerCase().trim();
+    let contadorVisibles = 0;
+
+    document.querySelectorAll('#listaProgramas a').forEach(item => {
+        const contenido = item.textContent.toLowerCase();
+        if (contenido.includes(termino)) {
+            item.style.display = 'block';
+            contadorVisibles++;
+        } else {
+            item.style.display = 'none';
         }
-    } else if (mensajeNoResultados) {
-        mensajeNoResultados.remove();
-    }
-}
-
-// Función para mostrar notificaciones mejorada
-function mostrarNotificacion(titulo, mensaje, tipo = 'info') {
-    const toast = document.getElementById('notificacionToast');
-    const toastTitulo = document.getElementById('toast-titulo');
-    const toastMensaje = document.getElementById('toast-mensaje');
-    const indicador = toast.querySelector('.rounded');
-
-    // Configurar el toast
-    toastTitulo.textContent = titulo;
-    toastMensaje.textContent = mensaje;
-
-    // Aplicar clase según el tipo
-    toast.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'text-white');
-    indicador.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info', 'bg-primary');
-
-    switch(tipo) {
-        case 'success':
-            indicador.classList.add('bg-success');
-            break;
-        case 'error':
-            indicador.classList.add('bg-danger');
-            break;
-        case 'warning':
-            indicador.classList.add('bg-warning');
-            break;
-        default:
-            indicador.classList.add('bg-primary');
-    }
-
-    // Mostrar el toast
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-}
-
-// Función para cargar instituciones desde el backend
-function cargarInstituciones() {
-    const institucionesLista = document.getElementById('instituciones-lista');
-    institucionesLista.innerHTML = `
-        <div class="text-center p-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando instituciones...</span>
-            </div>
-            <p class="mt-2 text-muted">Cargando instituciones...</p>
-        </div>
-    `;
-
-    // Petición al backend
-    fetch(`${apiConfig.baseUrl}/instituciones`, {
-        method: 'GET',
-        headers: apiConfig.headers
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al cargar instituciones');
-        }
-        return response.json();
-    })
-    .then(data => {
-        instituciones = data;
-        document.getElementById('contador-instituciones').textContent = instituciones.length;
-        renderizarInstituciones();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        institucionesLista.innerHTML = `
-            <div class="alert alert-danger m-3">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Error al cargar instituciones: ${error.message}
-            </div>
-        `;
-        mostrarNotificacion('Error', `No se pudieron cargar las instituciones: ${error.message}`, 'error');
-    });
-}
-
-// Función para renderizar instituciones en el panel
-function renderizarInstituciones() {
-    const listaInstituciones = document.getElementById('instituciones-lista');
-
-    if (instituciones.length === 0) {
-        listaInstituciones.innerHTML = `
-            <div class="text-center p-4">
-                <div class="empty-state">
-                    <i class="fas fa-university fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay instituciones disponibles</p>
-                    <button class="btn btn-primary btn-sm mt-2" onclick="mostrarModalNuevaInstitucion()">
-                        <i class="fas fa-plus-circle me-1"></i> Agregar institución
-                    </button>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-    instituciones.forEach(institucion => {
-        html += `
-            <a href="#" class="list-group-item list-group-item-action border-0 mb-1 ${institucionSeleccionadaId === institucion.id_institucion ? 'active' : ''}"
-               onclick="seleccionarInstitucion(${institucion.id_institucion})">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-1">${institucion.nombre}</h6>
-                        <div class="d-flex align-items-center text-muted small">
-                            <i class="fas fa-map-marker-alt me-1"></i>
-                            <span>${institucion.municipio || 'Sin ubicación'}</span>
-                            <i class="fas fa-building ms-2 me-1"></i>
-                            <span>${institucion.tipo || 'Universidad'}</span>
-                        </div>
-                    </div>
-                    <span class="badge bg-primary rounded-pill px-2">${institucion.codigo_ies}</span>
-                </div>
-            </a>
-        `;
     });
 
-    listaInstituciones.innerHTML = html;
+    // Actualizar contador con resultados filtrados
+    document.getElementById('contador-programas').textContent = contadorVisibles;
 }
 
-// Función para seleccionar una institución y cargar sus programas
-function seleccionarInstitucion(id) {
-    // Si ya está seleccionada, no hacer nada
-    if (institucionSeleccionadaId === id) return;
+// Función para filtrar asignaturas según texto de búsqueda
+function filtrarAsignaturas(texto) {
+    const termino = texto.toLowerCase().trim();
+    let contadorVisibles = 0;
+    const semestresVisibles = new Set();
 
-    institucionSeleccionadaId = id;
-    programaSeleccionadoId = null;
-    asignaturaSeleccionadaId = null;
-
-    // Actualizar UI para mostrar la institución seleccionada
-    const institucionSeleccionada = instituciones.find(i => i.id_institucion === id);
-    document.getElementById('institucion-seleccionada').textContent = `${institucionSeleccionada.nombre} (${institucionSeleccionada.codigo_ies})`;
-
-    // Resaltar el elemento seleccionado
-    document.querySelectorAll('#instituciones-lista .list-group-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    document.querySelector(`#instituciones-lista .list-group-item[onclick="seleccionarInstitucion(${id})"]`).classList.add('active');
-
-   // Mostrar el buscador de programas con animación
-    const buscarProgramaContainer = document.getElementById('buscar-programa-container');
-    buscarProgramaContainer.style.display = 'flex';
-    buscarProgramaContainer.classList.add('animate__animated', 'animate__fadeIn');
-
-    // Habilitar el botón para crear nuevo programa
-    document.getElementById('btn-nuevo-programa').disabled = false;
-
-    // Limpiar y mostrar loading en la lista de programas
-    document.getElementById('programas-lista').innerHTML = `
-        <div class="text-center p-4">
-            <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Cargando programas...</span>
-            </div>
-            <p class="mt-2 text-muted">Cargando programas...</p>
-        </div>
-    `;
-    document.getElementById('contador-programas').textContent = '0';
-
-    // Limpiar la lista de asignaturas
-    document.getElementById('asignaturas-lista').innerHTML = `
-        <div class="text-center p-4">
-            <div class="empty-state">
-                <i class="fas fa-hand-point-left fa-3x text-muted mb-3"></i>
-                <p class="text-muted">Seleccione un programa para ver sus asignaturas</p>
-            </div>
-        </div>
-    `;
-    document.getElementById('contador-asignaturas').textContent = '0';
-
-    // Ocultar detalles de asignatura si están visibles
-    document.getElementById('detalles-asignatura-container').style.display = 'none';
-
-    // Cargar programas de esta institución
-    cargarProgramasPorInstitucion(id);
-}
-
-// Función para cargar programas
-function cargarProgramasPorInstitucion(institucionId) {
-    fetch(`${apiConfig.baseUrl}/programas`, {
-        method: 'GET',
-        headers: apiConfig.headers
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al cargar programas');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Filtrar programas por institución
-        programas = data.filter(p => p.institucion === instituciones.find(i => i.id_institucion === institucionId).nombre);
-        document.getElementById('contador-programas').textContent = programas.length;
-        renderizarProgramas();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('programas-lista').innerHTML = `
-            <div class="alert alert-danger m-3">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Error al cargar programas: ${error.message}
-            </div>
-        `;
-        mostrarNotificacion('Error', `No se pudieron cargar los programas: ${error.message}`, 'error');
-    });
-}
-
-// Función para renderizar programas en el panel
-function renderizarProgramas() {
-    const listaProgramas = document.getElementById('programas-lista');
-
-    if (programas.length === 0) {
-        listaProgramas.innerHTML = `
-            <div class="text-center p-4">
-                <div class="empty-state">
-                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay programas disponibles para esta institución</p>
-                    <button class="btn btn-success btn-sm mt-2" onclick="mostrarModalNuevoPrograma()">
-                        <i class="fas fa-plus-circle me-1"></i> Agregar programa
-                    </button>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-    programas.forEach(programa => {
-        html += `
-            <a href="#" class="list-group-item list-group-item-action border-0 mb-1 ${programaSeleccionadoId === programa.id_programa ? 'active' : ''}"
-               onclick="seleccionarPrograma(${programa.id_programa})">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-1">${programa.programa}</h6>
-                        <div class="d-flex align-items-center text-muted small">
-                            <i class="fas fa-graduation-cap me-1"></i>
-                            <span>${programa.tipo_formacion || 'Universitaria'}</span>
-                            <i class="fas fa-chalkboard ms-2 me-1"></i>
-                            <span>${programa.metodologia || 'Presencial'}</span>
-                        </div>
-                    </div>
-                    <span class="badge bg-success rounded-pill px-2">${programa.codigo_snies}</span>
-                </div>
-            </a>
-        `;
+    // Primero ocultamos todos los semestres
+    document.querySelectorAll('#listaAsignaturas .semester-header').forEach(header => {
+        header.style.display = 'none';
     });
 
-    listaProgramas.innerHTML = html;
-}
+    // Filtramos asignaturas
+    document.querySelectorAll('#listaAsignaturas a:not(.semester-header)').forEach(item => {
+        const contenido = item.textContent.toLowerCase();
+        if (contenido.includes(termino)) {
+            item.style.display = 'block';
+            contadorVisibles++;
 
-// Función para seleccionar un programa y cargar sus asignaturas
-function seleccionarPrograma(id) {
-    // Si ya está seleccionado, no hacer nada
-    if (programaSeleccionadoId === id) return;
-
-    programaSeleccionadoId = id;
-    asignaturaSeleccionadaId = null;
-
-    // Actualizar UI para mostrar el programa seleccionado
-    const programaSeleccionado = programas.find(p => p.id_programa === id);
-    document.getElementById('programa-seleccionado').textContent = `${programaSeleccionado.programa} (${programaSeleccionado.codigo_snies})`;
-
-    // Resaltar el elemento seleccionado
-    document.querySelectorAll('#programas-lista .list-group-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    document.querySelector(`#programas-lista .list-group-item[onclick="seleccionarPrograma(${id})"]`).classList.add('active');
-
-    // Mostrar el buscador de asignaturas con animación
-    const buscarAsignaturaContainer = document.getElementById('buscar-asignatura-container');
-    buscarAsignaturaContainer.style.display = 'flex';
-    buscarAsignaturaContainer.classList.add('animate__animated', 'animate__fadeIn');
-
-    // Habilitar el botón para crear nueva asignatura
-    document.getElementById('btn-nueva-asignatura').disabled = false;
-
-    // Limpiar y mostrar loading en la lista de asignaturas
-    document.getElementById('asignaturas-lista').innerHTML = `
-        <div class="text-center p-4">
-            <div class="spinner-border text-info" role="status">
-                <span class="visually-hidden">Cargando asignaturas...</span>
-            </div>
-            <p class="mt-2 text-muted">Cargando asignaturas...</p>
-        </div>
-    `;
-
-    // Ocultar detalles de asignatura si están visibles
-    document.getElementById('detalles-asignatura-container').style.display = 'none';
-
-    // Cargar asignaturas de este programa
-    cargarAsignaturasPorPrograma(id);
-}
-
-// Función para cargar asignaturas
-function cargarAsignaturasPorPrograma(programaId) {
-    fetch(`${apiConfig.baseUrl}/asignaturas`, {
-        method: 'GET',
-        headers: apiConfig.headers
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error al cargar asignaturas');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Filtrar asignaturas por programa
-        asignaturas = data.filter(a => a.programa === programas.find(p => p.id_programa === programaId).programa);
-        document.getElementById('contador-asignaturas').textContent = asignaturas.length;
-        renderizarAsignaturas();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('asignaturas-lista').innerHTML = `
-            <div class="alert alert-danger m-3">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Error al cargar asignaturas: ${error.message}
-            </div>
-        `;
-        mostrarNotificacion('Error', `No se pudieron cargar las asignaturas: ${error.message}`, 'error');
-    });
-}
-
-// Función para renderizar asignaturas en el panel
-function renderizarAsignaturas() {
-    const listaAsignaturas = document.getElementById('asignaturas-lista');
-
-    if (asignaturas.length === 0) {
-        listaAsignaturas.innerHTML = `
-            <div class="text-center p-4">
-                <div class="empty-state">
-                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No hay asignaturas disponibles para este programa</p>
-                    <button class="btn btn-info text-white btn-sm mt-2" onclick="mostrarModalNuevaAsignatura()">
-                        <i class="fas fa-plus-circle me-1"></i> Agregar asignatura
-                    </button>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
-    // Agrupar asignaturas por semestre
-    const asignaturasPorSemestre = asignaturas.reduce((acc, asignatura) => {
-        const semestre = asignatura.semestre || '1';
-        if (!acc[semestre]) {
-            acc[semestre] = [];
-        }
-        acc[semestre].push(asignatura);
-        return acc;
-    }, {});
-
-    // Ordenar semestres
-    const semestres = Object.keys(asignaturasPorSemestre).sort((a, b) => a - b);
-
-    let html = '';
-
-    semestres.forEach(semestre => {
-        // Añadir encabezado del semestre
-        html += `
-            <div class="list-group-item list-group-item-secondary border-0 mb-1 rounded">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-layer-group me-2"></i>
-                        <span>Semestre ${semestre}</span>
-                    </div>
-                    <span class="badge bg-secondary rounded-pill">${asignaturasPorSemestre[semestre].length}</span>
-                </div>
-            </div>
-        `;
-
-        // Añadir las asignaturas de este semestre
-        asignaturasPorSemestre[semestre].sort((a, b) => a.nombre.localeCompare(b.nombre)).forEach(asignatura => {
-            html += `
-                <a href="#" class="list-group-item list-group-item-action border-0 mb-1 ps-4 ${asignaturaSeleccionadaId === asignatura.id_asignatura ? 'active' : ''}"
-                   onclick="mostrarDetallesAsignatura(${asignatura.id_asignatura})">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1">${asignatura.nombre}</h6>
-                            <div class="d-flex align-items-center text-muted small">
-                                <i class="fas fa-hashtag me-1"></i>
-                                <span>${asignatura.codigo_asignatura || 'Sin código'}</span>
-                                <i class="fas fa-tag ms-2 me-1"></i>
-                                <span>${asignatura.tipo || 'Obligatoria'}</span>
-                            </div>
-                        </div>
-                        <span class="badge bg-info rounded-pill">${asignatura.creditos} créd.</span>
-                    </div>
-                </a>
-            `;
-        });
-    });
-
-    listaAsignaturas.innerHTML = html;
-}
-
-// Función para mostrar detalles de una asignatura
-function mostrarDetallesAsignatura(id) {
-    asignaturaSeleccionadaId = id;
-
-    // Resaltar el elemento seleccionado
-    document.querySelectorAll('#asignaturas-lista .list-group-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    const elementoSeleccionado = document.querySelector(`#asignaturas-lista .list-group-item[onclick="mostrarDetallesAsignatura(${id})"]`);
-    if (elementoSeleccionado) {
-        elementoSeleccionado.classList.add('active');
-    }
-
-    // Obtener la asignatura de la lista
-    const asignatura = asignaturas.find(a => a.id_asignatura === id);
-    if (!asignatura) {
-        mostrarNotificacion('Error', 'No se encontró la asignatura seleccionada', 'error');
-        return;
-    }
-
-    // Actualizar título de la sección de detalles
-    document.getElementById('asignatura-seleccionada').textContent = `${asignatura.nombre} - ${asignatura.codigo_asignatura || 'Sin código'}`;
-
-    // Mostrar información básica de la asignatura en la pestaña "Información General"
-    const infoTab = document.getElementById('info');
-    infoTab.innerHTML = `
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-gradient-primary text-white py-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <h5 class="mb-0">Información Básica</h5>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Nombre</div>
-                                <div class="fw-bold text-end">${asignatura.nombre}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Código</div>
-                                <div class="fw-bold text-end">${asignatura.codigo_asignatura || 'N/A'}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Créditos</div>
-                                <div class="fw-bold text-end">${asignatura.creditos}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Semestre</div>
-                                <div class="fw-bold text-end">${asignatura.semestre || 'N/A'}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Tipo</div>
-                                <div class="fw-bold text-end">${asignatura.tipo || 'Obligatoria'}</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-gradient-success text-white py-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-graduation-cap me-2"></i>
-                            <h5 class="mb-0">Información Académica</h5>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Programa</div>
-                                <div class="fw-bold text-end">${asignatura.programa}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Intensidad Horaria</div>
-                                <div class="fw-bold text-end">${asignatura.intensidad_horaria || 'N/A'}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Modalidad</div>
-                                <div class="fw-bold text-end">${asignatura.modalidad || 'Presencial'}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Prerrequisitos</div>
-                                <div class="fw-bold text-end">${asignatura.prerequisitos || 'N/A'}</div>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center border-0">
-                                <div class="text-muted">Correquisitos</div>
-                                <div class="fw-bold text-end">${asignatura.corequisitos || 'N/A'}</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Preparar pestaña de contenido programático (se cargará después)
-    document.getElementById('contenido-programatico-lista').innerHTML = '';
-    document.getElementById('contenido-loader').style.display = 'block';
-
-    // Mostrar el contenedor de detalles con animación
-    const detallesContainer = document.getElementById('detalles-asignatura-container');
-    detallesContainer.style.display = 'block';
-    detallesContainer.classList.add('animate__animated', 'animate__fadeIn');
-
-    // Mostrar la primera pestaña por defecto
-    const firstTabEl = document.querySelector('#asignaturaTabs li:first-child button');
-    const firstTab = new bootstrap.Tab(firstTabEl);
-    firstTab.show();
-}
-
-// Función para cerrar detalles de asignatura
-function cerrarDetallesAsignatura() {
-    // Ocultar el panel con animación
-    const detallesContainer = document.getElementById('detalles-asignatura-container');
-    detallesContainer.classList.remove('animate__fadeIn');
-    detallesContainer.classList.add('animate__fadeOut');
-
-    // Esperar a que termine la animación para ocultarlo
-    setTimeout(() => {
-        detallesContainer.style.display = 'none';
-        detallesContainer.classList.remove('animate__fadeOut');
-    }, 500);
-
-    // Quitar selección de asignatura
-    asignaturaSeleccionadaId = null;
-    document.querySelectorAll('#asignaturas-lista .list-group-item').forEach(el => {
-        el.classList.remove('active');
-    });
-}
-
-// Función mejorada para cargar el contenido programático de una asignatura
-function cargarContenidoProgramatico(asignaturaId) {
-    // Elementos DOM
-    const loader = document.getElementById('contenido-loader');
-    const listaContainer = document.getElementById('contenido-programatico-lista');
-
-    // Mostrar loader y limpiar contenido anterior
-    loader.style.display = 'block';
-    listaContainer.innerHTML = '';
-
-    // Establecer el ID de asignatura en el formulario oculto
-    document.getElementById('asignatura_id').value = asignaturaId;
-
-    // URL de la API
-    const url = `${apiConfig.baseUrl}/contenidos-programaticos/asignatura/${asignaturaId}`;
-
-    // Hacer la petición
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Ocultar loader
-            loader.style.display = 'none';
-
-            // Procesamos los datos
-            // Si datos es un objeto con propiedad 'datos', usamos esa propiedad
-            const contenidos = data.datos ? data.datos : (Array.isArray(data) ? data : [data]);
-            contenidosProgramaticos = contenidos;
-
-            if (contenidos.length === 0) {
-                listaContainer.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-info">
-                            <div class="d-flex">
-                                <div class="me-3">
-                                    <i class="fas fa-info-circle fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h5>No hay contenidos programáticos</h5>
-                                    <p class="mb-0">Esta asignatura aún no tiene contenidos programáticos definidos. Puedes agregar uno nuevo usando el botón de abajo.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                return;
+            // Encontrar el header del semestre anterior
+            let prevEl = item.previousElementSibling;
+            while (prevEl && !prevEl.classList.contains('semester-header')) {
+                prevEl = prevEl.previousElementSibling;
             }
 
-            // Renderizar tarjetas de contenido
-            let html = '';
-            contenidos.forEach(contenido => {
-                html += `
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card contenido-card shadow-sm border-0 h-100">
-                            <div class="card-header bg-gradient-info text-white">
-                                <h5 class="mb-0 text-truncate">${contenido.tema}</h5>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">${contenido.descripcion.substring(0, 120)}${contenido.descripcion.length > 120 ? '...' : ''}</p>
-                            </div>
-                            <div class="card-footer bg-light border-top-0">
-                                <button class="btn btn-sm btn-primary w-100" onclick="mostrarDetalleContenido(${contenido.id_contenido})">
-                                    <i class="fas fa-eye me-1"></i> Ver detalles
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            listaContainer.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error al cargar contenido programático:', error);
-            loader.style.display = 'none';
-            listaContainer.innerHTML = `
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        <div class="d-flex">
-                            <div class="me-3">
-                                <i class="fas fa-exclamation-triangle fa-2x"></i>
-                            </div>
-                            <div>
-                                <h5>Error al cargar contenidos</h5>
-                                <p class="mb-0">${error.message}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-}
-
-// Función para mostrar los detalles de un contenido programático
-function mostrarDetalleContenido(contenidoId) {
-    contenidoSeleccionadoId = contenidoId;
-    const contenido = contenidosProgramaticos.find(c => c.id_contenido == contenidoId);
-
-    if (!contenido) {
-        mostrarNotificacion('Error', 'No se encontró el contenido programático seleccionado', 'error');
-        return;
-    }
-
-    // Rellenar el modal con los detalles
-    const detalleContainer = document.getElementById('contenido-programatico-detalle');
-
-    detalleContainer.innerHTML = `
-        <div class="row">
-            <div class="col-12 mb-4">
-                <div class="d-flex align-items-center">
-                    <div class="icon-shape bg-primary text-white rounded-circle me-3">
-                        <i class="fas fa-bookmark p-2"></i>
-                    </div>
-                    <h4 class="mb-0">${contenido.tema}</h4>
-                </div>
-                <hr>
-            </div>
-
-            <div class="col-12 mb-4">
-                <h5 class="text-primary">
-                    <i class="fas fa-bullseye me-2"></i>
-                    Resultados de Aprendizaje
-                </h5>
-                <p class="mb-0 bg-light p-3 rounded">${contenido.resultados_aprendizaje || 'No se han definido resultados de aprendizaje.'}</p>
-            </div>
-
-            <div class="col-12">
-                <h5 class="text-primary">
-                    <i class="fas fa-align-left me-2"></i>
-                    Descripción del Contenido
-                </h5>
-                <p class="mb-0 bg-light p-3 rounded">${contenido.descripcion}</p>
-            </div>
-
-            <div class="col-12 mt-4">
-                <div class="card bg-light border-0">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center text-muted">
-                            <small>
-                                <i class="far fa-calendar-alt me-1"></i>
-                                Actualizado: ${new Date(contenido.updated_at).toLocaleDateString()}
-                            </small>
-                            <div class="ms-auto">
-                                <small>ID: ${contenido.id_contenido}</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Mostrar el modal
-    const modal = new bootstrap.Modal(document.getElementById('contenidoProgramaticoModal'));
-    modal.show();
-}
-
-// Función para mostrar el modal de nuevo contenido programático
-function mostrarModalNuevoContenido() {
-    // Limpiar formulario
-    document.getElementById('contenidoForm').reset();
-    document.getElementById('contenido_id').value = '';
-    document.getElementById('asignatura_id').value = asignaturaSeleccionadaId;
-
-    // Cambiar título del modal
-    document.getElementById('formContenidoModalLabel').innerHTML = '<i class="fas fa-plus-circle me-2"></i> Nuevo Contenido Programático';
-
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('formContenidoModal'));
-    modal.show();
-}
-
-// Función para editar un contenido seleccionado
-function editarContenidoSeleccionado() {
-    // Cerrar el modal de detalles
-    bootstrap.Modal.getInstance(document.getElementById('contenidoProgramaticoModal')).hide();
-
-    const contenido = contenidosProgramaticos.find(c => c.id_contenido == contenidoSeleccionadoId);
-
-    if (!contenido) {
-        mostrarNotificacion('Error', 'No se encontró el contenido programático seleccionado', 'error');
-        return;
-    }
-
-    // Llenar el formulario con los datos del contenido
-    document.getElementById('contenido_id').value = contenido.id_contenido;
-    document.getElementById('asignatura_id').value = asignaturaSeleccionadaId;
-    document.getElementById('tema').value = contenido.tema;
-    document.getElementById('resultados_aprendizaje').value = contenido.resultados_aprendizaje || '';
-    document.getElementById('descripcion').value = contenido.descripcion;
-
-    // Cambiar título del modal
-    document.getElementById('formContenidoModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i> Editar Contenido Programático';
-
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('formContenidoModal'));
-    modal.show();
-}
-
-// Función para guardar un contenido programático (nuevo o edición)
-function guardarContenidoProgramatico() {
-    // Obtener datos del formulario
-    const contenidoId = document.getElementById('contenido_id').value;
-    const asignaturaId = document.getElementById('asignatura_id').value;
-    const tema = document.getElementById('tema').value;
-    const resultadosAprendizaje = document.getElementById('resultados_aprendizaje').value;
-    const descripcion = document.getElementById('descripcion').value;
-
-    // Validar campos obligatorios
-    if (!tema || !descripcion) {
-        mostrarNotificacion('Error', 'Debe completar todos los campos obligatorios', 'error');
-        return;
-    }
-
-    // Datos para enviar
-    const data = {
-        asignatura_id: asignaturaId,
-        tema: tema,
-        resultados_aprendizaje: resultadosAprendizaje,
-        descripcion: descripcion
-    };
-
-    // URL y método según sea nuevo o edición
-    const isNew = !contenidoId;
-    const url = isNew
-        ? `${apiConfig.baseUrl}/contenidos-programaticos`
-        : `${apiConfig.baseUrl}/contenidos-programaticos/${contenidoId}`;
-    const method = isNew ? 'POST' : 'PUT';
-
-    // Mostrar indicador de carga en el botón
-    const btnGuardar = document.getElementById('guardarContenido');
-    const btnTextoOriginal = btnGuardar.innerHTML;
-    btnGuardar.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
-    btnGuardar.disabled = true;
-
-    // Enviar petición
-    fetch(url, {
-        method: method,
-        headers: apiConfig.headers,
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(response => {
-        // Cerrar modal
-        bootstrap.Modal.getInstance(document.getElementById('formContenidoModal')).hide();
-
-        // Mostrar notificación
-        mostrarNotificacion(
-            'Éxito',
-            isNew ? 'Contenido programático creado correctamente' : 'Contenido programático actualizado correctamente',
-            'success'
-        );
-
-        // Recargar contenidos
-        cargarContenidoProgramatico(asignaturaId);
-    })
-    .catch(error => {
-        console.error('Error al guardar contenido programático:', error);
-        mostrarNotificacion('Error', `No se pudo guardar el contenido programático: ${error.message}`, 'error');
-    })
-    .finally(() => {
-        // Restaurar estado del botón
-        btnGuardar.innerHTML = btnTextoOriginal;
-        btnGuardar.disabled = false;
-    });
-}
-
-// Función para mostrar el modal de nueva institución
-function mostrarModalNuevaInstitucion() {
-    // Limpiar formulario
-    document.getElementById('institucionForm').reset();
-
-    // Cambiar título del modal
-    document.getElementById('institucion-modal-title').innerHTML = 'Nueva Institución';
-
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('institucionModal'));
-    modal.show();
-
-    // Configurar guardar
-    document.getElementById('guardarInstitucion').onclick = guardarInstitucion;
-}
-
-// Función para guardar una institución
-function guardarInstitucion() {
-    // Obtener datos del formulario
-    const nombre = document.getElementById('nombre').value;
-    const codigoIes = document.getElementById('codigo_ies').value;
-    const tipo = document.getElementById('tipo').value;
-    const municipio = document.getElementById('municipio').value;
-
-    // Validar campos obligatorios
-    if (!nombre || !codigoIes) {
-        mostrarNotificacion('Error', 'Debe completar el nombre y código IES', 'error');
-        return;
-    }
-
-    // Datos para enviar
-    const data = {
-        nombre: nombre,
-        codigo_ies: codigoIes,
-        tipo: tipo,
-        municipio: municipio
-    };
-
-    // Mostrar indicador de carga en el botón
-    const btnGuardar = document.getElementById('guardarInstitucion');
-    const btnTextoOriginal = btnGuardar.innerHTML;
-    btnGuardar.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
-    btnGuardar.disabled = true;
-
-    // Enviar petición
-    fetch(`${apiConfig.baseUrl}/instituciones`, {
-        method: 'POST',
-        headers: apiConfig.headers,
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(response => {
-        // Cerrar modal
-        bootstrap.Modal.getInstance(document.getElementById('institucionModal')).hide();
-
-        // Mostrar notificación
-        mostrarNotificacion('Éxito', 'Institución creada correctamente', 'success');
-
-        // Recargar instituciones
-        cargarInstituciones();
-    })
-    .catch(error => {
-        console.error('Error al guardar institución:', error);
-        mostrarNotificacion('Error', `No se pudo guardar la institución: ${error.message}`, 'error');
-    })
-    .finally(() => {
-        // Restaurar estado del botón
-        btnGuardar.innerHTML = btnTextoOriginal;
-        btnGuardar.disabled = false;
-    });
-}
-
-// Función para mostrar el modal de nuevo programa
-function mostrarModalNuevoPrograma() {
-    // Verificar si hay una institución seleccionada
-    if (!institucionSeleccionadaId) {
-        mostrarNotificacion('Error', 'Debe seleccionar una institución', 'error');
-        return;
-    }
-
-    // En implementación real, aquí iría la lógica para mostrar el modal de nuevo programa
-    mostrarNotificacion('Información', 'Funcionalidad en desarrollo', 'info');
-}
-
-// Función para mostrar el modal de nueva asignatura
-function mostrarModalNuevaAsignatura() {
-    // Verificar si hay un programa seleccionado
-    if (!programaSeleccionadoId) {
-        mostrarNotificacion('Error', 'Debe seleccionar un programa', 'error');
-        return;
-    }
-
-    // En implementación real, aquí iría la lógica para mostrar el modal de nueva asignatura
-    mostrarNotificacion('Información', 'Funcionalidad en desarrollo', 'info');
-}
-
-// Mejora de la experiencia de usuario: mostrar tooltips Bootstrap
-function habilitarTooltips() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-}
-
-// Función para añadir animaciones a elementos que entran en el viewport
-function habilitarAnimacionesScroll() {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate__animated', 'animate__fadeIn');
-                observer.unobserve(entry.target);
+            if (prevEl) {
+                prevEl.style.display = 'block';
             }
-        });
-    }, {
-        threshold: 0.1
-    });
-
-    document.querySelectorAll('.animate-on-scroll').forEach(el => {
-        observer.observe(el);
-    });
-}
-
-// Función para generar cartas más atractivas para contenidos programáticos
-function renderizarContenidoProgramaticoEnriquecido(contenido) {
-    // Extraer información relevante
-    const titulo = contenido.tema;
-    const descripcion = contenido.descripcion;
-    const resultados = contenido.resultados_aprendizaje || 'No se han definido resultados de aprendizaje.';
-
-    // Generar colores aleatorios para las tarjetas (para variedad visual)
-    const colores = [
-        'primary', 'success', 'info', 'warning', 'danger', 'dark'
-    ];
-    const colorRandom = colores[Math.floor(Math.random() * colores.length)];
-
-    // Crear un icono adecuado según el título
-    let icono = 'fas fa-book';
-    if (titulo.toLowerCase().includes('algoritmo')) icono = 'fas fa-code';
-    else if (titulo.toLowerCase().includes('datos')) icono = 'fas fa-database';
-    else if (titulo.toLowerCase().includes('programa')) icono = 'fas fa-laptop-code';
-    else if (titulo.toLowerCase().includes('diseño')) icono = 'fas fa-paint-brush';
-    else if (titulo.toLowerCase().includes('estruct')) icono = 'fas fa-sitemap';
-
-    return `
-        <div class="col-md-6 col-lg-4 mb-4 animate-on-scroll">
-            <div class="card contenido-card shadow-sm border-0 h-100">
-                <div class="card-header bg-gradient-${colorRandom} text-white">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-shape bg-white text-${colorRandom} rounded-circle me-2">
-                            <i class="${icono}"></i>
-                        </div>
-                        <h5 class="mb-0 text-truncate">${titulo}</h5>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <h6 class="text-${colorRandom} mb-2">
-                            <i class="fas fa-bullseye me-1"></i> Resultados de Aprendizaje
-                        </h6>
-                        <p class="small mb-0 bg-light p-2 rounded">${resultados.substring(0, 100)}${resultados.length > 100 ? '...' : ''}</p>
-                    </div>
-                    <div>
-                        <h6 class="text-${colorRandom} mb-2">
-                            <i class="fas fa-align-left me-1"></i> Descripción
-                        </h6>
-                        <p class="mb-0">${descripcion.substring(0, 120)}${descripcion.length > 120 ? '...' : ''}</p>
-                    </div>
-                </div>
-                <div class="card-footer bg-light border-top-0 d-flex justify-content-between">
-                    <button class="btn btn-sm btn-outline-${colorRandom}" onclick="editarContenidoDirecto(${contenido.id_contenido})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-${colorRandom}" onclick="mostrarDetalleContenido(${contenido.id_contenido})">
-                        <i class="fas fa-eye me-1"></i> Ver detalles
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// Función para editar contenido directamente desde la lista
-function editarContenidoDirecto(contenidoId) {
-    contenidoSeleccionadoId = contenidoId;
-    editarContenidoSeleccionado();
-}
-
-// Mejora visual: función para alternar modo oscuro
-function toggleModoOscuro() {
-    document.body.classList.toggle('modo-oscuro');
-
-    // Guardar preferencia en localStorage
-    const modoOscuro = document.body.classList.contains('modo-oscuro');
-    localStorage.setItem('modo-oscuro', modoOscuro);
-
-    // Actualizar icono del botón
-    const iconoModo = document.getElementById('icono-modo');
-    if (iconoModo) {
-        iconoModo.className = modoOscuro ? 'fas fa-sun' : 'fas fa-moon';
-    }
-}
-
-// Función para aplicar preferencia de modo oscuro al cargar la página
-function aplicarModoOscuro() {
-    const modoOscuro = localStorage.getItem('modo-oscuro') === 'true';
-    if (modoOscuro) {
-        document.body.classList.add('modo-oscuro');
-
-        // Actualizar icono del botón si existe
-        const iconoModo = document.getElementById('icono-modo');
-        if (iconoModo) {
-            iconoModo.className = 'fas fa-sun';
-        }
-    }
-}
-
-// Función para aplicar efectos visuales mejorados al hacer clic en elementos
-function aplicarEfectosClick() {
-    document.addEventListener('click', function(e) {
-        // Solo aplicar a elementos con la clase .btn
-        if (e.target.closest('.btn')) {
-            // Crear elemento de efecto ripple
-            const button = e.target.closest('.btn');
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple-effect';
-
-            // Calcular posición
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const posX = e.clientX - rect.left - size / 2;
-            const posY = e.clientY - rect.top - size / 2;
-
-            // Aplicar posición y tamaño
-            ripple.style.width = ripple.style.height = `${size}px`;
-            ripple.style.left = `${posX}px`;
-            ripple.style.top = `${posY}px`;
-
-            // Añadir y luego eliminar después de la animación
-            button.appendChild(ripple);
-            setTimeout(() => {
-                ripple.remove();
-            }, 600); // Duración de la animación + pequeño margen
+        } else {
+            item.style.display = 'none';
         }
     });
+
+    // Actualizar contador con resultados filtrados
+    document.getElementById('contador-asignaturas').textContent = contadorVisibles;
 }
 
-// Inicializar funciones adicionales cuando el DOM esté listo
+// Función para gestionar los botones de creación
+function configurarBotonesCreacion() {
+    // Botón de nueva institución
+    document.getElementById('btn-nueva-institucion').addEventListener('click', function() {
+        mostrarNotificacion('Funcionalidad de crear nueva institución en desarrollo', 'info');
+    });
+
+    // Botón de nuevo programa
+    document.getElementById('btn-nuevo-programa').addEventListener('click', function() {
+        if (!institucionSeleccionadaId) {
+            mostrarNotificacion('Seleccione una institución primero', 'warning');
+            return;
+        }
+        mostrarNotificacion('Funcionalidad de crear nuevo programa en desarrollo', 'info');
+    });
+
+    // Botón de nueva asignatura
+    document.getElementById('btn-nueva-asignatura').addEventListener('click', function() {
+        if (!programaSeleccionadoId) {
+            mostrarNotificacion('Seleccione un programa primero', 'warning');
+            return;
+        }
+        mostrarNotificacion('Funcionalidad de crear nueva asignatura en desarrollo', 'info');
+    });
+}
+
+// Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', function() {
-    // Habilitar funciones adicionales de UI
-    habilitarTooltips();
-    habilitarAnimacionesScroll();
-    aplicarModoOscuro();
-    aplicarEfectosClick();
+    console.log('Página cargada, iniciando explorador de contenidos programáticos...');
 
-    // Añadir botón para modo oscuro en la barra superior si no existe
-    const header = document.querySelector('.card.bg-gradient-primary');
-    if (header && !document.getElementById('btn-modo-oscuro')) {
-        const btnModoOscuro = document.createElement('button');
-        btnModoOscuro.id = 'btn-modo-oscuro';
-        btnModoOscuro.className = 'btn btn-sm btn-light position-absolute end-0 me-3';
-        btnModoOscuro.innerHTML = `<i id="icono-modo" class="${localStorage.getItem('modo-oscuro') === 'true' ? 'fas fa-sun' : 'fas fa-moon'}"></i>`;
-        btnModoOscuro.onclick = toggleModoOscuro;
-        btnModoOscuro.setAttribute('data-bs-toggle', 'tooltip');
-        btnModoOscuro.setAttribute('data-bs-placement', 'bottom');
-        btnModoOscuro.setAttribute('title', 'Cambiar modo claro/oscuro');
+    // Configurar botones de creación
+    configurarBotonesCreacion();
 
-        header.style.position = 'relative';
-        header.appendChild(btnModoOscuro);
-    }
-});
+    // Cargar instituciones inmediatamente
+    cargarInstituciones();
 
-// Estilos adicionales para modo oscuro
-const estilosModoOscuro = document.createElement('style');
-estilosModoOscuro.textContent = `
-    .modo-oscuro {
-        background-color: #121212;
-        color: #e0e0e0;
+    // Configurar buscadores con debounce
+    const buscadorInstituciones = document.getElementById('buscadorInstituciones');
+    if (buscadorInstituciones) {
+        let timeout = null;
+        buscadorInstituciones.addEventListener('keyup', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                filtrarInstituciones(this.value);
+            }, 300);
+        });
     }
 
-    .modo-oscuro .card {
-        background-color: #1e1e1e;
-        color: #e0e0e0;
+    const buscadorProgramas = document.getElementById('buscadorProgramas');
+    if (buscadorProgramas) {
+        let timeout = null;
+        buscadorProgramas.addEventListener('keyup', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                filtrarProgramas(this.value);
+            }, 300);
+        });
     }
 
-    .modo-oscuro .list-group-item {
-        background-color: #2a2a2a;
-        color: #e0e0e0;
-        border-color: #333;
+    const buscadorAsignaturas = document.getElementById('buscadorAsignaturas');
+    if (buscadorAsignaturas) {
+        let timeout = null;
+        buscadorAsignaturas.addEventListener('keyup', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                filtrarAsignaturas(this.value);
+            }, 300);
+        });
     }
 
-    .modo-oscuro .list-group-item-action:hover {
-        background-color: #333;
-    }
-
-    .modo-oscuro .list-group-item.active {
-        background-color: #4e73df;
-        color: white;
-    }
-
-    .modo-oscuro .card-header:not(.bg-gradient-primary):not(.bg-gradient-success):not(.bg-gradient-info):not(.bg-gradient-warning) {
-        background-color: #252525 !important;
-        color: #e0e0e0;
-    }
-
-    .modo-oscuro .card-footer, .modo-oscuro .bg-light {
-        background-color: #252525 !important;
-        color: #e0e0e0;
-    }
-
-    .modo-oscuro .text-muted {
-        color: #aaa !important;
-    }
-
-    .modo-oscuro .border-0 {
-        border-color: #333 !important;
-    }
-
-    .modo-oscuro .form-control, .modo-oscuro .input-group-text {
-        background-color: #333;
-        border-color: #444;
-        color: #e0e0e0;
-    }
-
-    .modo-oscuro .form-control::placeholder {
-        color: #888;
-    }
-
-    .modo-oscuro .modal-content {
-        background-color: #1e1e1e;
-        color: #e0e0e0;
-    }
-
-    .modo-oscuro .nav-pills .nav-link:not(.active) {
-        color: #e0e0e0;
-    }
-
-    .modo-oscuro .table {
-        color: #e0e0e0;
-    }
-
-    /* Efecto ripple para botones */
-    .btn {
-        position: relative;
-        overflow: hidden;
-    }
-
-    .ripple-effect {
-        position: absolute;
-        border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.5);
-        animation: ripple 0.6s linear;
-        pointer-events: none;
-    }
-
-    @keyframes ripple {
-        to {
-            transform: scale(2);
-            opacity: 0;
+    // Configurar eventos para los botones de reintentar
+    document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-reintentar') || e.target.closest('.btn-reintentar')) {
+            if (asignaturaSeleccionadaId) {
+                cargarContenidoProgramatico(asignaturaSeleccionadaId);
+            }
         }
-    }
-`;
+    });
 
-// Añadir estilos al documento
-document.head.appendChild(estilosModoOscuro);
+    // Monitorear estado de conexión
+    window.addEventListener('online', () => {
+        console.log('Conexión restablecida');
+        mostrarNotificacion('Conexión a internet restablecida', 'success');
+    });
+
+    window.addEventListener('offline', () => {
+        console.log('Conexión perdida');
+        mostrarNotificacion('Se ha perdido la conexión a internet', 'warning');
+    });
+
+    // Función global para diagnóstico
+    window.fijarProblema = function() {
+        if (asignaturaSeleccionadaId) {
+            cargarContenidoProgramatico(asignaturaSeleccionadaId);
+            return "Intentando recargar contenidos programáticos...";
+        } else if (programaSeleccionadoId) {
+            cargarAsignaturas(programaSeleccionadoId);
+            return "Intentando recargar asignaturas...";
+        } else if (institucionSeleccionadaId) {
+            cargarProgramas(institucionSeleccionadaId);
+            return "Intentando recargar programas...";
+        } else {
+            cargarInstituciones();
+            return "Recargando todas las instituciones...";
+        }
+    };
+});
 </script>
 @endsection

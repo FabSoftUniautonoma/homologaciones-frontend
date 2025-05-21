@@ -140,25 +140,34 @@ Route::prefix('homologaciones-vicerrectoria')
 | RUTAS PARA ADMINISTRADOR
 |--------------------------------------------------------------------------
 */
-
-   Route::get('/administrador', function () {
-            return view('admin.homologacionesadministrador.administrador');
-        });
-
-        Route::get('/crearinsti', function () {
-            return view('admin.homologacionesadministrador.crearinsti');
-        });
+Route::get('/administrador', function () {
+    return view('admin.homologacionesadministrador.administrador');
+})->name('administrador');
 
 
 
-        Route::get('/administrador/usuarios', function () {
-            return view('admin.homologacionesadministrador.usuarios');
-        });
+Route::get('/crearinsti', function () {
+    return view('admin.homologacionesadministrador.crearinsti');
+ });
+
+
+       Route::get('/administrador/usuarios', function () {
+    return view('admin.homologacionesadministrador.usuarios');
+})->name('administrador/usuarios');
+
 
         Route::get('/usuarioscrear', function () {
             return view('admin.homologacionesadministrador.usuarios_crear');
         });
 
+       Route::get('/sinstituciones', function () {
+    return view('admin.homologacionesadministrador.sinstituciones');
+})->name('sinstituciones');
+
+         Route::get('/crearasignatura', function () {
+            return view('admin.homologacionesadministrador.asignaturas');
+        });
+       
 
 /*
 |--------------------------------------------------------------------------

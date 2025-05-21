@@ -159,7 +159,7 @@
         </div>
     </div>
 
-  
+
 <!-- Estilos adicionales mejorados -->
 <style>
     .hover-card {

@@ -3,229 +3,214 @@
 @section('content')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <div class="container-fluid">
-        <div class="row">
+    <!-- Header institucional -->
+    <div class="container-fluid py-3 mb-4" style="background-color: #003366; font-family: 'Source Sans Pro', sans-serif;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center text-md-start">
+                    <img src="/img/logo-small.png" alt="Logo" class="img-fluid" style="max-height: 60px;">
+                </div>
+                <div class="col-md-8 text-center">
+                    <h1 class="display-5 fw-bold mb-0" style="color: white !important;">Crear Instituciones y Programas</h1>
+                    <p class="lead mb-0" style="color: white !important;">Gestión institucional</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Crear Institución, Programa y Asignaturas</h3>
-                    </div>
-                    <div class="card-body">
-                        <!-- Progress Bar -->
-                        <div class="progress mb-4">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                                style="width: 33%;" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">
-                                Paso 1 de 3
+                <div class="card shadow-lg border-0 rounded-lg">
+                    <div class="card-body p-4">
+                        <!-- Steps mejorados -->
+                        <div class="steps-container mb-5">
+                            <div class="step-circles d-flex justify-content-center position-relative">
+                                <div class="progress-line"></div>
+                                <div class="step-circle active" data-step="1">
+                                    <div class="circle">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div class="step-label">Institución</div>
+                                </div>
+                                <div class="step-circle" data-step="2">
+                                    <div class="circle">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <div class="step-label">Programa</div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Paso 1: Institución -->
-                        <div id="step1" class="step active">
-                            <h4 class="mb-3">Paso 1: Información de la Institución</h4>
-                            <form id="formInstitucion">
-                                <div class="form-group mb-3">
-                                    <label for="nombre_institucion">Nombre de la Institución</label>
-                                    <input type="text" class="form-control" id="nombre_institucion" required>
-                                </div>
+                        <div id="step1" class="step-content active">
+                            <h4 class="text-center mb-4 text-primary">Información de la Institución</h4>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label for="pais">País</label>
-                                        <select class="form-select custom-select" id="pais" required>
-                                            <option value="" disabled>Seleccione un país</option>
-                                            <option value="1" selected>Colombia</option>
-                                            <option value="2">Otro</option>
-
-                                        </select>
+                            <form id="formInstitucion" class="needs-validation">
+                                <div class="form-section">
+                                    <div class="form-section-title">
+                                        <i class="fas fa-university"></i> Datos Básicos
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <label for="departamento">Departamento</label>
-                                        <select class="form-select custom-select" id="departamento" required>
-                                            <option value="" disabled>Seleccione un departamento</option>
-                                            <!-- Se cargará dinámicamente -->
-                                        </select>
-                                        <input type="text" class="form-control mt-2 hidden" id="otro_departamento" placeholder="Ingrese departamento">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="nombre_institucion" placeholder="Nombre" required>
+                                        <label for="nombre_institucion">Nombre de la Institución</label>
+                                        <div class="invalid-feedback">Este campo es obligatorio</div>
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <label for="municipio">Municipio</label>
-                                        <select class="form-select custom-select" id="municipio" required>
-                                            <option value="" disabled>Seleccione un municipio</option>
-                                            <!-- Se cargará dinámicamente -->
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="codigo_ies" placeholder="Código IES">
+                                        <label for="codigo_ies">Código IES</label>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <select class="form-select" id="tipo_institucion" required>
+                                            <option value="">Seleccione el tipo</option>
+                                            <option value="Mixta" selected>Mixta</option>
+                                            <option value="Universitaria">Universitaria</option>
+                                            <option value="SENA">SENA</option>
                                         </select>
-                                        <input type="text" class="form-control mt-2 hidden" id="otro_municipio" placeholder="Ingrese municipio">
+                                        <label for="tipo_institucion">Tipo de Institución</label>
+                                        <div class="invalid-feedback">Seleccione un tipo de institución</div>
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-3">
-                                    <label for="tipo_institucion">Tipo de Institución</label>
-                                    <select class="form-select custom-select" id="tipo_institucion" required>
-                                        <option value="">Seleccione el tipo</option>
-                                        <option value="Mixta" selected>Mixta</option>
-                                        <option value="Universitaria">Universitaria</option>
-                                        <option value="SENA">SENA</option>
-                                    </select>
+                                <div class="form-section">
+                                    <div class="form-section-title">
+                                        <i class="fas fa-map-marker-alt"></i> Ubicación
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="pais" required>
+                                                    <option value="">Seleccione un país</option>
+                                                    <option value="1" selected>Colombia</option>
+                                                    <option value="2">Otro</option>
+                                                </select>
+                                                <label for="pais">País</label>
+                                                <div class="invalid-feedback">Seleccione un país</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4" id="departamento-container">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="departamento" required>
+                                                    <option value="">Cargando departamentos...</option>
+                                                </select>
+                                                <label for="departamento">Departamento</label>
+                                                <div class="invalid-feedback">Seleccione un departamento</div>
+                                            </div>
+                                            <div class="mt-2" id="otro-departamento-container" style="display:none;">
+                                                <input type="text" class="form-control" id="otro_departamento" placeholder="Ingrese departamento">
+                                                <div class="invalid-feedback">Ingrese el departamento</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4" id="municipio-container">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="municipio" required>
+                                                    <option value="">Seleccione primero un departamento</option>
+                                                </select>
+                                                <label for="municipio">Municipio</label>
+                                                <div class="invalid-feedback">Seleccione un municipio</div>
+                                            </div>
+                                            <div class="mt-2" id="otro-municipio-container" style="display:none;">
+                                                <input type="text" class="form-control" id="otro_municipio" placeholder="Ingrese municipio">
+                                                <div class="invalid-feedback">Ingrese el municipio</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="form-group mb-3">
-                                    <label for="codigo_ies">Código IES</label>
-                                    <input type="text" class="form-control" id="codigo_ies">
-                                    <div class="invalid-feedback"></div>
+                                <div class="btn-group-nav">
+                                    <a href="/admin/instituciones" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i> Volver
+                                    </a>
+                                    <button type="button" class="btn btn-primary" id="btnGuardarInstitucion">
+                                        <i class="fas fa-save me-2"></i> Guardar Institución
+                                    </button>
+                                    <button type="button" class="btn btn-success" onclick="nextStep(1)">
+                                        Continuar <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
                                 </div>
-
-                                <button type="button" class="btn btn-primary float-end" onclick="nextStep(1)">
-                                    Continuar con programa <i class="fas fa-arrow-right"></i>
-                                </button>
                             </form>
                         </div>
 
                         <!-- Paso 2: Programa -->
-                        <div id="step2" class="step">
-                            <h4 class="mb-3">Paso 2: Información del Programa</h4>
-                            <form id="formPrograma">
-                                <div class="form-group mb-3">
-                                    <label for="institucion_seleccionada">Institución</label>
-                                    <select class="form-select custom-select" id="institucion_seleccionada" required>
-                                        <option value="">Cargando instituciones...</option>
-                                        <!-- Se cargarán todas las instituciones desde la API -->
-                                    </select>
-                                </div>
+                        <div id="step2" class="step-content">
+                            <h4 class="text-center mb-4 text-primary">Información del Programa</h4>
 
-                                <div class="form-group mb-3">
-                                    <label for="nombre_programa">Nombre del Programa</label>
-                                    <input type="text" class="form-control" id="nombre_programa" required>
-                                </div>
+                            <form id="formPrograma" class="needs-validation">
+                                <div class="form-section">
+                                    <div class="form-section-title">
+                                        <i class="fas fa-building"></i> Institución Relacionada
+                                    </div>
 
-                                <div class="form-group mb-3">
-                                    <label for="tipo_formacion">Tipo de Formación</label>
-                                    <select class="form-select custom-select" id="tipo_formacion" required>
-                                        <option value="">Seleccione el tipo</option>
-                                        <option value="Profesional" selected>Profesional</option>
-                                        <option value="Técnico">Técnico</option>
-                                        <option value="Tecnólogo">Tecnólogo</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <label for="metodologia">Metodología</label>
-                                    <select class="form-select custom-select" id="metodologia" required>
-                                        <option value="">Seleccione la metodología</option>
-                                        <option value="Presencial" selected>Presencial</option>
-                                        <option value="Virtual">Virtual</option>
-                                        <option value="Híbrido">Híbrido</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group mb-3">
-                                    <label for="codigo_snies">Código SNIES</label>
-                                    <input type="text" class="form-control" id="codigo_snies">
-                                </div>
-
-                                <button type="button" class="btn btn-secondary float-start" onclick="previousStep(2)">
-                                    <i class="fas fa-arrow-left"></i> Atrás
-                                </button>
-                                <button type="button" class="btn btn-primary float-end" onclick="nextStep(2)">
-                                    Continuar con asignaturas <i class="fas fa-arrow-right"></i>
-                                </button>
-                            </form>
-                        </div>
-
-                        <!-- Paso 3: Asignaturas -->
-                        <div id="step3" class="step">
-                            <h4 class="mb-3">Paso 3: Asignaturas</h4>
-
-                            <div class="form-group mb-3">
-                                <label for="institucion_asignatura">Institución</label>
-                                <select class="form-select custom-select" id="institucion_asignatura" required>
-                                    <option value="">Seleccione una institución</option>
-                                    <!-- Se cargarán todas las instituciones desde la API -->
-                                </select>
-                            </div>
-
-                            <div class="form-group mb-3">
-                                <label for="programa_asignatura">Programa</label>
-                                <select class="form-select custom-select" id="programa_asignatura" required>
-                                    <option value="">Seleccione primero una institución</option>
-                                    <!-- Se cargarán los programas según la institución seleccionada -->
-                                </select>
-                            </div>
-
-                            <div id="asignaturas-container">
-                                <div class="asignatura-form mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <form class="formAsignatura">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6">
-                                                        <label>Nombre de la Asignatura</label>
-                                                        <input type="text" class="form-control nombre_asignatura"
-                                                            required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label>Tipo de Competencia</label>
-                                                        <select class="form-select custom-select tipo_asignatura" required>
-                                                            <option value="">Seleccione el tipo</option>
-                                                            <option value="Básica" selected>Básica</option>
-                                                            <option value="Específica">Específica</option>
-                                                            <option value="Optativa">Optativa</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                        <label>Código Asignatura</label>
-                                                        <input type="text" class="form-control codigo_asignatura">
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label>Número de Créditos</label>
-                                                        <input type="number" class="form-control creditos" value="3" required>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label>Semestre</label>
-                                                        <input type="number" class="form-control semestre" value="1" required>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                        <label>Tiempo Presencial</label>
-                                                        <input type="number" class="form-control tiempo_presencial" value="4"
-                                                            required>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label>Tiempo Independiente</label>
-                                                        <input type="number" class="form-control tiempo_independiente" value="8"
-                                                            required>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label>Horas Totales Semanales</label>
-                                                        <input type="number" class="form-control horas_totales_semanales" value="12"
-                                                            required>
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group mb-3">
-                                                    <label>Contenido Programático de la Asignatura</label>
-                                                    <textarea class="form-control pensum" rows="3" required>Contenido programático de la asignatura</textarea>
-                                                </div>
-                                            </form>
-                                        </div>
+                                    <div class="form-floating mb-4">
+                                        <select class="form-select" id="institucion_seleccionada" required>
+                                            <option value="">Cargando instituciones...</option>
+                                        </select>
+                                        <label for="institucion_seleccionada">Institución</label>
+                                        <div class="invalid-feedback">Seleccione una institución</div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <button type="button" class="btn btn-success mb-3" onclick="agregarAsignatura()">
-                                <i class="fas fa-plus"></i> Agregar más asignaturas
-                            </button>
+                                <div class="form-section">
+                                    <div class="form-section-title">
+                                        <i class="fas fa-graduation-cap"></i> Datos del Programa
+                                    </div>
 
-                            <button type="button" class="btn btn-secondary float-start" onclick="previousStep(3)">
-                                <i class="fas fa-arrow-left"></i> Atrás
-                            </button>
-                            <button type="button" class="btn btn-primary float-end" onclick="guardarTodo()">
-                                Guardar Todo <i class="fas fa-save"></i>
-                            </button>
+                                    <div class="form-floating mb-4">
+                                        <input type="text" class="form-control" id="nombre_programa" placeholder="Nombre" required>
+                                        <label for="nombre_programa">Nombre del Programa</label>
+                                        <div class="invalid-feedback">Ingrese el nombre del programa</div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="tipo_formacion" required>
+                                                    <option value="">Seleccione el tipo</option>
+                                                    <option value="Profesional" selected>Profesional</option>
+                                                    <option value="Técnico">Técnico</option>
+                                                    <option value="Tecnólogo">Tecnólogo</option>
+                                                </select>
+                                                <label for="tipo_formacion">Tipo de Formación</label>
+                                                <div class="invalid-feedback">Seleccione un tipo de formación</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <select class="form-select" id="metodologia" required>
+                                                    <option value="">Seleccione la metodología</option>
+                                                    <option value="Presencial" selected>Presencial</option>
+                                                    <option value="Virtual">Virtual</option>
+                                                    <option value="Híbrido">Híbrido</option>
+                                                </select>
+                                                <label for="metodologia">Metodología</label>
+                                                <div class="invalid-feedback">Seleccione una metodología</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-floating mb-4">
+                                        <input type="text" class="form-control" id="codigo_snies" placeholder="Código SNIES">
+                                        <label for="codigo_snies">Código SNIES</label>
+                                    </div>
+                                </div>
+
+                                <div class="btn-group-nav">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="previousStep(2)">
+                                        <i class="fas fa-arrow-left me-2"></i> Volver
+                                    </button>
+                                    <button type="button" class="btn btn-success" onclick="guardarPrograma()">
+                                        <i class="fas fa-save me-2"></i> Guardar Programa
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -233,1163 +218,1572 @@
         </div>
     </div>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Asegurarnos que Font Awesome esté incluido -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
-        /* Estilos generales */
-        .step {
-            display: none;
+        :root {
+            --primary-color: #3349aa;
+            --primary-light: #5698e4;
+            --secondary-color: #3349aa;
+            --success-color: #5698e4;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --transition: all 0.3s ease;
         }
 
-        .step.active {
-            display: block;
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .asignatura-form {
-            position: relative;
+        .card {
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transition: var(--transition);
+            margin-bottom: 3rem;
         }
 
-        .remove-asignatura {
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+            border-bottom: 0;
+            padding: 1.5rem;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .card-title {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Estilos mejorados para los steps circulares */
+        .steps-container {
+            margin: 2rem 0 4rem;
+        }
+
+        .step-circles {
+            width: 70%;
+            margin: 0 auto;
+        }
+
+        .progress-line {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 25px;
+            height: 6px;
+            width: 100%;
+            background-color: #e9ecef;
+            z-index: 1;
+            border-radius: 3px;
         }
 
-        .hidden {
+        .progress-line:before {
+            content: '';
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+            width: 0%;
+            transition: var(--transition);
+            z-index: 2;
+            border-radius: 3px;
+        }
+
+        .progress-line.step-1-active:before {
+            width: 0%;
+        }
+
+        .progress-line.step-2-active:before {
+            width: 100%;
+        }
+
+        .step-circle {
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 150px;
+            transition: var(--transition);
+        }
+
+        .circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 12px;
+            transition: var(--transition);
+            border: 3px solid #e9ecef;
+            box-shadow: 0 0 0 5px rgba(233, 236, 239, 0.5);
+        }
+
+        .circle i {
+            font-size: 1.4rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: #6c757d;
+            transition: var(--transition);
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+
+        .step-circle.active .circle {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 5px rgba(67, 97, 238, 0.2);
+            transform: scale(1.1);
+        }
+
+        .step-circle.active .step-label {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .step-circle.completed .circle {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        /* Estilos para el contenido de los pasos */
+        .step-content {
             display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
         }
 
-        /* Estilos específicos para selectores */
-        .custom-select {
-            display: block !important;
-            width: 100% !important;
-            padding: 0.375rem 0.75rem !important;
-            font-size: 1rem !important;
-            font-weight: 400 !important;
-            line-height: 1.5 !important;
-            color: #212529 !important;
-            background-color: #fff !important;
-            background-clip: padding-box !important;
-            border: 1px solid #ced4da !important;
-            border-radius: 0.25rem !important;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
-            appearance: auto !important;
-            -webkit-appearance: auto !important;
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.5s forwards;
         }
 
-        /* Garantizar que siempre se muestren en negro */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos para los elementos del formulario */
         .form-control,
-        .form-select,
-        .custom-select,
-        .custom-select option {
-            color: black !important;
-            background-color: white !important;
+        .form-select {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            transition: var(--transition);
+            height: calc(3.5rem + 2px);
+            box-shadow: none;
         }
 
-        /* Sobrescribir cualquier estilo oscuro */
-        .dark-mode .form-control,
-        .dark-mode .form-select,
-        .dark-mode .custom-select,
-        .dark-mode .custom-select option {
-            color: black !important;
-            background-color: white !important;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
         }
 
-        /* Notificaciones */
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            height: calc(3.5rem + 2px);
+            line-height: 1.25;
+        }
+
+        .form-floating > label {
+            padding: 1rem;
+        }
+
+        .btn {
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-outline-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #3da8cc;
+            border-color: #3da8cc;
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        /* Estilos para las secciones del formulario */
+        .form-section {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .form-section-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-section-title i {
+            margin-right: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-group-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Notificaciones mejoradas */
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 15px;
-            border-radius: 4px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
             color: white;
-            font-weight: bold;
+            font-weight: 500;
             z-index: 1000;
             display: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            max-width: 500px;
+            transform: translateX(100%);
+            animation: slideIn 0.3s forwards;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+            }
         }
 
         .notification.success {
-            background-color: #4CAF50;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-left: 5px solid #059669;
         }
 
         .notification.error {
-            background-color: #f44336;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-left: 5px solid #dc2626;
+        }
+
+        /* Estilo para los mensajes de carga */
+        .loading-spinner {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            vertical-align: middle;
+            border: 3px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
         }
     </style>
 
     <div id="notification" class="notification"></div>
 
     <script>
-        // Variables para almacenar los IDs creados
-        let institucionId = null;
-        let programaId = null;
+// Variables para almacenar los IDs creados
+let institucionId = null;
+let programaId = null;
+let apiBaseUrl = 'https://homologacionesback.educarenemociones.com/api';
+let usarProxyLocal = false; // Bandera para usar un proxy local si es necesario
 
-        // Datos precargados para Colombia
-        const departamentosColombia = [
-            { id: 1, nombre: "Antioquia" },
-            { id: 2, nombre: "Atlántico" },
-            { id: 3, nombre: "Bogotá D.C." },
-            { id: 4, nombre: "Bolívar" },
-            { id: 5, nombre: "Boyacá" },
-            { id: 6, nombre: "Caldas" },
-            { id: 7, nombre: "Caquetá" },
-            { id: 8, nombre: "Cauca" },
-            { id: 9, nombre: "Cesar" },
-            { id: 10, nombre: "Córdoba" },
-            { id: 11, nombre: "Cundinamarca" },
-            { id: 12, nombre: "Chocó" },
-            { id: 13, nombre: "Huila" },
-            { id: 14, nombre: "La Guajira" },
-            { id: 15, nombre: "Magdalena" },
-            { id: 16, nombre: "Meta" },
-            { id: 17, nombre: "Nariño" },
-            { id: 18, nombre: "Norte de Santander" },
-            { id: 19, nombre: "Quindío" },
-            { id: 20, nombre: "Risaralda" },
-            { id: 21, nombre: "Santander" },
-            { id: 22, nombre: "Sucre" },
-            { id: 23, nombre: "Tolima" },
-            { id: 24, nombre: "Valle del Cauca" },
-            { id: 25, nombre: "Arauca" },
-            { id: 26, nombre: "Casanare" },
-            { id: 27, nombre: "Putumayo" },
-            { id: 28, nombre: "San Andrés y Providencia" },
-            { id: 29, nombre: "Amazonas" },
-            { id: 30, nombre: "Guainía" },
-            { id: 31, nombre: "Guaviare" },
-            { id: 32, nombre: "Vaupés" },
-            { id: 33, nombre: "Vichada" }
-        ];
+// Lista de departamentos de Colombia
+const departamentosColombia = [
+    { id: 1, nombre: "Antioquia" },
+    { id: 2, nombre: "Atlántico" },
+    { id: 3, nombre: "Bogotá D.C." },
+    { id: 4, nombre: "Bolívar" },
+    { id: 5, nombre: "Boyacá" },
+    { id: 6, nombre: "Caldas" },
+    { id: 7, nombre: "Caquetá" },
+    { id: 8, nombre: "Cauca" },
+    { id: 9, nombre: "Cesar" },
+    { id: 10, nombre: "Córdoba" },
+    { id: 11, nombre: "Cundinamarca" },
+    { id: 12, nombre: "Chocó" },
+    { id: 13, nombre: "Huila" },
+    { id: 14, nombre: "La Guajira" },
+    { id: 15, nombre: "Magdalena" },
+    { id: 16, nombre: "Meta" },
+    { id: 17, nombre: "Nariño" },
+    { id: 18, nombre: "Norte de Santander" },
+    { id: 19, nombre: "Quindío" },
+    { id: 20, nombre: "Risaralda" },
+    { id: 21, nombre: "Santander" },
+    { id: 22, nombre: "Sucre" },
+    { id: 23, nombre: "Tolima" },
+    { id: 24, nombre: "Valle del Cauca" },
+    { id: 25, nombre: "Arauca" },
+    { id: 26, nombre: "Casanare" },
+    { id: 27, nombre: "Putumayo" },
+    { id: 28, nombre: "San Andrés y Providencia" },
+    { id: 29, nombre: "Amazonas" },
+    { id: 30, nombre: "Guainía" },
+    { id: 31, nombre: "Guaviare" },
+    { id: 32, nombre: "Vaupés" },
+    { id: 33, nombre: "Vichada" }
+];
 
-        // Mapa de municipios por departamento (algunos ejemplos por departamento)
-        const municipiosPorDepartamento = {
-            1: [ // Antioquia
-                { id: 1, nombre: "Medellín" },
-                { id: 2, nombre: "Bello" },
-                { id: 3, nombre: "Envigado" },
-                { id: 4, nombre: "Itagüí" },
-                { id: 5, nombre: "Rionegro" }
-            ],
-            2: [ // Atlántico
-                { id: 6, nombre: "Barranquilla" },
-                { id: 7, nombre: "Soledad" },
-                { id: 8, nombre: "Malambo" }
-            ],
-            3: [ // Bogotá D.C.
-                { id: 9, nombre: "Bogotá" }
-            ],
-            8: [ // Cauca
-                { id: 10, nombre: "Popayán" },
-                { id: 11, nombre: "Santander de Quilichao" },
-                { id: 12, nombre: "Puerto Tejada" }
-            ]
-            // Agregar más departamentos según sea necesario
-        };
-
-        // Map para convertir valores de tipo de asignatura
-        const tipoAsignaturaMap = {
-            'Básica': 'B',
-            'Específica': 'E',
-            'Optativa': 'O'
-        };
-
-        // Función para obtener el token CSRF
-        function getCsrfToken() {
-            const token = document.querySelector('meta[name="csrf-token"]');
-            return token ? token.getAttribute('content') : '';
-        }
-
-        // Función para mostrar notificaciones
-        function mostrarNotificacion(mensaje, tipo) {
-            const notificacion = document.getElementById('notification');
-            notificacion.textContent = mensaje;
-            notificacion.className = 'notification ' + tipo;
-            notificacion.style.display = 'block';
-
-            setTimeout(() => {
-                notificacion.style.display = 'none';
-            }, 3000);
-        }
-
-        // Función para cambiar de paso
-        function changeStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-
-            const progress = step === 1 ? 33 : step === 2 ? 66 : 100;
-            document.querySelector('.progress-bar').style.width = progress + '%';
-            document.querySelector('.progress-bar').textContent = `Paso ${step} de 3`;
-
-            // Si avanzamos al paso 2, cargar las instituciones
-            if (step === 2) {
-                cargarInstituciones();
-            }
-
-            // Si avanzamos al paso 3, cargar las instituciones para asignaturas
-            if (step === 3) {
-                cargarInstitucionesParaAsignaturas();
-            }
-        }
-
-        // Función para cargar todas las instituciones desde la API
-        function cargarInstituciones() {
-            const selectInstitucion = document.getElementById('institucion_seleccionada');
-            selectInstitucion.innerHTML = '<option value="">Cargando instituciones...</option>';
-
-            fetch('https://homologacionesback.educarenemociones.com/api/instituciones')
-                .then(response => response.json())
-                .then(instituciones => {
-                    selectInstitucion.innerHTML = '<option value="">Seleccione una institución</option>';
-
-                    instituciones.forEach(institucion => {
-                        const option = document.createElement('option');
-                        option.value = institucion.id_institucion;
-                        option.textContent = institucion.nombre;
-                        selectInstitucion.appendChild(option);
-                    });
-
-                    // Si ya tenemos una institucion seleccionada, seleccionarla
-                    if (institucionId) {
-                        selectInstitucion.value = institucionId;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar instituciones:', error);
-                    selectInstitucion.innerHTML = '<option value="">Error al cargar instituciones</option>';
-                    mostrarNotificacion('Error al cargar instituciones. Intente nuevamente.', 'error');
-                });
-        }
-
-        // Función para cargar instituciones en el paso 3
-        function cargarInstitucionesParaAsignaturas() {
-            const selectInstitucion = document.getElementById('institucion_asignatura');
-            selectInstitucion.innerHTML = '<option value="">Cargando instituciones...</option>';
-
-            fetch('https://homologacionesback.educarenemociones.com/api/instituciones')
-                .then(response => response.json())
-                .then(instituciones => {
-                    selectInstitucion.innerHTML = '<option value="">Seleccione una institución</option>';
-
-                    instituciones.forEach(institucion => {
-                        const option = document.createElement('option');
-                        option.value = institucion.id_institucion;
-                        option.textContent = institucion.nombre;
-                        selectInstitucion.appendChild(option);
-                    });
-
-                    // Si ya tenemos una institucion seleccionada, seleccionarla
-                    if (institucionId) {
-                        selectInstitucion.value = institucionId;
-                        // Cargar los programas asociados a esta institución
-                        cargarProgramasPorInstitucion(institucionId);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar instituciones:', error);
-                    selectInstitucion.innerHTML = '<option value="">Error al cargar instituciones</option>';
-                });
-        }
-
-        // Función para cargar programas por institución
-        function cargarProgramasPorInstitucion(institucionId) {
-            if (!institucionId) return;
-
-            const selectPrograma = document.getElementById('programa_asignatura');
-            selectPrograma.innerHTML = '<option value="">Cargando programas...</option>';
-
-            fetch(`https://homologacionesback.educarenemociones.com/api/programas/institucion/${institucionId}`)
-                .then(response => response.json())
-                .then(programas => {
-                    selectPrograma.innerHTML = '<option value="">Seleccione un programa</option>';
-
-                    programas.forEach(programa => {
-                        const option = document.createElement('option');
-                        option.value = programa.id_programa;
-                        option.textContent = programa.nombre;
-                        selectPrograma.appendChild(option);
-                    });
-
-                    // Si ya tenemos un programa seleccionado, seleccionarlo
-                    if (programaId) {
-                        selectPrograma.value = programaId;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar programas:', error);
-                    selectPrograma.innerHTML = '<option value="">Error al cargar programas</option>';
-                });
-        }
-
-        // Cargar departamentos para Colombia
-        function cargarDepartamentosColombia() {
-            const selectDepartamento = document.getElementById('departamento');
-            selectDepartamento.innerHTML = '<option value="" disabled>Seleccione un departamento</option>';
-
-            departamentosColombia.forEach(depto => {
-                const option = document.createElement('option');
-                option.value = depto.id;
-                option.textContent = depto.nombre;
-                selectDepartamento.appendChild(option);
-            });
-
-            // Seleccionar Cauca (id: 8) por defecto, ya que estamos en Popayán
-            selectDepartamento.value = 8;
-
-            // Cargar municipios del departamento seleccionado
-            cargarMunicipiosPorDepartamento(8);
-        }
-
-        // Cargar municipios por departamento
-        function cargarMunicipiosPorDepartamento(departamentoId) {
-            const selectMunicipio = document.getElementById('municipio');
-            selectMunicipio.innerHTML = '<option value="" disabled>Seleccione un municipio</option>';
-
-            if (municipiosPorDepartamento[departamentoId]) {
-                municipiosPorDepartamento[departamentoId].forEach(municipio => {
-                    const option = document.createElement('option');
-                    option.value = municipio.id;
-                    option.textContent = municipio.nombre;
-                    selectMunicipio.appendChild(option);
-                });
-
-                // Si es Cauca (id: 8), seleccionar Popayán por defecto
-                if (departamentoId == 8) {
-                    selectMunicipio.value = 10; // ID de Popayán
-                } else if (municipiosPorDepartamento[departamentoId].length > 0) {
-                    selectMunicipio.value = municipiosPorDepartamento[departamentoId][0].id;
-                }
-            }
-        }
-
-        // Función para validar formulario
-        function validateForm(form) {
-            let valid = true;
-            form.querySelectorAll('[required]').forEach(field => {
-                if (!field.value) {
-                    field.classList.add('is-invalid');
-                    valid = false;
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
-            return valid;
-        }
-
-        // Función para siguiente paso - MODIFICADA para permitir avanzar sin completar todos los campos
-        function nextStep(currentStep) {
-            // Nueva política: avanzamos al siguiente paso sin validar todos los campos
-
-            if (currentStep === 1) {
-                // Si hay campos completados, intentar guardar la institución
-                const nombre = document.getElementById('nombre_institucion').value.trim();
-                if (nombre) {
-                    guardarInstitucionParcial();
-                }
-                // Avanzar al siguiente paso de todas formas
-                changeStep(2);
-            } else if (currentStep === 2) {
-                // Si hay campos completados, intentar guardar el programa
-                const nombrePrograma = document.getElementById('nombre_programa').value.trim();
-                if (nombrePrograma) {
-                    guardarProgramaParcial();
-                }
-                // Avanzar al siguiente paso de todas formas
-                changeStep(3);
-            }
-        }
-
-        // Función para paso anterior
-        function previousStep(currentStep) {
-            changeStep(currentStep - 1);
-        }
-
-        // Función para guardar institución de forma parcial
-        function guardarInstitucionParcial() {
-            const nombre = document.getElementById('nombre_institucion').value.trim();
-            const municipioId = document.getElementById('municipio').value;
-            const tipo = document.getElementById('tipo_institucion').value;
-            const codigoIes = document.getElementById('codigo_ies').value.trim();
-
-            if (!nombre) return; // No guardar si al menos no hay nombre
-
-            const data = {
-                nombre: nombre,
-                codigo_ies: codigoIes || '',
-                municipio_id: municipioId,
-                tipo: tipo || 'Mixta'
-            };
-
-            // Deshabilitar botón durante la petición
-            const nextButton = document.querySelector('#step1 .btn-primary');
-            const originalText = nextButton.innerHTML;
-            nextButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-            nextButton.disabled = true;
-
-            fetch('https://homologacionesback.educarenemociones.com/api/instituciones', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(`Error HTTP: ${response.status}, ${text}`);
-                        }
-                    });
-                }
-                return response.json();
-            })
-            .then(result => {
-                nextButton.innerHTML = originalText;
-                nextButton.disabled = false;
-
-                if (result.mensaje === 'Institución insertada correctamente') {
-                    if (result.id_institucion) {
-                        institucionId = result.id_institucion;
-                        mostrarNotificacion('Institución guardada correctamente', 'success');
-                    }
-                } else if (result.error && result.error.includes('already been taken')) {
-                    mostrarNotificacion('Este código IES ya está registrado', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                nextButton.innerHTML = originalText;
-                nextButton.disabled = false;
-                mostrarNotificacion('Error al guardar institución', 'error');
-            });
-        }
-
-        // Función para guardar programa de forma parcial
-        function guardarProgramaParcial() {
-            const nombrePrograma = document.getElementById('nombre_programa').value.trim();
-            if (!nombrePrograma) return; // No guardar si al menos no hay nombre
-
-            // Obtener institución seleccionada
-const institucionSeleccionada = document.getElementById('institucion_seleccionada').value;
-// Si no hay institución seleccionada, usar la creada anteriormente o mostrar error
-const instId = institucionSeleccionada || institucionId;
-
-if (!instId) {
-    mostrarNotificacion('No hay institución seleccionada para el programa', 'error');
-    return;
-}
-
-const data = {
-    institucion_id: parseInt(instId),
-    facultad_id: null,
-    nombre: nombrePrograma,
-    codigo_snies: document.getElementById('codigo_snies').value.trim() || '',
-    tipo_formacion: document.getElementById('tipo_formacion').value || 'Profesional',
-    metodologia: document.getElementById('metodologia').value || 'Presencial'
+// Mapa de municipios por departamento (completo)
+const municipiosPorDepartamento = {
+    1: [ // Antioquia
+        { id: 1, nombre: "Medellín" },
+        { id: 2, nombre: "Bello" },
+        { id: 3, nombre: "Envigado" },
+        { id: 4, nombre: "Itagüí" },
+        { id: 5, nombre: "Rionegro" },
+        { id: 6, nombre: "Apartadó" },
+        { id: 7, nombre: "Turbo" },
+        { id: 8, nombre: "Caucasia" },
+        { id: 9, nombre: "La Estrella" },
+        { id: 10, nombre: "Sabaneta" }
+    ],
+    2: [ // Atlántico
+        { id: 11, nombre: "Barranquilla" },
+        { id: 12, nombre: "Soledad" },
+        { id: 13, nombre: "Malambo" },
+        { id: 14, nombre: "Sabanalarga" },
+        { id: 15, nombre: "Baranoa" },
+        { id: 16, nombre: "Puerto Colombia" },
+        { id: 17, nombre: "Galapa" },
+        { id: 18, nombre: "Santo Tomás" }
+    ],
+    3: [ // Bogotá D.C.
+        { id: 19, nombre: "Bogotá" }
+    ],
+    4: [ // Bolívar
+        { id: 20, nombre: "Cartagena" },
+        { id: 21, nombre: "Magangué" },
+        { id: 22, nombre: "El Carmen de Bolívar" },
+        { id: 23, nombre: "Turbaco" },
+        { id: 24, nombre: "Arjona" },
+        { id: 25, nombre: "María La Baja" }
+    ],
+    5: [ // Boyacá
+        { id: 26, nombre: "Tunja" },
+        { id: 27, nombre: "Duitama" },
+        { id: 28, nombre: "Sogamoso" },
+        { id: 29, nombre: "Chiquinquirá" },
+        { id: 30, nombre: "Paipa" },
+        { id: 31, nombre: "Moniquirá" },
+        { id: 32, nombre: "Villa de Leyva" }
+    ],
+    6: [ // Caldas
+        { id: 33, nombre: "Manizales" },
+        { id: 34, nombre: "La Dorada" },
+        { id: 35, nombre: "Chinchiná" },
+        { id: 36, nombre: "Villamaría" },
+        { id: 37, nombre: "Anserma" },
+        { id: 38, nombre: "Riosucio" }
+    ],
+    7: [ // Caquetá
+        { id: 39, nombre: "Florencia" },
+        { id: 40, nombre: "San Vicente del Caguán" },
+        { id: 41, nombre: "Puerto Rico" },
+        { id: 42, nombre: "El Doncello" },
+        { id: 43, nombre: "Belén de los Andaquíes" }
+    ],
+    8: [ // Cauca
+        { id: 44, nombre: "Popayán" },
+        { id: 45, nombre: "Santander de Quilichao" },
+        { id: 46, nombre: "Puerto Tejada" },
+        { id: 47, nombre: "Patía" },
+        { id: 48, nombre: "Miranda" },
+        { id: 49, nombre: "Caloto" },
+        { id: 50, nombre: "Piendamó" }
+    ],
+    9: [ // Cesar
+        { id: 51, nombre: "Valledupar" },
+        { id: 52, nombre: "Aguachica" },
+        { id: 53, nombre: "Agustín Codazzi" },
+        { id: 54, nombre: "Bosconia" },
+        { id: 55, nombre: "La Paz" },
+        { id: 56, nombre: "Chiriguaná" }
+    ],
+    10: [ // Córdoba
+        { id: 57, nombre: "Montería" },
+        { id: 58, nombre: "Cereté" },
+        { id: 59, nombre: "Lorica" },
+        { id: 60, nombre: "Sahagún" },
+        { id: 61, nombre: "Planeta Rica" },
+        { id: 62, nombre: "Montelíbano" },
+        { id: 63, nombre: "Tierralta" }
+    ],
+    11: [ // Cundinamarca
+        { id: 64, nombre: "Soacha" },
+        { id: 65, nombre: "Facatativá" },
+        { id: 66, nombre: "Zipaquirá" },
+        { id: 67, nombre: "Chía" },
+        { id: 68, nombre: "Mosquera" },
+        { id: 69, nombre: "Madrid" },
+        { id: 70, nombre: "Funza" },
+        { id: 71, nombre: "Cajicá" },
+        { id: 72, nombre: "Girardot" }
+    ],
+    12: [ // Chocó
+        { id: 73, nombre: "Quibdó" },
+        { id: 74, nombre: "Istmina" },
+        { id: 75, nombre: "Tadó" },
+        { id: 76, nombre: "Acandí" },
+        { id: 77, nombre: "Bahía Solano" },
+        { id: 78, nombre: "Nuquí" }
+    ],
+    13: [ // Huila
+        { id: 79, nombre: "Neiva" },
+        { id: 80, nombre: "Pitalito" },
+        { id: 81, nombre: "Garzón" },
+        { id: 82, nombre: "La Plata" },
+        { id: 83, nombre: "Campoalegre" },
+        { id: 84, nombre: "Gigante" }
+    ],
+    14: [ // La Guajira
+        { id: 85, nombre: "Riohacha" },
+        { id: 86, nombre: "Maicao" },
+        { id: 87, nombre: "Uribia" },
+        { id: 88, nombre: "Manaure" },
+        { id: 89, nombre: "Fonseca" },
+        { id: 90, nombre: "San Juan del Cesar" }
+    ],
+    15: [ // Magdalena
+        { id: 91, nombre: "Santa Marta" },
+        { id: 92, nombre: "Ciénaga" },
+        { id: 93, nombre: "Fundación" },
+        { id: 94, nombre: "Plato" },
+        { id: 95, nombre: "El Banco" },
+        { id: 96, nombre: "Zona Bananera" }
+    ],
+    16: [ // Meta
+        { id: 97, nombre: "Villavicencio" },
+        { id: 98, nombre: "Acacías" },
+        { id: 99, nombre: "Granada" },
+        { id: 100, nombre: "Puerto López" },
+        { id: 101, nombre: "La Macarena" },
+        { id: 102, nombre: "San Martín" }
+    ],
+    17: [ // Nariño
+        { id: 103, nombre: "Pasto" },
+        { id: 104, nombre: "Ipiales" },
+        { id: 105, nombre: "Tumaco" },
+        { id: 106, nombre: "Túquerres" },
+        { id: 107, nombre: "La Unión" },
+        { id: 108, nombre: "Samaniego" }
+    ],
+    18: [ // Norte de Santander
+        { id: 109, nombre: "Cúcuta" },
+        { id: 110, nombre: "Ocaña" },
+        { id: 111, nombre: "Pamplona" },
+        { id: 112, nombre: "Villa del Rosario" },
+        { id: 113, nombre: "Los Patios" },
+        { id: 114, nombre: "Tibú" }
+    ],
+    19: [ // Quindío
+        { id: 115, nombre: "Armenia" },
+        { id: 116, nombre: "Calarcá" },
+        { id: 117, nombre: "Montenegro" },
+        { id: 118, nombre: "Quimbaya" },
+        { id: 119, nombre: "La Tebaida" },
+        { id: 120, nombre: "Circasia" }
+    ],
+    20: [ // Risaralda
+        { id: 121, nombre: "Pereira" },
+        { id: 122, nombre: "Dosquebradas" },
+        { id: 123, nombre: "Santa Rosa de Cabal" },
+        { id: 124, nombre: "La Virginia" },
+        { id: 125, nombre: "Belén de Umbría" },
+        { id: 126, nombre: "Quinchía" }
+    ],
+    21: [ // Santander
+        { id: 127, nombre: "Bucaramanga" },
+        { id: 128, nombre: "Floridablanca" },
+        { id: 129, nombre: "Girón" },
+        { id: 130, nombre: "Piedecuesta" },
+        { id: 131, nombre: "Barrancabermeja" },
+        { id: 132, nombre: "San Gil" },
+        { id: 133, nombre: "Socorro" }
+    ],
+    22: [ // Sucre
+        { id: 134, nombre: "Sincelejo" },
+        { id: 135, nombre: "Corozal" },
+        { id: 136, nombre: "San Marcos" },
+        { id: 137, nombre: "San Onofre" },
+        { id: 138, nombre: "Tolú" },
+        { id: 139, nombre: "Sampués" }
+    ],
+    23: [ // Tolima
+        { id: 140, nombre: "Ibagué" },
+        { id: 141, nombre: "Espinal" },
+        { id: 142, nombre: "Chaparral" },
+        { id: 143, nombre: "Mariquita" },
+        { id: 144, nombre: "Honda" },
+        { id: 145, nombre: "Líbano" },
+        { id: 146, nombre: "Melgar" }
+    ],
+    24: [ // Valle del Cauca
+        { id: 147, nombre: "Cali" },
+        { id: 148, nombre: "Buenaventura" },
+        { id: 149, nombre: "Palmira" },
+        { id: 150, nombre: "Tuluá" },
+        { id: 151, nombre: "Yumbo" },
+        { id: 152, nombre: "Jamundí" },
+        { id: 153, nombre: "Cartago" },
+        { id: 154, nombre: "Buga" },
+        { id: 155, nombre: "Candelaria" }
+    ],
+    25: [ // Arauca
+        { id: 156, nombre: "Arauca" },
+        { id: 157, nombre: "Saravena" },
+        { id: 158, nombre: "Tame" },
+        { id: 159, nombre: "Arauquita" },
+        { id: 160, nombre: "Fortul" }
+    ],
+    26: [ // Casanare
+        { id: 161, nombre: "Yopal" },
+        { id: 162, nombre: "Aguazul" },
+        { id: 163, nombre: "Villanueva" },
+        { id: 164, nombre: "Paz de Ariporo" },
+        { id: 165, nombre: "Tauramena" },
+        { id: 166, nombre: "Monterrey" }
+    ],
+    27: [ // Putumayo
+        { id: 167, nombre: "Mocoa" },
+        { id: 168, nombre: "Puerto Asís" },
+        { id: 169, nombre: "Orito" },
+        { id: 170, nombre: "Valle del Guamuez" },
+        { id: 171, nombre: "Puerto Leguízamo" },
+        { id: 172, nombre: "Villagarzón" }
+    ],
+    28: [ // San Andrés y Providencia
+        { id: 173, nombre: "San Andrés" },
+        { id: 174, nombre: "Providencia" }
+    ],
+    29: [ // Amazonas
+        { id: 175, nombre: "Leticia" },
+        { id: 176, nombre: "Puerto Nariño" }
+    ],
+    30: [ // Guainía
+        { id: 177, nombre: "Inírida" },
+        { id: 178, nombre: "Barranco Minas" },
+        { id: 179, nombre: "Mapiripana" },
+        { id: 180, nombre: "San Felipe" }
+    ],
+    31: [ // Guaviare
+        { id: 181, nombre: "San José del Guaviare" },
+        { id: 182, nombre: "El Retorno" },
+        { id: 183, nombre: "Calamar" },
+        { id: 184, nombre: "Miraflores" }
+    ],
+    32: [ // Vaupés
+        { id: 185, nombre: "Mitú" },
+        { id: 186, nombre: "Carurú" },
+        { id: 187, nombre: "Taraira" },
+        { id: 188, nombre: "Papunaua" }
+    ],
+    33: [ // Vichada
+        { id: 189, nombre: "Puerto Carreño" },
+        { id: 190, nombre: "La Primavera" },
+        { id: 191, nombre: "Santa Rosalía" },
+        { id: 192, nombre: "Cumaribo" }
+    ]
 };
 
-// Deshabilitar botón durante la petición
-const nextButton = document.querySelector('#step2 .btn-primary');
-const originalText = nextButton.innerHTML;
-nextButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-nextButton.disabled = true;
+// Datos de instituciones para trabajar en modo local si hay problemas CORS
+const institucionesDato = [
+    { id_institucion: 1, nombre: "Universidad Nacional de Colombia" },
+    { id_institucion: 2, nombre: "Universidad de Antioquia" },
+    { id_institucion: 3, nombre: "Universidad del Valle" },
+    { id_institucion: 4, nombre: "Universidad de Los Andes" },
+    { id_institucion: 5, nombre: "Pontificia Universidad Javeriana" },
+    { id_institucion: 6, nombre: "Universidad Industrial de Santander" },
+    { id_institucion: 7, nombre: "Universidad del Norte" },
+    { id_institucion: 8, nombre: "Universidad EAFIT" },
+    { id_institucion: 9, nombre: "Universidad Externado de Colombia" },
+    { id_institucion: 10, nombre: "Universidad del Rosario" }
+];
 
-fetch('https://homologacionesback.educarenemociones.com/api/programas', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': getCsrfToken(),
-        'Accept': 'application/json'
-    },
-    body: JSON.stringify(data)
-})
-.then(response => {
-    if (!response.ok) {
-        return response.text().then(text => {
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                throw new Error(`Error HTTP: ${response.status}, ${text}`);
-            }
-        });
-    }
-    return response.json();
-})
-.then(result => {
-    nextButton.innerHTML = originalText;
-    nextButton.disabled = false;
-
-    if (result.mensaje === 'Programa insertado correctamente') {
-        if (result.id_programa) {
-            programaId = result.id_programa;
-            institucionId = instId; // Actualizar institucionId con la seleccionada
-            mostrarNotificacion('Programa guardado correctamente', 'success');
-        }
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    nextButton.innerHTML = originalText;
-    nextButton.disabled = false;
-    mostrarNotificacion('Error al guardar programa', 'error');
-});
+// Función para obtener el token CSRF
+function getCsrfToken() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    return token ? token.getAttribute('content') : '';
 }
 
-// Función para agregar asignatura
-function agregarAsignatura() {
-    const container = document.getElementById('asignaturas-container');
-    const newAsignatura = document.querySelector('.asignatura-form').cloneNode(true);
+// Determinar si estamos en un entorno local
+function isLocalEnvironment() {
+    return window.location.hostname === 'localhost' ||
+           window.location.hostname === '127.0.0.1';
+}
 
-    // Limpiar campos
-    newAsignatura.querySelectorAll('input, select, textarea').forEach(field => {
-        // Mantener valores por defecto para campos numéricos
-        if (field.type === 'number') {
-            // No limpiar, mantener los valores originales
-        } else if (field.tagName === 'SELECT') {
-            // Mantener selección por defecto en selects
+// Función para realizar peticiones AJAX con manejo de errores mejorado y soporte para CORS
+async function fetchWithErrorHandling(url, options = {}) {
+    try {
+        // Si estamos en modo local y la URL es para instituciones y usarProxyLocal está activado
+        if (usarProxyLocal && url.includes('/instituciones')) {
+            // Para consulta de instituciones, devolver datos locales
+            if (options.method === 'GET') {
+                console.log("Usando datos locales para instituciones (modo desarrollo)");
+                return institucionesDato;
+            }
+
+            // Para creación de institución, simular respuesta exitosa
+            if (options.method === 'POST') {
+                console.log("Simulando creación de institución (modo desarrollo)");
+                const data = JSON.parse(options.body);
+                // Generar un ID simulado único
+                const newId = Math.floor(Math.random() * 1000) + 100;
+                const response = {
+                    id_institucion: newId,
+                    nombre: data.nombre,
+                    mensaje: "Institución creada en modo de desarrollo local"
+                };
+                // Mostrar mensaje al usuario
+                mostrarNotificacion("Modo desarrollo: Institución simulada creada correctamente", "info");
+                return response;
+            }
+        }
+
+        // Opciones para solicitudes que pueden tener problemas CORS
+        if (isLocalEnvironment()) {
+            options.mode = 'cors';
+            options.credentials = 'include';
+        }
+
+        const response = await fetch(url, options);
+
+        // Si la respuesta no es exitosa, intentar obtener detalles del error
+        if (!response.ok) {
+            let errorMessage = `Error HTTP ${response.status}`;
+            try {
+                const errorData = await response.json();
+                if (errorData.message) {
+                    errorMessage = errorData.message;
+                } else if (errorData.error) {
+                    errorMessage = errorData.error;
+                }
+            } catch (parseError) {
+                // Si no se puede parsear la respuesta como JSON, usar el statusText
+                errorMessage = `${errorMessage}: ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        // Intentar parsear la respuesta como JSON
+        try {
+            return await response.json();
+        } catch (jsonError) {
+            // Si no es JSON, devolver el texto de la respuesta
+            return { success: true, message: await response.text() };
+        }
+    } catch (error) {
+        console.error('Error en la petición:', error);
+
+        // Si estamos en entorno local y hay error de CORS, activar el modo de datos locales
+        if (isLocalEnvironment() &&
+            (error.message.includes('CORS') || error.message.includes('Failed to fetch'))) {
+
+            if (!usarProxyLocal) {
+                usarProxyLocal = true;
+                mostrarNotificacion(
+                    "Detectado error CORS. Cambiando a modo de desarrollo local para continuar.",
+                    "warning"
+                );
+
+                // Si la URL era para instituciones, intentar de nuevo con datos locales
+                if (url.includes('/instituciones')) {
+                    if (options.method === 'GET') {
+                        return institucionesDato;
+                    } else if (options.method === 'POST') {
+                        const data = JSON.parse(options.body);
+                        const newId = Math.floor(Math.random() * 1000) + 100;
+                        return {
+                            id_institucion: newId,
+                            nombre: data.nombre,
+                            mensaje: "Institución creada en modo de desarrollo local"
+                        };
+                    }
+                }
+            }
+        }
+
+        throw error;
+    }
+}
+
+// Función para mostrar notificaciones mejorada
+function mostrarNotificacion(mensaje, tipo) {
+    const notificacion = document.getElementById('notification');
+
+    // Añadir ícono según tipo
+    let icono = '';
+    if (tipo === 'success') {
+        icono = '<i class="fas fa-check-circle"></i> ';
+    } else if (tipo === 'error') {
+        icono = '<i class="fas fa-exclamation-circle"></i> ';
+    } else if (tipo === 'warning') {
+        icono = '<i class="fas fa-exclamation-triangle"></i> ';
+    } else if (tipo === 'info') {
+        icono = '<i class="fas fa-info-circle"></i> ';
+    }
+
+    notificacion.innerHTML = icono + mensaje;
+    notificacion.className = 'notification ' + tipo;
+    notificacion.style.display = 'flex';
+
+    // Mostrar por 4 segundos y luego ocultar con animación
+    setTimeout(() => {
+        notificacion.style.opacity = '0';
+        setTimeout(() => {
+            notificacion.style.display = 'none';
+            notificacion.style.opacity = '1';
+        }, 300);
+    }, 4000);
+}
+
+// Función para cambiar de paso con mejor manejo de errores
+function changeStep(step) {
+    try {
+        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+        const stepElement = document.getElementById('step' + step);
+        if (!stepElement) {
+            throw new Error(`Step ${step} not found`);
+        }
+        stepElement.classList.add('active');
+
+        // Actualizar los círculos de progreso
+        document.querySelectorAll('.step-circle').forEach(circle => {
+            const circleStep = parseInt(circle.getAttribute('data-step'));
+            circle.classList.remove('active', 'completed');
+
+            if (circleStep === step) {
+                circle.classList.add('active');
+            } else if (circleStep < step) {
+                circle.classList.add('completed');
+            }
+        });
+
+        // Actualizar la línea de progreso
+        const progressLine = document.querySelector('.progress-line');
+        progressLine.className = 'progress-line';
+        progressLine.classList.add('step-' + step + '-active');
+
+        // Si avanzamos al paso 2, cargar las instituciones
+        if (step === 2) {
+            cargarInstituciones();
+        }
+    } catch (error) {
+        console.error('Error al cambiar de paso:', error);
+        mostrarNotificacion('Error al cambiar de paso: ' + error.message, 'error');
+    }
+}
+
+// Función para cargar todas las instituciones desde la API con mejor manejo de errores
+async function cargarInstituciones() {
+    const selectInstitucion = document.getElementById('institucion_seleccionada');
+    selectInstitucion.innerHTML = '<option value="">Cargando instituciones...</option>';
+
+    try {
+        const instituciones = await fetchWithErrorHandling(`${apiBaseUrl}/instituciones`);
+
+        selectInstitucion.innerHTML = '<option value="">Seleccione una institución</option>';
+
+        if (Array.isArray(instituciones) && instituciones.length > 0) {
+            instituciones.forEach(institucion => {
+                const option = document.createElement('option');
+                option.value = institucion.id_institucion;
+                option.textContent = institucion.nombre;
+                selectInstitucion.appendChild(option);
+            });
+
+            // Si ya tenemos una institucion seleccionada, seleccionarla
+            if (institucionId) {
+                selectInstitucion.value = institucionId;
+            }
         } else {
-            field.value = '';
+            // Si no hay instituciones, mostrar mensaje
+            const option = document.createElement('option');
+            option.value = "";
+            option.textContent = "No hay instituciones disponibles";
+            selectInstitucion.appendChild(option);
+        }
+    } catch (error) {
+        console.error('Error al cargar instituciones:', error);
+
+        // En caso de error, mostrar opciones de datos locales si estamos en modo desarrollo
+        if (isLocalEnvironment()) {
+            selectInstitucion.innerHTML = '<option value="">Seleccione una institución (modo local)</option>';
+            institucionesDato.forEach(institucion => {
+                const option = document.createElement('option');
+                option.value = institucion.id_institucion;
+                option.textContent = institucion.nombre;
+                selectInstitucion.appendChild(option);
+            });
+
+            // Si ya tenemos una institución seleccionada, seleccionarla
+            if (institucionId) {
+                selectInstitucion.value = institucionId;
+            }
+        } else {
+            selectInstitucion.innerHTML = '<option value="">Error al cargar instituciones</option>';
+        }
+
+        mostrarNotificacion('Error al cargar instituciones: ' + error.message, 'error');
+    }
+}
+
+// Cargar departamentos para Colombia (modificado para mejor manejo de errores)
+function cargarDepartamentosColombia() {
+    try {
+        const selectDepartamento = document.getElementById('departamento');
+
+        // Limpiar select
+        selectDepartamento.innerHTML = '<option value="">Seleccione un departamento</option>';
+
+        // Verificar si tenemos datos
+        if (!Array.isArray(departamentosColombia) || departamentosColombia.length === 0) {
+            throw new Error('No se encontraron datos de departamentos');
+        }
+
+        // Agregar departamentos al select
+        departamentosColombia.forEach(depto => {
+            const option = document.createElement('option');
+            option.value = depto.id;
+            option.textContent = depto.nombre;
+            selectDepartamento.appendChild(option);
+        });
+
+        // Seleccionar Cauca (id: 8) por defecto, ya que estamos en Popayán
+        selectDepartamento.value = "8";
+
+        // Cargar municipios del departamento seleccionado
+        cargarMunicipiosPorDepartamento(8);
+    } catch (error) {
+        console.error('Error al cargar departamentos:', error);
+        mostrarNotificacion('Error al cargar departamentos: ' + error.message, 'error');
+    }
+}
+
+// Cargar municipios por departamento (con mejor manejo de errores)
+function cargarMunicipiosPorDepartamento(departamentoId) {
+    try {
+        const selectMunicipio = document.getElementById('municipio');
+
+        // Limpiar select
+        selectMunicipio.innerHTML = '<option value="">Seleccione un municipio</option>';
+
+        // Verificar si existen municipios para este departamento
+        if (!municipiosPorDepartamento[departamentoId] ||
+            !Array.isArray(municipiosPorDepartamento[departamentoId]) ||
+            municipiosPorDepartamento[departamentoId].length === 0) {
+            console.warn(`No se encontraron municipios para el departamento ID: ${departamentoId}`);
+            return;
+        }
+
+        // Agregar municipios al select
+        municipiosPorDepartamento[departamentoId].forEach(municipio => {
+            const option = document.createElement('option');
+            option.value = municipio.id;
+            option.textContent = municipio.nombre;
+            selectMunicipio.appendChild(option);
+        });
+
+        // Si es Cauca (id: 8), seleccionar Popayán por defecto
+        if (parseInt(departamentoId) === 8) {
+            // Buscar el ID de Popayán en el array de municipios de Cauca
+            const popayan = municipiosPorDepartamento[8].find(m => m.nombre === "Popayán");
+            if (popayan) {
+                selectMunicipio.value = popayan.id;
+            }
+        } else if (municipiosPorDepartamento[departamentoId].length > 0) {
+            // Si no es Cauca, seleccionar el primer municipio por defecto
+            selectMunicipio.value = municipiosPorDepartamento[departamentoId][0].id;
+        }
+    } catch (error) {
+        console.error('Error al cargar municipios:', error);
+        mostrarNotificacion('Error al cargar municipios: ' + error.message, 'error');
+    }
+}
+
+// Función para validar formulario mejorada
+function validateForm(form) {
+    let valid = true;
+
+    // Resetear todos los campos
+    form.querySelectorAll('.form-control, .form-select').forEach(field => {
+        field.classList.remove('is-invalid', 'is-valid');
+        const feedbackElement = field.nextElementSibling?.classList.contains('invalid-feedback')
+            ? field.nextElementSibling
+            : field.parentElement.querySelector('.invalid-feedback');
+
+        if (feedbackElement) {
+            feedbackElement.style.display = 'none';
         }
     });
 
-    // Agregar botón de eliminar
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'btn btn-danger btn-sm remove-asignatura';
-    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-    removeBtn.onclick = function() {
-        newAsignatura.remove();
-    };
-    newAsignatura.querySelector('.card-body').appendChild(removeBtn);
+    // Validar campos requeridos
+    form.querySelectorAll('[required]').forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            const feedbackElement = field.nextElementSibling?.classList.contains('invalid-feedback')
+                ? field.nextElementSibling
+                : field.parentElement.querySelector('.invalid-feedback');
 
-    container.appendChild(newAsignatura);
-}
+            if (feedbackElement) {
+                feedbackElement.textContent = 'Este campo es obligatorio';
+                feedbackElement.style.display = 'block';
+            }
+            valid = false;
+        } else {
+            field.classList.add('is-valid');
+        }
+    });
 
-// Función para guardar asignaturas con contenido programático
-function guardarAsignaturas() {
-    // Obtener el programa seleccionado en el paso 3
-    const programaSeleccionado = document.getElementById('programa_asignatura').value;
-    // Si no hay programa seleccionado, usar el creado anteriormente o mostrar error
-    const progId = programaSeleccionado || programaId;
+    // Validación específica para código IES si tiene valor
+    const codigoIES = form.querySelector('#codigo_ies');
+    if (codigoIES && codigoIES.value.trim()) {
+        // Solo números y letras, sin espacios
+        const regex = /^[a-zA-Z0-9]+$/;
+        if (!regex.test(codigoIES.value.trim())) {
+            codigoIES.classList.add('is-invalid');
+            const feedbackElement = codigoIES.nextElementSibling?.classList.contains('invalid-feedback')
+                ? codigoIES.nextElementSibling
+                : codigoIES.parentElement.querySelector('.invalid-feedback');
 
-    if (!progId) {
-        mostrarNotificacion('No hay programa seleccionado para las asignaturas', 'error');
-        return Promise.reject('No hay programa ID');
+            if (feedbackElement) {
+                feedbackElement.textContent = 'El código IES solo debe contener letras y números, sin espacios';
+                feedbackElement.style.display = 'block';
+            }
+            valid = false;
+        }
     }
 
-    const asignaturasFormsCollection = document.querySelectorAll('.formAsignatura');
-    let promises = [];
+    // Validación específica para código SNIES si tiene valor
+    const codigoSNIES = form.querySelector('#codigo_snies');
+    if (codigoSNIES && codigoSNIES.value.trim()) {
+        // Solo números, sin espacios
+        const regex = /^[0-9]+$/;
+        if (!regex.test(codigoSNIES.value.trim())) {
+            codigoSNIES.classList.add('is-invalid');
+            const feedbackElement = codigoSNIES.nextElementSibling?.classList.contains('invalid-feedback')
+                ? codigoSNIES.nextElementSibling
+                : codigoSNIES.parentElement.querySelector('.invalid-feedback');
 
-    asignaturasFormsCollection.forEach((form, index) => {
-        if (!validateForm(form)) return;
+            if (feedbackElement) {
+                feedbackElement.textContent = 'El código SNIES solo debe contener números';
+                feedbackElement.style.display = 'block';
+            }
+            valid = false;
+        }
+    }
 
-        // Obtener el tipo de asignatura
-        const tipoDisplay = form.querySelector('.tipo_asignatura').value;
-        // Mapear al valor de una sola letra que espera el backend
-        const tipo = tipoAsignaturaMap[tipoDisplay] || 'B';
+    return valid;
+}
 
-        // Asegurarnos que los campos numéricos tengan valores adecuados
-        const creditos = parseInt(form.querySelector('.creditos').value) || 0;
-        const semestre = parseInt(form.querySelector('.semestre').value) || 1;
-        const tiempo_presencial = parseInt(form.querySelector('.tiempo_presencial').value) || 0;
-        const tiempo_independiente = parseInt(form.querySelector('.tiempo_independiente').value) || 0;
-        const horas_totales = parseInt(form.querySelector('.horas_totales_semanales').value) || 0;
+// Función para siguiente paso con mejor manejo de errores
+function nextStep(currentStep) {
+    try {
+        if (currentStep === 1) {
+            // Intentar guardar la institución (parcialmente, sin validación completa)
+            guardarInstitucion(false);
 
-        const nombreAsignatura = form.querySelector('.nombre_asignatura').value.trim();
-        const pensum = form.querySelector('.pensum').value.trim();
-        const codigoAsignatura = form.querySelector('.codigo_asignatura').value.trim() || '';
+            // Avanzar al siguiente paso
+            changeStep(2);
+        }
+    } catch (error) {
+        console.error('Error al avanzar al siguiente paso:', error);
+        mostrarNotificacion('Error: ' + error.message, 'error');
+    }
+}
 
-        // Datos formateados correctamente para la API
-        const asignaturaData = {
-            programa_id: parseInt(progId),
-            nombre: nombreAsignatura,
-            tipo: tipo, // Ahora usando el valor mapeado (B, E, O)
-            codigo_asignatura: codigoAsignatura,
-            creditos: creditos,
-            semestre: semestre,
-            horas_sena: 0,
-            tiempo_presencial: tiempo_presencial,
-            tiempo_independiente: tiempo_independiente,
-            horas_totales_semanales: horas_totales,
-            modalidad: 'Regular',
+// Función para paso anterior
+function previousStep(currentStep) {
+    try {
+        changeStep(currentStep - 1);
+    } catch (error) {
+        console.error('Error al volver al paso anterior:', error);
+        mostrarNotificacion('Error: ' + error.message, 'error');
+    }
+}
+
+// Función para guardar institución (completa o parcial) con mejor manejo de errores y soporte para modo local
+async function guardarInstitucion(validarCompleto = false) {
+    try {
+        // Si se pide validación completa, validar los campos
+        if (validarCompleto) {
+            const formInstitucion = document.getElementById('formInstitucion');
+            if (!validateForm(formInstitucion)) {
+                mostrarNotificacion('Por favor complete todos los campos requeridos correctamente', 'error');
+                return false;
+            }
+        } else {
+            // En modo parcial, al menos verificar que exista el nombre
+            const nombre = document.getElementById('nombre_institucion').value.trim();
+            if (!nombre) {
+                mostrarNotificacion('Debe ingresar al menos el nombre de la institución', 'error');
+                return false;
+            }
+        }
+
+        // Obtener datos del formulario
+        const nombre = document.getElementById('nombre_institucion').value.trim();
+        const paisId = document.getElementById('pais').value;
+        let departamentoId = null;
+        let municipioId = null;
+        let departamentoNombre = null;
+        let municipioNombre = null;
+
+        if (paisId == '1') { // Colombia
+            const selectDepartamento = document.getElementById('departamento');
+            const selectMunicipio = document.getElementById('municipio');
+
+            departamentoId = selectDepartamento.value;
+            municipioId = selectMunicipio.value;
+
+            // Solo incluir nombres si los select tienen una opción seleccionada
+            if (selectDepartamento.selectedIndex > 0) {
+                departamentoNombre = selectDepartamento.options[selectDepartamento.selectedIndex].text;
+            }
+
+            if (selectMunicipio.selectedIndex > 0) {
+                municipioNombre = selectMunicipio.options[selectMunicipio.selectedIndex].text;
+            }
+        } else { // Otro país
+            departamentoNombre = document.getElementById('otro_departamento').value.trim();
+            municipioNombre = document.getElementById('otro_municipio').value.trim();
+        }
+
+        const tipoInstitucion = document.getElementById('tipo_institucion').value;
+        const codigoIes = document.getElementById('codigo_ies').value.trim();
+
+        // Construir objeto de datos solo con valores que existen
+        const data = {
+            nombre: nombre
+        };
+
+        if (codigoIes) data.codigo_ies = codigoIes;
+        if (paisId) data.pais_id = parseInt(paisId);
+        if (departamentoId) data.departamento_id = parseInt(departamentoId);
+        if (departamentoNombre) data.departamento_nombre = departamentoNombre;
+        if (municipioId) data.municipio_id = parseInt(municipioId);
+        if (municipioNombre) data.municipio_nombre = municipioNombre;
+        if (tipoInstitucion) data.tipo = tipoInstitucion;
+
+        console.log('Enviando datos institución:', data);
+
+        // Deshabilitar botón durante la petición
+        const saveButton = document.getElementById('btnGuardarInstitucion') || document.querySelector('#step1 .btn-primary');
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        saveButton.disabled = true;
+
+        // Cabeceras para la petición
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+
+        // Añadir CSRF si está disponible
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (token) {
+            headers['X-CSRF-TOKEN'] = token.getAttribute('content');
+        }
+
+        try {
+            // Intentar enviar datos a la API
+            const result = await fetchWithErrorHandling(`${apiBaseUrl}/instituciones`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(data)
+            });
+
+            console.log('Respuesta API institución:', result);
+
+            // Procesar resultado
+            if (result && result.id_institucion) {
+                institucionId = result.id_institucion;
+                mostrarNotificacion('¡Institución guardada correctamente!', 'success');
+
+                // Si es guardado completo, avanzar al siguiente paso
+                if (validarCompleto) {
+                    setTimeout(() => {
+                        changeStep(2);
+                    }, 1000);
+                }
+
+                // Restaurar botón
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+
+                return true;
+            } else if (result && result.error) {
+                if (result.error.includes('already been taken')) {
+                    mostrarNotificacion('Este código IES ya está registrado', 'error');
+                } else {
+                    mostrarNotificacion('Error: ' + result.error, 'error');
+                }
+            } else if (result && result.mensaje) {
+                mostrarNotificacion(result.mensaje, 'success');
+                return true;
+            } else {
+                mostrarNotificacion('Error al guardar institución', 'error');
+            }
+        } catch (fetchError) {
+            console.error('Error al guardar en API:', fetchError);
+
+            // Si estamos en ambiente local, generar un ID simulado y continuar
+            if (isLocalEnvironment()) {
+                const localId = Math.floor(Math.random() * 1000) + 100;
+                institucionId = localId;
+                mostrarNotificacion('Modo desarrollo: Institución simulada creada con ID: ' + localId, 'warning');
+
+                // Si es guardado completo, avanzar al siguiente paso
+                if (validarCompleto) {
+                    setTimeout(() => {
+                        changeStep(2);
+                    }, 1000);
+                }
+
+                // Restaurar botón
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+
+                return true;
+            } else {
+                throw fetchError; // Re-lanzar el error si no estamos en entorno local
+            }
+        }
+
+        // Restaurar botón
+        saveButton.innerHTML = originalText;
+        saveButton.disabled = false;
+
+        return false;
+    } catch (error) {
+        console.error('Error al guardar institución:', error);
+
+        // Restaurar botón
+        const saveButton = document.getElementById('btnGuardarInstitucion') || document.querySelector('#step1 .btn-primary');
+        if (saveButton) {
+            saveButton.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Institución';
+            saveButton.disabled = false;
+        }
+
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
+        return false;
+    }
+}
+
+// Función para guardar programa completo con mejor manejo de errores y soporte para modo local
+async function guardarPrograma() {
+    try {
+        // Validar el formulario de programa
+        const formPrograma = document.getElementById('formPrograma');
+        if (!validateForm(formPrograma)) {
+            mostrarNotificacion('Por favor complete todos los campos requeridos correctamente', 'error');
+            return;
+        }
+
+        const nombrePrograma = document.getElementById('nombre_programa').value.trim();
+        if (!nombrePrograma) {
+            mostrarNotificacion('Por favor ingrese el nombre del programa', 'error');
+            return;
+        }
+
+        // Obtener institución seleccionada
+        const institucionSeleccionada = document.getElementById('institucion_seleccionada').value;
+        // Si no hay institución seleccionada, usar la creada anteriormente o mostrar error
+        const instId = institucionSeleccionada || institucionId;
+
+        if (!instId) {
+            mostrarNotificacion('No hay institución seleccionada para el programa', 'error');
+            return;
+        }
+
+        const data = {
+            institucion_id: parseInt(instId),
+            facultad_id: null,
+            nombre: nombrePrograma,
+            codigo_snies: document.getElementById('codigo_snies').value.trim() || null,
+            tipo_formacion: document.getElementById('tipo_formacion').value || 'Profesional',
             metodologia: document.getElementById('metodologia').value || 'Presencial'
         };
 
-        console.log(`Datos formateados para API asignatura ${index + 1}:`, asignaturaData);
+        // Deshabilitar botón durante la petición
+        const saveButton = document.querySelector('#step2 .btn-success');
+        const originalText = saveButton.innerHTML;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        saveButton.disabled = true;
 
-        const promise = new Promise((resolve, reject) => {
-            // Paso 1: Guardar la asignatura
-            fetch('https://homologacionesback.educarenemociones.com/api/asignaturas', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(asignaturaData)
-            })
-            .then(response => {
-                console.log(`Status de respuesta asignatura ${index + 1}:`, response.status);
-
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error(`Error en asignatura ${index + 1}:`, text);
-                        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(result => {
-                console.log(`Respuesta asignatura ${index + 1}:`, result);
-
-                if (result.mensaje === 'Asignatura insertada correctamente') {
-                    // MODIFICACIÓN: En lugar de buscar la asignatura, obtenemos el ID directamente o generamos uno temporal
-                    let asignaturaId;
-
-                    if (result.id_asignatura) {
-                        // Si la API devuelve el ID directamente (mejor caso)
-                        asignaturaId = result.id_asignatura;
-                        console.log(`ID obtenido directamente para asignatura ${index + 1}:`, asignaturaId);
-                    } else {
-                        // Generamos un ID temporal para completar el proceso
-                        asignaturaId = new Date().getTime() + index;
-                        console.warn(`Usando ID temporal para asignatura ${index + 1}:`, asignaturaId);
-                    }
-
-                    console.log(
-                        `Guardando contenido programático para asignatura ${index + 1} (ID: ${asignaturaId}):`,
-                        pensum);
-
-                    // Datos para el contenido programático - asegurar que todos son strings
-                    const contenidoData = {
-                        asignatura_id: parseInt(asignaturaId),
-                        tema: nombreAsignatura.toString(),
-                        resultados_aprendizaje: pensum.toString(),
-                        descripcion: pensum.toString()
-                    }
-                    // Guardar contenido programático
-return fetch(
-    'https://homologacionesback.educarenemociones.com/api/contenidos-programaticos', {
-        method: 'POST',
-        headers: {
+        const headers = {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': getCsrfToken(),
             'Accept': 'application/json'
-        },
-        body: JSON.stringify(contenidoData)
-    })
-.then(response => {
-    if (!response.ok) {
-        return response.text().then(text => {
-            console.error(
-                `Error al guardar contenido programático para asignatura ${asignaturaId}:`,
-                text);
-            throw new Error(
-                `Error al guardar contenido programático: ${text}`
-            );
-        });
-    }
-    return response.json();
-})
-.then(contenidoResult => {
-    console.log(
-        `Contenido programático guardado para asignatura ${asignaturaId}:`,
-        contenidoResult);
+        };
 
-    // Devolvemos información sobre la asignatura guardada
-    resolve({
-        nombre: nombreAsignatura,
-        id: asignaturaId,
-        contenidoGuardado: true
-    });
-})
-.catch(error => {
-    console.error("Error al guardar contenido programático:", error);
-    // Aún si falla el contenido programático, consideramos la asignatura guardada
-    resolve({
-        nombre: nombreAsignatura,
-        id: asignaturaId,
-        contenidoGuardado: false,
-        error: error.message
-    });
-});
-                } else {
-                    const error = new Error('Error: ' + result.mensaje);
-                    console.error(error);
-                    reject(error);
-                }
-            })
-            .catch(error => {
-                console.error("Error en el proceso de guardar asignatura:", error);
-                reject(error);
-            });
-        });
-
-        promises.push(promise);
-    });
-
-    return Promise.all(promises).then(results => {
-        console.log("Todas las asignaturas y contenidos programáticos guardados correctamente:", results);
-        return results;
-    });
-}
-
-// Función para guardar todo con mejor manejo de errores
-function guardarTodo() {
-    console.log('Iniciando proceso de guardado completo...');
-
-    // Obtener institución y programa seleccionados en el paso 3
-    const institucionSeleccionada = document.getElementById('institucion_asignatura').value;
-    const programaSeleccionado = document.getElementById('programa_asignatura').value;
-
-    // Actualizar IDs con las selecciones más recientes
-    if (institucionSeleccionada) {
-        institucionId = institucionSeleccionada;
-    }
-
-    if (programaSeleccionado) {
-        programaId = programaSeleccionado;
-    }
-
-    // Verificamos que haya al menos una asignatura
-    const asignaturaForms = document.querySelectorAll('.formAsignatura');
-    if (asignaturaForms.length === 0) {
-        alert('Debe agregar al menos una asignatura');
-        return;
-    }
-
-    // Validamos cada formulario de asignatura
-    let asignaturasValidas = true;
-    asignaturaForms.forEach(form => {
-        if (!validateForm(form)) {
-            asignaturasValidas = false;
+        // Añadir CSRF si está disponible
+        const token = document.querySelector('meta[name="csrf-token"]');
+        if (token) {
+            headers['X-CSRF-TOKEN'] = token.getAttribute('content');
         }
-    });
 
-    if (!asignaturasValidas) {
-        alert('Por favor complete todos los campos obligatorios en las asignaturas');
-        return;
-    }
+        try {
+            const result = await fetchWithErrorHandling(`${apiBaseUrl}/programas`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(data)
+            });
 
-    // Mostramos un mensaje de espera
-    const saveButton = document.querySelector('#step3 .btn-primary');
-    const originalText = saveButton.innerHTML;
-    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    saveButton.disabled = true;
+            saveButton.innerHTML = '<i class="fas fa-check"></i> ¡Guardado!';
 
-    // Verificar que tenemos IDs para continuar (o usar temporales si no)
-    if (!institucionId) {
-        console.warn('No hay ID de institución. Usando ID temporal.');
-        institucionId = document.getElementById('municipio').value * 100 || new Date().getTime();
-    }
+            if (result.mensaje === 'Programa insertado correctamente' || result.id_programa) {
+                programaId = result.id_programa;
+                institucionId = instId; // Actualizar institucionId con la seleccionada
+                mostrarNotificacion('¡Programa guardado correctamente!', 'success');
 
-    if (!programaId) {
-        console.warn('No hay ID de programa. Usando ID temporal.');
-        programaId = new Date().getTime();
-    }
+                // Redirigir después de un breve retraso
+                setTimeout(() => {
+                    window.location.href = '/admin/programas';
+                }, 2000);
+                return true;
+            } else {
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+                mostrarNotificacion('Error al guardar el programa', 'error');
+            }
+        } catch (fetchError) {
+            console.error('Error al guardar programa en API:', fetchError);
 
-    console.log(`Guardando asignaturas para Institución ID: ${institucionId}, Programa ID: ${programaId}`);
+            // Si estamos en ambiente local, simular una respuesta exitosa
+            if (isLocalEnvironment()) {
+                saveButton.innerHTML = '<i class="fas fa-check"></i> ¡Guardado en modo local!';
+                mostrarNotificacion('Modo desarrollo: Programa simulado guardado correctamente', 'warning');
 
-    // Proceder directamente a guardar asignaturas
-    guardarAsignaturas()
-        .then((resultados) => {
-            console.log('Todas las asignaturas guardadas exitosamente:', resultados);
-            saveButton.innerHTML = '<i class="fas fa-check"></i> Guardado!';
+                // Simular redirección
+                setTimeout(() => {
+                    mostrarNotificacion('Modo desarrollo: La redirección está desactivada en modo local', 'info');
+                    saveButton.innerHTML = originalText;
+                    saveButton.disabled = false;
+                }, 2000);
 
-            // Mensaje de éxito mostrando ID de institución y programa
-            const mensaje = `¡Datos guardados exitosamente!\n\nInstitución ID: ${institucionId}\nPrograma ID: ${programaId}\nAsignaturas: ${resultados.length}`;
-            alert(mensaje);
-            mostrarNotificacion('Asignaturas guardadas correctamente', 'success');
+                return true;
+            } else {
+                throw fetchError; // Re-lanzar el error si no estamos en entorno local
+            }
+        }
+    } catch (error) {
+        console.error('Error al guardar programa:', error);
 
-            // Redirigir después de un breve retraso
-            setTimeout(() => {
-                window.location.href = '/admin/programas';
-            }, 1000);
-        })
-        .catch(error => {
-            console.error('Error completo en guardado:', error);
-            saveButton.innerHTML = originalText;
+        // Restaurar botón
+        const saveButton = document.querySelector('#step2 .btn-success');
+        if (saveButton) {
+            saveButton.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Programa';
             saveButton.disabled = false;
-            mostrarNotificacion('Error al guardar asignaturas', 'error');
+        }
 
-            // Incluso en caso de error, dar opción de continuar
-            if (confirm('Hubo un problema al guardar las asignaturas: ' + error.message + '. ¿Desea intentarlo nuevamente?')) {
-                guardarTodo();
-            }
-        });
+        mostrarNotificacion('Error al guardar programa: ' + error.message, 'error');
+    }
 }
 
-// Función para obtener una institución por ID
-function obtenerInstitucionPorId(id) {
-    return fetch(`https://homologacionesback.educarenemociones.com/api/instituciones/${id}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al obtener institución: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data && data.datos) {
-                return data.datos;
-            } else {
-                throw new Error('Formato de respuesta inesperado');
-            }
-        });
-}
-
-// Función para obtener un programa por ID
-function obtenerProgramaPorId(id) {
-    return fetch(`https://homologacionesback.educarenemociones.com/api/programas/${id}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al obtener programa: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data && data.datos) {
-                return data.datos;
-            } else {
-                throw new Error('Formato de respuesta inesperado');
-            }
-        });
-}
-
-// Función para obtener contenido programático de una asignatura
-function obtenerContenidoPorAsignatura(asignaturaId) {
-    return fetch(`https://homologacionesback.educarenemociones.com/api/contenidos-programaticos/${asignaturaId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al obtener contenido programático: ${response.status}`);
-            }
-            return response.json();
-        });
-}
-
-// Función para calcular automáticamente las horas totales semanales
-function calcularHorasTotales(form) {
-    const tiempoPresencial = parseInt(form.querySelector('.tiempo_presencial').value) || 0;
-    const tiempoIndependiente = parseInt(form.querySelector('.tiempo_independiente').value) || 0;
-    form.querySelector('.horas_totales_semanales').value = tiempoPresencial + tiempoIndependiente;
-}
-
-// Inicialización al cargar el documento
+// Inicializar el formulario cuando se cargue el documento
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Inicializando formulario...');
 
-    // Aplicar estilos adicionales a los selects para mejorar su visualización
-    document.querySelectorAll('select').forEach(select => {
-        select.style.color = 'black';
-        select.style.backgroundColor = 'white';
-        select.style.border = '1px solid #ced4da';
-    });
+    // Verificar si estamos en entorno local
+    if (isLocalEnvironment()) {
+        console.log("Detectado entorno local. Activando modos compatibles.");
+        mostrarNotificacion("Entorno local detectado. Si hay problemas de CORS, se activará el modo de desarrollo local.", "info");
+    }
 
     // Cargar departamentos de Colombia por defecto
     cargarDepartamentosColombia();
 
-    // Event listener para cambio de país
+    // Event listeners para cambios en país
     document.getElementById('pais').addEventListener('change', function() {
         const paisId = this.value;
+        const deptoContainer = document.getElementById('departamento-container');
+        const muniContainer = document.getElementById('municipio-container');
+        const otroDeptoContainer = document.getElementById('otro-departamento-container');
+        const otroMuniContainer = document.getElementById('otro-municipio-container');
 
-        // Mostrar/ocultar campos alternativos según el país seleccionado
-        if (paisId == 1) { // Colombia
-            document.getElementById('departamento').classList.remove('hidden');
-            document.getElementById('otro_departamento').classList.add('hidden');
-            document.getElementById('municipio').classList.remove('hidden');
-            document.getElementById('otro_municipio').classList.add('hidden');
+        if (paisId == '1') { // Colombia
+            // Mostrar select de departamentos y municipios de Colombia
+            document.getElementById('departamento').required = true;
+            document.getElementById('municipio').required = true;
+            document.getElementById('otro_departamento').required = false;
+            document.getElementById('otro_municipio').required = false;
+
+            deptoContainer.querySelector('.form-floating').style.display = 'block';
+            muniContainer.querySelector('.form-floating').style.display = 'block';
+            otroDeptoContainer.style.display = 'none';
+            otroMuniContainer.style.display = 'none';
 
             cargarDepartamentosColombia();
+        } else if (paisId == '2') { // Otro país
+            // Mostrar campos de texto para departamento y municipio
+            document.getElementById('departamento').required = false;
+            document.getElementById('municipio').required = false;
+            document.getElementById('otro_departamento').required = true;
+            document.getElementById('otro_municipio').required = true;
+
+            deptoContainer.querySelector('.form-floating').style.display = 'none';
+            muniContainer.querySelector('.form-floating').style.display = 'none';
+            otroDeptoContainer.style.display = 'block';
+            otroMuniContainer.style.display = 'block';
         } else {
-            // Para otros países, mostrar campos de texto
-            document.getElementById('departamento').classList.add('hidden');
-            document.getElementById('otro_departamento').classList.remove('hidden');
-            document.getElementById('municipio').classList.add('hidden');
-            document.getElementById('otro_municipio').classList.remove('hidden');
+            // Si no se selecciona país, ocultar todo
+            document.getElementById('departamento').required = false;
+            document.getElementById('municipio').required = false;
+            document.getElementById('otro_departamento').required = false;
+            document.getElementById('otro_municipio').required = false;
+
+            deptoContainer.querySelector('.form-floating').style.display = 'none';
+            muniContainer.querySelector('.form-floating').style.display = 'none';
+            otroDeptoContainer.style.display = 'none';
+            otroMuniContainer.style.display = 'none';
         }
     });
 
-
-   // Mejora del event listener para cambio de institución en paso 3
-document.getElementById('institucion_asignatura').addEventListener('change', function() {
-    const institucionId = this.value;
-    if (institucionId) {
-        cargarProgramasPorInstitucion(institucionId);
-    } else {
-        // Resetear el selector de programas si no hay institución seleccionada
-        const selectPrograma = document.getElementById('programa_asignatura');
-        selectPrograma.innerHTML = '<option value="">Seleccione primero una institución</option>';
-    }
-});
- document.getElementById('institucion_asignatura').addEventListener('change', function() {
-        const institucionId = this.value;
-        if (institucionId) {
-            console.log('Institución seleccionada:', institucionId);
-            cargarProgramasPorInstitucion(institucionId);
+    // Event listener para cambio de departamento
+    document.getElementById('departamento').addEventListener('change', function() {
+        const departamentoId = this.value;
+        if (departamentoId) {
+            cargarMunicipiosPorDepartamento(departamentoId);
         } else {
-            // Resetear el selector de programas si no hay institución seleccionada
-            const selectPrograma = document.getElementById('programa_asignatura');
-            selectPrograma.innerHTML = '<option value="">Seleccione primero una institución</option>';
+            // Si no hay departamento seleccionado, limpiar municipios
+            const selectMunicipio = document.getElementById('municipio');
+            selectMunicipio.innerHTML = '<option value="">Seleccione primero un departamento</option>';
         }
     });
 
-    // Verificar si hay un programa seleccionado al iniciar el paso 3
-    document.querySelector('#step2 .btn-primary').addEventListener('click', function() {
-        setTimeout(() => {
-            const institucionId = document.getElementById('institucion_asignatura').value;
-            if (institucionId) {
-                cargarProgramasPorInstitucion(institucionId);
-            }
-        }, 300);
+    // Botón para guardar institución explícitamente
+    const btnGuardarInstitucion = document.getElementById('btnGuardarInstitucion');
+    if (btnGuardarInstitucion) {
+        btnGuardarInstitucion.addEventListener('click', function(e) {
+            e.preventDefault();
+            guardarInstitucion(true); // Guardar con validación completa
+        });
+    }
+
+    // Manejar eventos de formulario para prevenir envío por defecto
+    document.getElementById('formInstitucion').addEventListener('submit', function(e) {
+        e.preventDefault();
+        guardarInstitucion(true);
     });
 
-    // Pre-seleccionar institución y programa en paso 3 si tenemos esos valores
-    document.querySelector('#step2 .btn-primary').addEventListener('click', function() {
-        if (institucionId) {
-            setTimeout(() => {
-                const selectInstitucion = document.getElementById('institucion_asignatura');
-                selectInstitucion.value = institucionId;
-                cargarProgramasPorInstitucion(institucionId);
-
-                if (programaId) {
-                    setTimeout(() => {
-                        const selectPrograma = document.getElementById('programa_asignatura');
-                        selectPrograma.value = programaId;
-                    }, 500);
-                }
-            }, 300);
-        }
+    document.getElementById('formPrograma').addEventListener('submit', function(e) {
+        e.preventDefault();
+        guardarPrograma();
     });
+
+    // Verificar si hay errores de conexión con la API y mostrar notificación
+    testApiConnection();
+
+    // Inicializar validaciones de campos
+    setupFieldValidations();
 });
 
-// Función para obtener contenido programático por asignatura mejorada
-function obtenerContenidoPorAsignatura(asignaturaId) {
-    return fetch(`https://homologacionesback.educarenemociones.com/api/contenidos-programaticos/asignatura/${asignaturaId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al obtener contenido programático: ${response.status}`);
-            }
-            return response.json();
+// Función para probar la conexión con la API
+async function testApiConnection() {
+    try {
+        // Intentar hacer una petición simple para verificar la conexión
+        await fetch(`${apiBaseUrl}/test-connection`, {
+            method: 'GET',
+            mode: 'cors',
+            credentials: 'include'
         });
-}
 
-// Modificación en la función guardarAsignaturas para asegurar que se usa el programa seleccionado
-function guardarAsignaturas() {
-    // Obtener el programa seleccionado en el paso 3
-    const programaSeleccionado = document.getElementById('programa_asignatura').value;
+        console.log("Conexión a la API exitosa");
+    } catch (error) {
+        // Si hay un error de red, mostrar notificación
+        console.warn('Advertencia: No se puede conectar con la API. Algunas funciones pueden no estar disponibles.', error);
 
-    if (!programaSeleccionado) {
-        mostrarNotificacion('Debe seleccionar un programa para las asignaturas', 'error');
-        return Promise.reject('No hay programa seleccionado');
-    }
-
-    const progId = programaSeleccionado;
-    console.log(`Guardando asignaturas para el programa ID: ${progId}`);
-
-    const asignaturasFormsCollection = document.querySelectorAll('.formAsignatura');
-    let promises = [];
-
-    asignaturasFormsCollection.forEach((form, index) => {
-        if (!validateForm(form)) {
-            mostrarNotificacion('Complete todos los campos obligatorios', 'error');
-            return;
+        if (isLocalEnvironment() && (error.message.includes('CORS') || error.message.includes('Failed to fetch'))) {
+            usarProxyLocal = true;
+            mostrarNotificacion(
+                "Error CORS detectado. Se ha activado el modo de desarrollo local para continuar.",
+                "warning"
+            );
+        } else {
+            mostrarNotificacion(
+                "Advertencia: Problemas de conexión con el servidor. Algunas funciones pueden no estar disponibles.",
+                "warning"
+            );
         }
-
-        // Obtener el tipo de asignatura
-        const tipoDisplay = form.querySelector('.tipo_asignatura').value;
-        // Mapear al valor de una sola letra que espera el backend
-        const tipo = tipoAsignaturaMap[tipoDisplay] || 'B';
-
-        // Asegurarnos que los campos numéricos tengan valores adecuados
-        const creditos = parseInt(form.querySelector('.creditos').value) || 0;
-        const semestre = parseInt(form.querySelector('.semestre').value) || 1;
-        const tiempo_presencial = parseInt(form.querySelector('.tiempo_presencial').value) || 0;
-        const tiempo_independiente = parseInt(form.querySelector('.tiempo_independiente').value) || 0;
-        const horas_totales = parseInt(form.querySelector('.horas_totales_semanales').value) || 0;
-
-        const nombreAsignatura = form.querySelector('.nombre_asignatura').value.trim();
-        const pensum = form.querySelector('.pensum').value.trim();
-        const codigoAsignatura = form.querySelector('.codigo_asignatura').value.trim() || '';
-
-        // Datos formateados correctamente para la API
-        const asignaturaData = {
-            programa_id: parseInt(progId),
-            nombre: nombreAsignatura,
-            tipo: tipo, // Valor mapeado (B, E, O)
-            codigo_asignatura: codigoAsignatura,
-            creditos: creditos,
-            semestre: semestre,
-            horas_sena: 0,
-            tiempo_presencial: tiempo_presencial,
-            tiempo_independiente: tiempo_independiente,
-            horas_totales_semanales: horas_totales,
-            modalidad: 'Regular',
-            metodologia: document.getElementById('metodologia').value || 'Presencial'
-        };
-
-        console.log(`Datos para asignatura ${index + 1}:`, asignaturaData);
-
-        const promise = new Promise((resolve, reject) => {
-            // Paso 1: Guardar la asignatura
-            fetch('https://homologacionesback.educarenemociones.com/api/asignaturas', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(asignaturaData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error(`Error en asignatura ${index + 1}:`, text);
-                        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(result => {
-                console.log(`Respuesta asignatura ${index + 1}:`, result);
-
-                if (result.mensaje === 'Asignatura insertada correctamente') {
-                    // Obtener el ID de la asignatura recién creada
-                    let asignaturaId;
-
-                    if (result.id_asignatura) {
-                        asignaturaId = result.id_asignatura;
-                        console.log(`ID obtenido para asignatura ${index + 1}:`, asignaturaId);
-                    } else {
-                        reject(new Error('No se recibió ID de asignatura'));
-                        return;
-                    }
-
-                    // Datos para el contenido programático
-                    const contenidoData = {
-                        asignatura_id: parseInt(asignaturaId),
-                        tema: nombreAsignatura.toString(),
-                        resultados_aprendizaje: pensum.toString(),
-                        descripcion: pensum.toString()
-                    }
-
-                    // Guardar contenido programático
-                    return fetch('https://homologacionesback.educarenemociones.com/api/contenidos-programaticos', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': getCsrfToken(),
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(contenidoData)
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                console.error(`Error al guardar contenido programático:`, text);
-                                throw new Error(`Error al guardar contenido programático: ${text}`);
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(contenidoResult => {
-                        console.log(`Contenido programático guardado:`, contenidoResult);
-
-                        resolve({
-                            nombre: nombreAsignatura,
-                            id: asignaturaId,
-                            contenidoGuardado: true
-                        });
-                    });
-                } else {
-                    const error = new Error('Error: ' + (result.mensaje || 'Desconocido'));
-                    console.error(error);
-                    reject(error);
-                }
-            })
-            .catch(error => {
-                console.error("Error en el proceso:", error);
-                reject(error);
-            });
-        });
-
-        promises.push(promise);
-    });
-
-    return Promise.all(promises).then(results => {
-        console.log("Todas las asignaturas guardadas correctamente:", results);
-        return results;
-    });
+    }
 }
 
-// Modificación de la función guardarTodo para mejor manejo de errores y UI
-function guardarTodo() {
-    console.log('Iniciando proceso de guardado...');
+// Función auxiliar para agregar estilos dinámicamente si falta algún recurso
+function addMissingStyles() {
+    // Verificar si Font Awesome está cargado
+    if (!document.querySelector('link[href*="font-awesome"]') &&
+        !document.querySelector('link[href*="fontawesome"]')) {
 
-    // Verificamos que haya una institución y programa seleccionados
-    const institucionSeleccionada = document.getElementById('institucion_asignatura').value;
-    const programaSeleccionado = document.getElementById('programa_asignatura').value;
+        // Agregar Font Awesome dinámicamente
+        const fontAwesomeLink = document.createElement('link');
+        fontAwesomeLink.rel = 'stylesheet';
+        fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
+        document.head.appendChild(fontAwesomeLink);
 
-    if (!institucionSeleccionada) {
-        mostrarNotificacion('Debe seleccionar una institución', 'error');
-        return;
+        console.log('Font Awesome agregado dinámicamente');
     }
-
-    if (!programaSeleccionado) {
-        mostrarNotificacion('Debe seleccionar un programa', 'error');
-        return;
-    }
-
-    // Verificamos que haya al menos una asignatura
-    const asignaturaForms = document.querySelectorAll('.formAsignatura');
-    if (asignaturaForms.length === 0) {
-        alert('Debe agregar al menos una asignatura');
-        return;
-    }
-
-    // Validamos cada formulario de asignatura
-    let asignaturasValidas = true;
-    asignaturaForms.forEach(form => {
-        if (!validateForm(form)) {
-            asignaturasValidas = false;
-        }
-    });
-
-    if (!asignaturasValidas) {
-        alert('Por favor complete todos los campos obligatorios en las asignaturas');
-        return;
-    }
-
-    // Mostramos un mensaje de espera
-    const saveButton = document.querySelector('#step3 .btn-primary');
-    const originalText = saveButton.innerHTML;
-    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    saveButton.disabled = true;
-
-    // Proceder a guardar asignaturas
-    guardarAsignaturas()
-        .then((resultados) => {
-            console.log('Asignaturas guardadas exitosamente:', resultados);
-            saveButton.innerHTML = '<i class="fas fa-check"></i> Guardado!';
-
-            // Mensaje de éxito
-            mostrarNotificacion(`${resultados.length} asignatura(s) guardada(s) correctamente`, 'success');
-
-            // Redirigir después de un breve retraso
-            setTimeout(() => {
-                window.location.href = '/admin/programas';
-            }, 2000);
-        })
-        .catch(error => {
-            console.error('Error en guardado:', error);
-            saveButton.innerHTML = originalText;
-            saveButton.disabled = false;
-            mostrarNotificacion('Error al guardar asignaturas: ' + error.message, 'error');
-        });
 }
 
-</script>
+// Llamar a la función que agrega estilos faltantes
+addMissingStyles();
 
+// Funciones de utilidad para manipulación del DOM
+function showElement(element) {
+    if (typeof element === 'string') {
+        element = document.getElementById(element);
+    }
+    if (element) {
+        element.style.display = 'block';
+    }
+}
+
+function hideElement(element) {
+    if (typeof element === 'string') {
+        element = document.getElementById(element);
+    }
+    if (element) {
+        element.style.display = 'none';
+    }
+}
+
+function toggleElement(element, show) {
+    if (typeof element === 'string') {
+        element = document.getElementById(element);
+    }
+    if (element) {
+        element.style.display = show ? 'block' : 'none';
+    }
+}
+
+// Función para sanitizar entradas de usuario (evitar XSS)
+function sanitizeInput(input) {
+    if (!input) return '';
+
+    // Convertir a string si no lo es
+    input = String(input);
+
+    // Reemplazar caracteres especiales
+    return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Validaciones adicionales para los campos de texto
+function setupFieldValidations() {
+    // Validar nombre de institución (solo permitir caracteres válidos)
+    const nombreInstitucion = document.getElementById('nombre_institucion');
+    if (nombreInstitucion) {
+        nombreInstitucion.addEventListener('input', function() {
+            // Eliminar caracteres especiales excepto letras, números, espacios y algunos símbolos comunes
+            this.value = this.value.replace(/[^\w\s.,&()-]/gi, '');
+        });
+    }
+
+    // Validar código IES (solo alfanumérico sin espacios)
+    const codigoIes = document.getElementById('codigo_ies');
+    if (codigoIes) {
+        codigoIes.addEventListener('input', function() {
+            // Solo permitir letras y números
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+    }
+
+    // Validar código SNIES (solo números)
+    const codigoSnies = document.getElementById('codigo_snies');
+    if (codigoSnies) {
+        codigoSnies.addEventListener('input', function() {
+            // Solo permitir números
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Validar nombre de programa (solo permitir caracteres válidos)
+    const nombrePrograma = document.getElementById('nombre_programa');
+    if (nombrePrograma) {
+        nombrePrograma.addEventListener('input', function() {
+            // Eliminar caracteres especiales excepto letras, números, espacios y algunos símbolos comunes
+            this.value = this.value.replace(/[^\w\s.,&()-]/gi, '');
+        });
+    }
+}
+    </script>
 @endsection

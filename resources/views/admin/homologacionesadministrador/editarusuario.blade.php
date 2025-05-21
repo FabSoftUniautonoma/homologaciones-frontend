@@ -449,8 +449,7 @@ function cargarPaises() {
         if (!response.ok) {
             return Promise.resolve([
                 { id_pais: 1, nombre: 'Colombia' },
-                { id_pais: 2, nombre: 'México' },
-                { id_pais: 3, nombre: 'Argentina' }
+                { id_pais: 2, nombre: 'Otro' },
             ]);
         }
         return response.json();
@@ -471,8 +470,8 @@ function cargarPaises() {
         // Cargar datos de ejemplo en caso de error
         const paises = [
             { id_pais: 1, nombre: 'Colombia' },
-            { id_pais: 2, nombre: 'México' },
-            { id_pais: 3, nombre: 'Argentina' }
+            { id_pais: 2, nombre: 'Otro' },
+
         ];
 
         const select = document.getElementById('pais_id');

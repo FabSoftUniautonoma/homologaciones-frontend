@@ -257,7 +257,7 @@
                                                     <i class="fas fa-user"></i>
                                                 </div>
                                                 <div class="role-info">
-                                                    <h5 class="mb-1">Usuario</h5>
+                                                    <h5 class="mb-1">Aspirante</h5>
                                                     <p class="mb-0 text-muted small">Acceso básico al sistema</p>
                                                 </div>
                                                 <div class="role-check">
@@ -416,7 +416,7 @@
     /* Steps circulares */
     .steps-container {
         position: relative;
-        padding: 0 0 30px;
+        padding: 0 0 25px;
     }
 
     .steps-wrapper {
@@ -558,7 +558,7 @@
     }
 
     .admin-role {
-        background-color: #6610f2;
+        background-color: #6d76ee;
     }
 
     .user-role {
@@ -655,7 +655,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Campos del formulario
     const rolIdInput = document.getElementById('rol_id');
-    const roleCards = document.querySelectorAll('.role-card');
     const numeroIdentificacion = document.getElementById('numero_identificacion');
     const email = document.getElementById('email');
 
@@ -670,25 +669,342 @@ document.addEventListener('DOMContentLoaded', function() {
     const estadoSwitch = document.getElementById('activo');
     const estadoLabel = document.getElementById('estado-label');
 
+    // Array para almacenar los roles de la API
+    let rolesAPI = [];
+
     // Inicialización
     inicializar();
 
     function inicializar() {
-        // Cargar datos iniciales
-        cargarPaisesEstaticos(); // Datos estáticos para países
-        cargarInstitucionesDesdeAPI(); // Datos de API para instituciones
+        // Cargar roles desde la API y luego inicializar
+        cargarRolesDesdeAPI().then(() => {
+            // Cargar datos iniciales
+            cargarPaisesEstaticos();
+            cargarInstitucionesDesdeAPI();
 
-        // Configurar eventos
-        configurarEventos();
+            // Configurar eventos
+            configurarEventos();
 
-        // Configurar navegación de pasos
-        configurarNavegacionPasos();
+            // Configurar navegación de pasos
+            configurarNavegacionPasos();
 
-        // Configurar estado de usuario
-        configurarEstadoUsuario();
+            // Configurar estado de usuario
+            configurarEstadoUsuario();
 
-        // Configurar toggle de contraseñas
-        configurarTogglePassword();
+            // Configurar toggle de contraseñas
+            configurarTogglePassword();
+        });
+    }
+
+    // Función para cargar roles desde la API
+    async function cargarRolesDesdeAPI() {
+        try {
+            const response = await fetch(`${API_URL}/roles`);
+            if (!response.ok) {
+                throw new Error('Error al obtener roles');
+            }
+
+            const data = await response.json();
+            rolesAPI = Array.isArray(data) ? data : [];
+
+            console.log('Roles cargados desde API:', rolesAPI);
+
+            // Generar las tarjetas de roles dinámicamente
+            generarTarjetasRoles();
+
+            return true;
+        } catch (error) {
+            console.error('Error al cargar roles:', error);
+            mostrarNotificacion('error', 'Error', 'No se pudieron cargar los roles. Usando roles predeterminados.');
+
+            // Establecer roles predeterminados en caso de error
+            rolesAPI = [
+                { id_rol: 1, nombre: "Aspirante" },
+                { id_rol: 2, nombre: "Coordinador" },
+                { id_rol: 3, nombre: "Decano" },
+                { id_rol: 4, nombre: "Vicerrector" },
+                { id_rol: 5, nombre: "Administrador" }
+            ];
+
+            generarTarjetasRoles();
+            return false;
+        }
+    }
+
+    // Función para generar tarjetas de roles dinámicamente
+    function generarTarjetasRoles() {
+        // El contenedor donde van las tarjetas - intentamos varias opciones de selector
+        let roleCardContainer = document.querySelector('.col-12.mt-3 .row.g-3');
+
+        // Si no encontramos el contenedor con el primer selector, intentamos otro
+        if (!roleCardContainer) {
+            roleCardContainer = document.querySelector('.row.g-3');
+        }
+
+        // Si todavía no encontramos, intentamos crear uno
+        if (!roleCardContainer) {
+            console.error("No se pudo encontrar el contenedor de tarjetas de roles. Creando uno nuevo");
+
+            // Buscar el contenedor más cercano que podemos encontrar
+            const parentContainer = document.querySelector('.col-12.mt-3');
+            if (parentContainer) {
+                // Crear el contenedor de tarjetas
+                roleCardContainer = document.createElement('div');
+                roleCardContainer.className = 'row g-3';
+                parentContainer.appendChild(roleCardContainer);
+            } else {
+                console.error("No se pudo crear el contenedor para las tarjetas de roles");
+                return;
+            }
+        }
+
+        console.log("Contenedor de tarjetas encontrado. Generando tarjetas para", rolesAPI.length, "roles");
+
+        // Limpiamos el contenedor
+        roleCardContainer.innerHTML = '';
+
+        // Solo mostrar máximo 3 roles por fila
+        const maxRolesPerRow = 3;
+        const rolesToShow = rolesAPI.slice(0, maxRolesPerRow);
+
+        // Iconos y clases para los diferentes tipos de roles
+        const roleIcons = {
+            "Administrador": { icon: "fas fa-user-shield", class: "admin-role" },
+            "Aspirante": { icon: "fas fa-user", class: "user-role" },
+            "Coordinador": { icon: "fas fa-user-cog", class: "user-role" },
+            "Vicerrector": { icon: "fas fa-user-tie", class: "manager-role" },
+            "Decano": { icon: "fas fa-user-graduate", class: "manager-role" }
+        };
+
+        // Generar tarjeta para cada rol
+        rolesToShow.forEach(rol => {
+            const roleConfig = roleIcons[rol.nombre] || { icon: "fas fa-user", class: "user-role" };
+
+            const colDiv = document.createElement('div');
+            colDiv.className = 'col-md-4';
+
+            colDiv.innerHTML = `
+                <div class="role-card" data-role="${rol.id_rol}">
+                    <div class="role-icon ${roleConfig.class}">
+                        <i class="${roleConfig.icon}"></i>
+                    </div>
+                    <div class="role-info">
+                        <h5 class="mb-1">${rol.nombre}</h5>
+                        <p class="mb-0 text-muted small">${getRoleDescription(rol.nombre)}</p>
+                    </div>
+                    <div class="role-check">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            `;
+
+            roleCardContainer.appendChild(colDiv);
+        });
+
+        // Si hay más roles que los mostrados, agregar un botón "Ver más roles"
+        if (rolesAPI.length > maxRolesPerRow) {
+            const verMasDiv = document.createElement('div');
+            verMasDiv.className = 'col-12 mt-2 text-center';
+            verMasDiv.innerHTML = `
+                <button type="button" class="btn btn-sm btn-outline-info" id="btn-ver-mas-roles">
+                    <i class="fas fa-plus-circle me-1"></i> Ver más roles (${rolesAPI.length - maxRolesPerRow} adicionales)
+                </button>
+            `;
+            roleCardContainer.appendChild(verMasDiv);
+
+            // Agregar evento para mostrar modal con todos los roles
+            document.getElementById('btn-ver-mas-roles').addEventListener('click', function() {
+                console.log("Botón Ver más roles clickeado. Mostrando modal...");
+                mostrarModalTodosRoles();
+            });
+        }
+
+        // Agregar eventos a las nuevas tarjetas
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Eliminar selección anterior
+                document.querySelectorAll('.role-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+
+                // Aplicar selección actual
+                this.classList.add('selected');
+
+                // Guardar valor
+                const roleId = this.getAttribute('data-role');
+                rolIdInput.value = roleId;
+                console.log("Rol seleccionado:", roleId);
+
+                document.getElementById('rol-feedback').style.display = 'none';
+            });
+        });
+    }
+
+    // Función para obtener descripción según el rol
+    function getRoleDescription(rolNombre) {
+        const descriptions = {
+            "Administrador": "Control total del sistema",
+            "Aspirante": "Acceso básico al sistema",
+            "Coordinador": "Gestión de homologaciones",
+            "Vicerrector": "Gestión académica",
+            "Decano": "Gestión de facultad"
+        };
+
+        return descriptions[rolNombre] || "Usuario del sistema";
+    }
+
+    // Función para mostrar modal con todos los roles
+    function mostrarModalTodosRoles() {
+        // Crear contenido HTML para el modal con estilos inline para evitar dependencias de CSS externo
+        let rolesHtml = `
+        <style>
+            .roles-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 15px;
+                max-height: 400px;
+                overflow-y: auto;
+                padding: 10px;
+            }
+            .role-card-modal {
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                padding: 15px;
+                cursor: pointer;
+                background-color: #fff;
+                transition: all 0.2s ease;
+            }
+            .role-card-modal:hover {
+                border-color: #0d6efd;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+                transform: translateY(-2px);
+            }
+            .role-icon-container {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                margin-right: 15px;
+            }
+            .role-info-modal {
+                display: flex;
+                align-items: center;
+            }
+            .role-details h5 {
+                margin: 0 0 5px 0;
+                font-size: 16px;
+            }
+            .role-details p {
+                margin: 0;
+                font-size: 13px;
+                color: #6c757d;
+            }
+            .bg-admin { background-color: #6f42c1; }
+            .bg-aspirante { background-color: #0d6efd; }
+            .bg-coordinador { background-color: #20c997; }
+            .bg-vicerrector { background-color: #fd7e14; }
+            .bg-decano { background-color: #6c757d; }
+        </style>
+        <div class="roles-grid">`;
+
+        rolesAPI.forEach(rol => {
+            // Determinar clase de color según el rol
+            let bgColorClass = 'bg-secondary';
+            let iconClass = 'fas fa-user';
+
+            switch(rol.nombre.toLowerCase()) {
+                case 'administrador':
+                    bgColorClass = 'bg-admin';
+                    iconClass = 'fas fa-user-shield';
+                    break;
+                case 'aspirante':
+                    bgColorClass = 'bg-aspirante';
+                    iconClass = 'fas fa-user';
+                    break;
+                case 'coordinador':
+                    bgColorClass = 'bg-coordinador';
+                    iconClass = 'fas fa-user-cog';
+                    break;
+                case 'vicerrector':
+                    bgColorClass = 'bg-vicerrector';
+                    iconClass = 'fas fa-user-tie';
+                    break;
+                case 'decano':
+                    bgColorClass = 'bg-decano';
+                    iconClass = 'fas fa-user-graduate';
+                    break;
+            }
+
+            rolesHtml += `
+                <div class="role-card-modal" data-role-id="${rol.id_rol}">
+                    <div class="role-info-modal">
+                        <div class="role-icon-container ${bgColorClass}">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="role-details">
+                            <h5>${rol.nombre}</h5>
+                            <p>${getRoleDescription(rol.nombre)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        rolesHtml += '</div>';
+
+        // Mostrar modal con SweetAlert2
+        Swal.fire({
+            title: 'Seleccione un Rol',
+            html: rolesHtml,
+            width: '600px',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            showConfirmButton: false,
+            didOpen: () => {
+                console.log("Modal abierto, configurando eventos de tarjetas de roles");
+
+                // Agregar evento a cada tarjeta en el modal
+                const tarjetasRoles = document.querySelectorAll('.role-card-modal');
+                console.log(`Encontradas ${tarjetasRoles.length} tarjetas de roles`);
+
+                tarjetasRoles.forEach(card => {
+                    card.addEventListener('click', function() {
+                        const roleId = this.getAttribute('data-role-id');
+                        console.log("Rol seleccionado ID:", roleId);
+
+                        const rolSeleccionado = rolesAPI.find(r => r.id_rol == roleId);
+                        if (!rolSeleccionado) {
+                            console.error("No se encontró el rol con ID:", roleId);
+                            return;
+                        }
+
+                        console.log("Rol seleccionado:", rolSeleccionado.nombre);
+
+                        // Actualizar el valor del rolIdInput
+                        rolIdInput.value = roleId;
+
+                        // Cerrar el modal
+                        Swal.close();
+
+                        // Actualizar la UI para mostrar el rol seleccionado
+                        document.querySelectorAll('.role-card').forEach(c => {
+                            c.classList.remove('selected');
+                            if (c.getAttribute('data-role') == roleId) {
+                                c.classList.add('selected');
+                            }
+                        });
+
+                        // Mostrar una notificación independientemente de si está visible o no
+                        mostrarNotificacion('success', 'Rol seleccionado', `Ha seleccionado el rol: ${rolSeleccionado.nombre}`);
+
+                        document.getElementById('rol-feedback').style.display = 'none';
+                    });
+                });
+            }
+        });
     }
 
     // DATOS ESTÁTICOS
@@ -780,43 +1096,300 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function cargarMunicipiosEstaticos(departamentoId) {
-        // Mapa de municipios por departamento
-        const municipiosPorDepartamento = {
-            // Antioquia
-            '1': [
-                { id: '1', nombre: 'Medellín' },
-                { id: '2', nombre: 'Bello' },
-                { id: '3', nombre: 'Envigado' },
-                { id: '4', nombre: 'Itagüí' },
-                { id: '5', nombre: 'Rionegro' }
-            ],
-            // Atlántico
-            '2': [
-                { id: '6', nombre: 'Barranquilla' },
-                { id: '7', nombre: 'Soledad' },
-                { id: '8', nombre: 'Malambo' }
-            ],
-            // Bogotá D.C.
-            '3': [
-                { id: '9', nombre: 'Bogotá' }
-            ],
-            // Valle del Cauca
-            '24': [
-                { id: '10', nombre: 'Cali' },
-                { id: '11', nombre: 'Buenaventura' },
-                { id: '12', nombre: 'Palmira' },
-                { id: '13', nombre: 'Tuluá' },
-                { id: '14', nombre: 'Yumbo' }
-            ],
-            // Cauca
-            '8': [
-                { id: '15', nombre: 'Popayán' },
-                { id: '16', nombre: 'Santander de Quilichao' },
-                { id: '17', nombre: 'Puerto Tejada' },
-                { id: '18', nombre: 'Patía' }
-            ]
-        };
-
+    // Mapa completo de municipios por departamento para Colombia
+    const municipiosPorDepartamento = {
+        // Antioquia
+        '1': [
+            { id: '1', nombre: 'Medellín' },
+            { id: '2', nombre: 'Bello' },
+            { id: '3', nombre: 'Envigado' },
+            { id: '4', nombre: 'Itagüí' },
+            { id: '5', nombre: 'Rionegro' },
+            { id: '6', nombre: 'Apartadó' },
+            { id: '7', nombre: 'Turbo' },
+            { id: '8', nombre: 'Caucasia' },
+            { id: '9', nombre: 'La Estrella' },
+            { id: '10', nombre: 'Sabaneta' }
+        ],
+        // Atlántico
+        '2': [
+            { id: '11', nombre: 'Barranquilla' },
+            { id: '12', nombre: 'Soledad' },
+            { id: '13', nombre: 'Malambo' },
+            { id: '14', nombre: 'Sabanalarga' },
+            { id: '15', nombre: 'Baranoa' },
+            { id: '16', nombre: 'Puerto Colombia' },
+            { id: '17', nombre: 'Galapa' },
+            { id: '18', nombre: 'Santo Tomás' }
+        ],
+        // Bogotá D.C.
+        '3': [
+            { id: '19', nombre: 'Bogotá' }
+        ],
+        // Bolívar
+        '4': [
+            { id: '20', nombre: 'Cartagena' },
+            { id: '21', nombre: 'Magangué' },
+            { id: '22', nombre: 'El Carmen de Bolívar' },
+            { id: '23', nombre: 'Turbaco' },
+            { id: '24', nombre: 'Arjona' },
+            { id: '25', nombre: 'María La Baja' }
+        ],
+        // Boyacá
+        '5': [
+            { id: '26', nombre: 'Tunja' },
+            { id: '27', nombre: 'Duitama' },
+            { id: '28', nombre: 'Sogamoso' },
+            { id: '29', nombre: 'Chiquinquirá' },
+            { id: '30', nombre: 'Paipa' },
+            { id: '31', nombre: 'Moniquirá' },
+            { id: '32', nombre: 'Villa de Leyva' }
+        ],
+        // Caldas
+        '6': [
+            { id: '33', nombre: 'Manizales' },
+            { id: '34', nombre: 'La Dorada' },
+            { id: '35', nombre: 'Chinchiná' },
+            { id: '36', nombre: 'Villamaría' },
+            { id: '37', nombre: 'Anserma' },
+            { id: '38', nombre: 'Riosucio' }
+        ],
+        // Caquetá
+        '7': [
+            { id: '39', nombre: 'Florencia' },
+            { id: '40', nombre: 'San Vicente del Caguán' },
+            { id: '41', nombre: 'Puerto Rico' },
+            { id: '42', nombre: 'El Doncello' },
+            { id: '43', nombre: 'Belén de los Andaquíes' }
+        ],
+        // Cauca
+        '8': [
+            { id: '44', nombre: 'Popayán' },
+            { id: '45', nombre: 'Santander de Quilichao' },
+            { id: '46', nombre: 'Puerto Tejada' },
+            { id: '47', nombre: 'Patía' },
+            { id: '48', nombre: 'Miranda' },
+            { id: '49', nombre: 'Caloto' },
+            { id: '50', nombre: 'Piendamó' }
+        ],
+        // Cesar
+        '9': [
+            { id: '51', nombre: 'Valledupar' },
+            { id: '52', nombre: 'Aguachica' },
+            { id: '53', nombre: 'Agustín Codazzi' },
+            { id: '54', nombre: 'Bosconia' },
+            { id: '55', nombre: 'La Paz' },
+            { id: '56', nombre: 'Chiriguaná' }
+        ],
+        // Córdoba
+        '10': [
+            { id: '57', nombre: 'Montería' },
+            { id: '58', nombre: 'Cereté' },
+            { id: '59', nombre: 'Lorica' },
+            { id: '60', nombre: 'Sahagún' },
+            { id: '61', nombre: 'Planeta Rica' },
+            { id: '62', nombre: 'Montelíbano' },
+            { id: '63', nombre: 'Tierralta' }
+        ],
+        // Cundinamarca
+        '11': [
+            { id: '64', nombre: 'Soacha' },
+            { id: '65', nombre: 'Facatativá' },
+            { id: '66', nombre: 'Zipaquirá' },
+            { id: '67', nombre: 'Chía' },
+            { id: '68', nombre: 'Mosquera' },
+            { id: '69', nombre: 'Madrid' },
+            { id: '70', nombre: 'Funza' },
+            { id: '71', nombre: 'Cajicá' },
+            { id: '72', nombre: 'Girardot' }
+        ],
+        // Chocó
+        '12': [
+            { id: '73', nombre: 'Quibdó' },
+            { id: '74', nombre: 'Istmina' },
+            { id: '75', nombre: 'Tadó' },
+            { id: '76', nombre: 'Acandí' },
+            { id: '77', nombre: 'Bahía Solano' },
+            { id: '78', nombre: 'Nuquí' }
+        ],
+        // Huila
+        '13': [
+            { id: '79', nombre: 'Neiva' },
+            { id: '80', nombre: 'Pitalito' },
+            { id: '81', nombre: 'Garzón' },
+            { id: '82', nombre: 'La Plata' },
+            { id: '83', nombre: 'Campoalegre' },
+            { id: '84', nombre: 'Gigante' }
+        ],
+        // La Guajira
+        '14': [
+            { id: '85', nombre: 'Riohacha' },
+            { id: '86', nombre: 'Maicao' },
+            { id: '87', nombre: 'Uribia' },
+            { id: '88', nombre: 'Manaure' },
+            { id: '89', nombre: 'Fonseca' },
+            { id: '90', nombre: 'San Juan del Cesar' }
+        ],
+        // Magdalena
+        '15': [
+            { id: '91', nombre: 'Santa Marta' },
+            { id: '92', nombre: 'Ciénaga' },
+            { id: '93', nombre: 'Fundación' },
+            { id: '94', nombre: 'Plato' },
+            { id: '95', nombre: 'El Banco' },
+            { id: '96', nombre: 'Zona Bananera' }
+        ],
+        // Meta
+        '16': [
+            { id: '97', nombre: 'Villavicencio' },
+            { id: '98', nombre: 'Acacías' },
+            { id: '99', nombre: 'Granada' },
+            { id: '100', nombre: 'Puerto López' },
+            { id: '101', nombre: 'La Macarena' },
+            { id: '102', nombre: 'San Martín' }
+        ],
+        // Nariño
+        '17': [
+            { id: '103', nombre: 'Pasto' },
+            { id: '104', nombre: 'Ipiales' },
+            { id: '105', nombre: 'Tumaco' },
+            { id: '106', nombre: 'Túquerres' },
+            { id: '107', nombre: 'La Unión' },
+            { id: '108', nombre: 'Samaniego' }
+        ],
+        // Norte de Santander
+        '18': [
+            { id: '109', nombre: 'Cúcuta' },
+            { id: '110', nombre: 'Ocaña' },
+            { id: '111', nombre: 'Pamplona' },
+            { id: '112', nombre: 'Villa del Rosario' },
+            { id: '113', nombre: 'Los Patios' },
+            { id: '114', nombre: 'Tibú' }
+        ],
+        // Quindío
+        '19': [
+            { id: '115', nombre: 'Armenia' },
+            { id: '116', nombre: 'Calarcá' },
+            { id: '117', nombre: 'Montenegro' },
+            { id: '118', nombre: 'Quimbaya' },
+            { id: '119', nombre: 'La Tebaida' },
+            { id: '120', nombre: 'Circasia' }
+        ],
+        // Risaralda
+        '20': [
+            { id: '121', nombre: 'Pereira' },
+            { id: '122', nombre: 'Dosquebradas' },
+            { id: '123', nombre: 'Santa Rosa de Cabal' },
+            { id: '124', nombre: 'La Virginia' },
+            { id: '125', nombre: 'Belén de Umbría' },
+            { id: '126', nombre: 'Quinchía' }
+        ],
+        // Santander
+        '21': [
+            { id: '127', nombre: 'Bucaramanga' },
+            { id: '128', nombre: 'Floridablanca' },
+            { id: '129', nombre: 'Girón' },
+            { id: '130', nombre: 'Piedecuesta' },
+            { id: '131', nombre: 'Barrancabermeja' },
+            { id: '132', nombre: 'San Gil' },
+            { id: '133', nombre: 'Socorro' }
+        ],
+        // Sucre
+        '22': [
+            { id: '134', nombre: 'Sincelejo' },
+            { id: '135', nombre: 'Corozal' },
+            { id: '136', nombre: 'San Marcos' },
+            { id: '137', nombre: 'San Onofre' },
+            { id: '138', nombre: 'Tolú' },
+            { id: '139', nombre: 'Sampués' }
+        ],
+        // Tolima
+        '23': [
+            { id: '140', nombre: 'Ibagué' },
+            { id: '141', nombre: 'Espinal' },
+            { id: '142', nombre: 'Chaparral' },
+            { id: '143', nombre: 'Mariquita' },
+            { id: '144', nombre: 'Honda' },
+            { id: '145', nombre: 'Líbano' },
+            { id: '146', nombre: 'Melgar' }
+        ],
+        // Valle del Cauca
+        '24': [
+            { id: '147', nombre: 'Cali' },
+            { id: '148', nombre: 'Buenaventura' },
+            { id: '149', nombre: 'Palmira' },
+            { id: '150', nombre: 'Tuluá' },
+            { id: '151', nombre: 'Yumbo' },
+            { id: '152', nombre: 'Jamundí' },
+            { id: '153', nombre: 'Cartago' },
+            { id: '154', nombre: 'Buga' },
+            { id: '155', nombre: 'Candelaria' }
+        ],
+        // Arauca
+        '25': [
+            { id: '156', nombre: 'Arauca' },
+            { id: '157', nombre: 'Saravena' },
+            { id: '158', nombre: 'Tame' },
+            { id: '159', nombre: 'Arauquita' },
+            { id: '160', nombre: 'Fortul' }
+        ],
+        // Casanare
+        '26': [
+            { id: '161', nombre: 'Yopal' },
+            { id: '162', nombre: 'Aguazul' },
+            { id: '163', nombre: 'Villanueva' },
+            { id: '164', nombre: 'Paz de Ariporo' },
+            { id: '165', nombre: 'Tauramena' },
+            { id: '166', nombre: 'Monterrey' }
+        ],
+        // Putumayo
+        '27': [
+            { id: '167', nombre: 'Mocoa' },
+            { id: '168', nombre: 'Puerto Asís' },
+            { id: '169', nombre: 'Orito' },
+            { id: '170', nombre: 'Valle del Guamuez' },
+            { id: '171', nombre: 'Puerto Leguízamo' },
+            { id: '172', nombre: 'Villagarzón' }
+        ],
+        // San Andrés y Providencia
+        '28': [
+            { id: '173', nombre: 'San Andrés' },
+            { id: '174', nombre: 'Providencia' }
+        ],
+        // Amazonas
+        '29': [
+            { id: '175', nombre: 'Leticia' },
+            { id: '176', nombre: 'Puerto Nariño' }
+        ],
+        // Guainía
+        '30': [
+            { id: '177', nombre: 'Inírida' },
+            { id: '178', nombre: 'Barranco Minas' },
+            { id: '179', nombre: 'Mapiripana' },
+            { id: '180', nombre: 'San Felipe' }
+        ],
+        // Guaviare
+        '31': [
+            { id: '181', nombre: 'San José del Guaviare' },
+            { id: '182', nombre: 'El Retorno' },
+            { id: '183', nombre: 'Calamar' },
+            { id: '184', nombre: 'Miraflores' }
+        ],
+        // Vaupés
+        '32': [
+            { id: '185', nombre: 'Mitú' },
+            { id: '186', nombre: 'Carurú' },
+            { id: '187', nombre: 'Taraira' },
+            { id: '188', nombre: 'Papunaua' }
+        ],
+        // Vichada
+        '33': [
+            { id: '189', nombre: 'Puerto Carreño' },
+            { id: '190', nombre: 'La Primavera' },
+            { id: '191', nombre: 'Santa Rosalía' },
+            { id: '192', nombre: 'Cumaribo' }
+        ]
+    };
         // Resetear el select
         municipioSelect.innerHTML = '';
 
@@ -963,7 +1536,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Insertar después del select de países
             const paisContainer = paisSelect.closest('.col-md-4');
-            paisContainer.parentNode.insertBefore(inputContainer, paisContainer.nextSibling);
+            if (paisContainer && paisContainer.parentNode) {
+                paisContainer.parentNode.insertBefore(inputContainer, paisContainer.nextSibling);
+            } else {
+                // Fallback si no encontramos el elemento padre
+                const locationSection = document.querySelector('#institucional-section .row.g-3');
+                if (locationSection) {
+                    locationSection.appendChild(inputContainer);
+                }
+            }
         } else {
             document.getElementById('pais_otro_container').style.display = 'block';
         }
@@ -998,27 +1579,13 @@ document.addEventListener('DOMContentLoaded', function() {
             mostrarSeccion('institucional');
         });
 
-        // Selección de rol
-        roleCards.forEach(card => {
-            card.addEventListener('click', function() {
-                // Eliminar selección anterior
-                roleCards.forEach(c => {
-                    c.classList.remove('selected');
-                });
-
-                // Aplicar selección actual
-                this.classList.add('selected');
-
-                // Guardar valor
-                rolIdInput.value = this.getAttribute('data-role');
-                document.getElementById('rol-feedback').style.display = 'none';
-            });
-        });
-
         // Validación de campos únicos
         numeroIdentificacion.addEventListener('blur', function() {
             if (this.value.trim() !== '') {
-                verificarIdentificacionExistente(this.value);
+                // Verificar que no sea un email (contiene @)
+                if (!this.value.includes('@')) {
+                    verificarIdentificacionExistente(this.value);
+                }
             }
         });
 
@@ -1361,6 +1928,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Verificar identificación existente a través de la API
     function verificarIdentificacionExistente(numeroIdentificacion) {
+        // Comprobamos que no sea un email antes de verificar
+        if (numeroIdentificacion.includes('@')) {
+            console.warn('Se intentó verificar un email como identificación, omitiendo verificación');
+            return;
+        }
+
         fetch(`${API_URL}/usuarios/verificar-identificacion/${numeroIdentificacion}`)
             .then(response => {
                 if (!response.ok) {
@@ -1468,18 +2041,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Incluir información adicional de selects
         if (institucionSelect.value) {
+            usuario.institucion_origen_id = institucionSelect.value;
             usuario.institucion_nombre = institucionSelect.options[institucionSelect.selectedIndex].text;
         }
 
         if (facultadSelect.value) {
+            usuario.facultad_id = facultadSelect.value;
             usuario.facultad_nombre = facultadSelect.options[facultadSelect.selectedIndex].text;
         }
 
+        // Obtener el nombre del rol desde los datos de la API
         if (rolIdInput.value) {
-            const rolCard = document.querySelector(`.role-card[data-role="${rolIdInput.value}"]`);
-            if (rolCard) {
-                const rolNombre = rolCard.querySelector('h5').textContent;
-                usuario.rol_nombre = rolNombre;
+            const rolSeleccionado = rolesAPI.find(r => r.id_rol == rolIdInput.value);
+            if (rolSeleccionado) {
+                usuario.rol_nombre = rolSeleccionado.nombre;
             }
         }
 
