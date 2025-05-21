@@ -86,8 +86,8 @@ Route::post('/homologaciones/guardar', [HomologacionController::class, 'guardarH
 // Panel principal del coordinador
 Route::prefix('coordinador')->group(function () {
     // Dashboard principal
-    Route::get('/', [HomologacionController::class, 'obtenerDatosBack'])
-        ->name('admin.homologacionescoordinador.index');
+    /* Route::get('/', [HomologacionController::class, 'obtenerDatosBack'])
+        ->name('admin.homologacionescoordinador.index'); */
 
     Route::get('/inicio', function () {
         return view('admin.homologacionescoordinador.pantallaprincipal');
@@ -212,7 +212,7 @@ Route::prefix('homologaciones-vicerrectoria')
     ->group(function () {
         Route::get('/inicio', [HomologacionViceController::class, 'index'])->name('index');
         Route::get('/reportes', [HomologacionViceController::class, 'verReportes'])->name('reportes');
-        Route::get('/vicerrector', [HomologacionViceController::class, 'obtenerDatosBack']) ->name('procesohomologacion.vicerrectoria');
+        Route::get('/vicerrector', [HomologacionViceController::class, 'obtenerDatosBack']) ->name('procesohomologacion.vicerrectoria'); // CUIDADO ESTA DOS VECES
          Route::get('/documentos/{radicado}', [HomologacionViceController::class, 'verDocumentos'])->name('documentos');
         Route::get('/informacion/{radicado}', [HomologacionViceController::class, 'verInformacion'])->name('informacion');
         Route::get('/homologaciones/{id}/proceso', [HomologacionViceController::class, 'vicerrectoria'])->name('procesohomologacion.vicerrectoria');

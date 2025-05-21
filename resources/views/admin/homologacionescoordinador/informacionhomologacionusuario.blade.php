@@ -205,7 +205,7 @@
 
     // Base URL for updates - USAMOS LA MISMA RUTA QUE FUNCIONA
     const baseUrl = "{{ url('/coordinador/admin/homologacionescoordinador/actualizar-estado') }}";
-    const apiBaseUrl = "{{ config('services.api.url', 'http://127.0.0.1:8000/api') }}";
+    const apiBaseUrl = "{{ config('services.api.url', 'https://homologacionesback.educarenemociones.com/api') }}";
 
     console.log('Número de radicado:', radicado);
     console.log('ID solicitud:', solicitudId);

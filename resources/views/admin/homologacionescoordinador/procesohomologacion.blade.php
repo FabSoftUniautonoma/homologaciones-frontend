@@ -1006,7 +1006,7 @@
 
                 let url = '';
                 if (tipo === 'destino') {
-                    url = `http://127.0.0.1:8000/api/asignaturas/${id}`;
+                    url = `https://homologacionesback.educarenemociones.com/api/asignaturas/${id}`;
                 } else {
                     // Para asignaturas de origen, podríamos crear un endpoint específico
                     return Promise.reject('No hay API específica para asignaturas de origen individuales');

@@ -328,7 +328,7 @@
             // Función para cargar datos desde la API
             async function cargarDatos() {
                 try {
-                    const response = await fetch('http://127.0.0.1:8000/api/solicitudes');
+                    const response = await fetch('https://homologacionesback.educarenemociones.com/api/solicitudes');
 
                     if (!response.ok) {
                         throw new Error('Error al cargar los datos');

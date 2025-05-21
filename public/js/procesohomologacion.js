@@ -2005,6 +2005,7 @@ function verificarDatosHomologacion() {
    });
    console.groupEnd();
 }
+
 /**
 * Valida los datos de homologación antes de guardar
 * @returns {Array} Lista de errores encontrados
@@ -2471,6 +2472,8 @@ async function handleFirmaCoordinadorUpload(event) {
 
     reader.readAsDataURL(file);
 }
+
+
 // Función para manejar la subida de la firma del vicerrector
 async function handleFirmaVicerrectorUpload(event) {
     console.log("Función handleFirmaVicerrectorUpload iniciada");
@@ -2561,6 +2564,7 @@ async function handleFirmaVicerrectorUpload(event) {
 
     reader.readAsDataURL(file);
 }
+
 // Función para determinar en qué vista estamos
 function esVistaCoordinador() {
     const resultado = document.getElementById('firma') !== null &&
@@ -2767,6 +2771,8 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
     document.head.appendChild(style);
 });
+
+
 
 // Función de ayuda para obtener datos informativos sin usar :contains (que no es estándar)
 function obtenerDatoInformativo(etiqueta) {
@@ -3124,7 +3130,7 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
         // Texto considerando
         doc.setFont('helvetica', 'normal');
         let considerandos = [
-            `Que el Decano de la Facultad de ${programa}, realizó el estudio de homologación de los cursos aprobados en el Programa de ${programa.toUpperCase()}, de ${universidad.toUpperCase()}, solicitado por ${estudiante.toUpperCase()} identificado con ${identificacion}.`,
+            `Que el Decano de la Facssssssssssssssssssssssssssssssssssssssssssssssssultad de ${programa}, realizó el estudio de homologación de los cursos aprobados en el Programa de ${programa.toUpperCase()}, de ${universidad.toUpperCase()}, solicitado por ${estudiante.toUpperCase()} identificado con ${identificacion}.`,
 
             `Que la Vicerrectora Académica revisó los procedimientos aplicados y los anexos allegados por ${estudiante.toUpperCase()} para el estudio y análisis de la homologación realizada por el Decano de la Facultad correspondiente, con el correspondiente pensum vigente del Programa de ${programa} y por lo anterior.`,
 
@@ -3194,23 +3200,21 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
 
         yPos += lineasArticulo1.length * 6 + 12;
 
-        // Nueva página para la tabla si es necesario
-        if (yPos > 160) {
-            doc.addPage();
-            yPos = 30;
+        // Siempre crear una nueva página para la tabla para tener espacio suficiente
+        doc.addPage();
+        yPos = 30;
 
-            // Marco decorativo
-            doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-            doc.setLineWidth(0.3);
-            doc.roundedRect(10, 10, 195, 260, 2, 2);
+        // Marco decorativo para la nueva página
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2);
 
-            // Encabezado en la nueva página
-            doc.setFontSize(9);
-            doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
-            doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(10);
-        }
+        // Encabezado en la nueva página
+        doc.setFontSize(9);
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
 
         // Título de la tabla
         doc.setFontSize(11);
@@ -3270,29 +3274,40 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
                 startY: yPos,
                 head: [headers],
                 body: data,
-                margin: { left: 20, right: 20 },
+                margin: { left: 15, right: 15 },
                 styles: {
-                    fontSize: 8,
-                    cellPadding: 5,
+                    fontSize: 9,  // Aumentado de 8 a 9
+                    cellPadding: 6,  // Aumentado de 5 a 6
                     lineWidth: 0.1,
-                    valign: 'middle'
+                    valign: 'middle',
+                    overflow: 'linebreak',
+                    lineColor: [200, 200, 200]
                 },
                 headStyles: {
                     fillColor: colorAzulInstitucional,
                     textColor: [255, 255, 255],
                     fontStyle: 'bold',
-                    halign: 'center'
+                    halign: 'center',
+                    fontSize: 9  // Asegurar que el encabezado sea legible
                 },
                 columnStyles: {
-                    0: { cellWidth: 40 },
-                    1: { cellWidth: 15, halign: 'center' },
-                    2: { cellWidth: 40 },
-                    3: { cellWidth: 12, halign: 'center' },
-                    4: { cellWidth: 12, halign: 'center' },
-                    5: { cellWidth: 12, halign: 'center' }
+                    0: { cellWidth: 50 },  // Aumentado espacio para curso de origen
+                    1: { cellWidth: 18, halign: 'center' },
+                    2: { cellWidth: 50 },  // Aumentado espacio para curso destino
+                    3: { cellWidth: 15, halign: 'center' },
+                    4: { cellWidth: 15, halign: 'center' },
+                    5: { cellWidth: 15, halign: 'center' }
                 },
                 alternateRowStyles: {
                     fillColor: [245, 245, 245]
+                },
+                didDrawCell: function(data) {
+                    // Agregar bordes más visibles a las celdas
+                    if (data.section === 'body' || data.section === 'head') {
+                        doc.setDrawColor(150, 150, 150);
+                        doc.setLineWidth(0.1);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                    }
                 }
             });
 
@@ -3301,50 +3316,10 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
         } else {
             // Implementación alternativa simple si autoTable no está disponible
             console.warn('autoTable no está disponible, usando implementación básica');
-            yPos += 10;
 
-            // Dibujar encabezados
-            const colWidths = [40, 15, 40, 12, 12, 12];
-            let xPos = 20;
-
-            // Fondo del encabezado
-            doc.setFillColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-            doc.rect(xPos, yPos - 5, colWidths.reduce((a, b) => a + b, 0) + 10, 10, 'F');
-
-            // Texto del encabezado
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(8);
-            doc.setFont('helvetica', 'bold');
-
-            headers.forEach((header, i) => {
-                doc.text(header, xPos + 5, yPos, { maxWidth: colWidths[i] - 2 });
-                xPos += colWidths[i] + 2;
-            });
-
-            // Restablecer color de texto
-            doc.setTextColor(0, 0, 0);
-            doc.setFont('helvetica', 'normal');
-
-            yPos += 15;
-
-            // Dibujar filas de datos
-            data.forEach((row, rowIndex) => {
-                xPos = 20;
-                // Fondo alternado
-                if (rowIndex % 2 === 1) {
-                    doc.setFillColor(245, 245, 245);
-                    doc.rect(xPos, yPos - 5, colWidths.reduce((a, b) => a + b, 0) + 10, 10, 'F');
-                }
-
-                row.forEach((cell, i) => {
-                    doc.text(cell.toString(), xPos + 5, yPos, { maxWidth: colWidths[i] - 2 });
-                    xPos += colWidths[i] + 2;
-                });
-
-                yPos += 10;
-            });
-
-            yPos += 10;
+            // Esta parte es para situaciones donde autoTable no esté disponible
+            // pero sería mejor asegurarse de que autoTable siempre esté incluido
+            yPos = 150;  // Simplemente avanzamos a una posición posterior en la página
         }
 
         // Calcular total de créditos
@@ -3354,47 +3329,86 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
 
         // Resumen de totales
         doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
-        doc.roundedRect(95, yPos - 5, 90, 20, 2, 2, 'F');
+        doc.roundedRect(95, yPos - 5, 90, 25, 2, 2, 'F');  // Aumentado altura del recuadro
 
         // Total de cursos y créditos
-        doc.setFontSize(9);
+        doc.setFontSize(10);  // Aumentado tamaño de fuente
         doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL CURSOS HOMOLOGADOS:', 110, yPos);
-        doc.text(asignaturasFiltradas.length.toString(), 170, yPos);
+        doc.text('TOTAL CURSOS HOMOLOGADOS:', 110, yPos + 5);
+        doc.text(asignaturasFiltradas.length.toString(), 175, yPos + 5);
+
+        yPos += 12;  // Aumentado espacio entre líneas
+
+        doc.text('TOTAL CRÉDITOS HOMOLOGADOS:', 110, yPos + 5);
+        doc.text(totalCreditos.toString(), 175, yPos + 5);
+
+        // Nueva página para firmas
+        doc.addPage();
+        yPos = 50;
+
+        // Marco decorativo para la página de firmas
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2);
+
+        // Encabezado en la página de firmas
+        doc.setFontSize(9);
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+
+        // Artículo Segundo
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('ARTÍCULO 2°.', 20, yPos);
+        doc.setFont('helvetica', 'normal');
 
         yPos += 10;
 
-        doc.text('TOTAL CRÉDITOS HOMOLOGADOS:', 110, yPos);
-        doc.text(totalCreditos.toString(), 170, yPos);
+        // Texto del artículo segundo
+        const textoArticuloSegundo = `Ordenar al Departamento de Admisiones, Registro y Control Académico, registrar en el sistema la homologación de los cursos académicos relacionados.`;
+        const lineasArticulo2 = doc.splitTextToSize(textoArticuloSegundo, 175);
+        doc.text(lineasArticulo2, 20, yPos);
 
-        // Nueva página para firmas si es necesario
-        if (yPos > 180) {
-            doc.addPage();
-            yPos = 50;
+        yPos += lineasArticulo2.length * 6 + 10;
 
-            // Marco decorativo
-            doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-            doc.setLineWidth(0.3);
-            doc.roundedRect(10, 10, 195, 260, 2, 2);
+        // Artículo Tercero
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('ARTÍCULO 3°.', 20, yPos);
+        doc.setFont('helvetica', 'normal');
 
-            // Encabezado en la nueva página
-            doc.setFontSize(9);
-            doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
-            doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(10);
-        } else {
-            yPos = 200; // Posición fija para firmas
-        }
+        yPos += 10;
+
+        // Texto del artículo tercero
+        const textoArticuloTercero = `La presente Resolución rige a partir de la fecha de su expedición.`;
+        doc.text(textoArticuloTercero, 20, yPos);
+
+        yPos += 20;
+
+        // Comuníquese y cúmplase
+        doc.setFont('helvetica', 'bold');
+        doc.text('COMUNÍQUESE Y CÚMPLASE', 105, yPos, { align: 'center' });
+
+        yPos += 10;
+
+        // Fecha de expedición
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Dada en Popayán, a los ${dia} días del mes de ${mes} de ${año}.`, 105, yPos, { align: 'center' });
+
+        yPos += 30;
 
         const espacioFirma = 90;
 
-        // Rectángulos de fondo para área de firmas
+        // Rectángulos de fondo para área de firmas - mejorados
         doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2], 0.3);
-        doc.roundedRect(105 - espacioFirma / 2 - 40, yPos - 20, 80, 60, 3, 3, 'F');
-        doc.roundedRect(105 + espacioFirma / 2 - 40, yPos - 20, 80, 60, 3, 3, 'F');
+        doc.roundedRect(105 - espacioFirma / 2 - 40, yPos - 20, 80, 70, 3, 3, 'F');  // Aumentado altura
+        doc.roundedRect(105 + espacioFirma / 2 - 40, yPos - 20, 80, 70, 3, 3, 'F');  // Aumentado altura
 
-        // Agregar firmas
+        // Agregar firmas con mejor posicionamiento
         try {
             // Firma del coordinador
             if (window.firmaCoordinadorData) {
@@ -3402,9 +3416,9 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
                     window.firmaCoordinadorData,
                     'PNG',
                     (105 - espacioFirma / 2) - 25,
-                    yPos - 15,
+                    yPos - 10,  // Ajustado
                     50,
-                    20
+                    25  // Aumentado tamaño
                 );
             }
 
@@ -3414,9 +3428,9 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
                     window.firmaVicerrectorData,
                     'PNG',
                     (105 + espacioFirma / 2) - 25,
-                    yPos - 15,
+                    yPos - 10,  // Ajustado
                     50,
-                    20
+                    25  // Aumentado tamaño
                 );
             }
         } catch (error) {
@@ -3426,16 +3440,16 @@ function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, 
         // Líneas para firmas
         doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
         doc.setLineWidth(0.5);
-        doc.line(105 - espacioFirma / 2 - 35, yPos + 15, 105 - espacioFirma / 2 + 35, yPos + 15);
-        doc.line(105 + espacioFirma / 2 - 35, yPos + 15, 105 + espacioFirma / 2 + 35, yPos + 15);
+        doc.line(105 - espacioFirma / 2 - 35, yPos + 20, 105 - espacioFirma / 2 + 35, yPos + 20);  // Ajustado
+        doc.line(105 + espacioFirma / 2 - 35, yPos + 20, 105 + espacioFirma / 2 + 35, yPos + 20);  // Ajustado
 
         // Nombres y cargos
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(9);
-        doc.text('JUAN PABLO DIAGO RODRÍGUEZ', 105 - espacioFirma / 2, yPos + 25, { align: 'center' });
-        doc.text('ISABEL RAMIREZ MEJIA', 105 + espacioFirma / 2, yPos + 25, { align: 'center' });
+        doc.text('JUAN PABLO DIAGO RODRÍGUEZ', 105 - espacioFirma / 2, yPos + 30, { align: 'center' });  // Ajustado
+        doc.text('ISABEL RAMIREZ MEJIA', 105 + espacioFirma / 2, yPos + 30, { align: 'center' });  // Ajustado
 
-        yPos += 35;
+        yPos += 40;  // Ajustado
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.text(`Decano Facultad ${programa}`, 105 - espacioFirma / 2, yPos, { align: 'center' });
@@ -3506,13 +3520,21 @@ function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
             throw new Error('No se encontró el elemento pdf-preview-content');
         }
 
-        // SOLO SI ES LA VISTA DE VICERRECTOR (PDF FINAL) guardar en el backend
+        // IMPORTANTE: Subir el PDF final con todas las firmas
+        // Solo si es la vista del vicerrector (donde tenemos ambas firmas)
         if (esVistaVicerrector) {
             // Obtener el ID de homologación
             let id = null;
             if (typeof homologacionId !== 'undefined' && homologacionId) {
                 id = homologacionId;
+            } else if (typeof cargarHomologacionId === 'function') {
+                id = cargarHomologacionId();
             } else {
+                // Define la función si no existe
+                window.cargarHomologacionId = function() {
+                    return new URLSearchParams(window.location.search).get('id') ||
+                          document.querySelector('[data-homologacion-id]')?.dataset.homologacionId;
+                };
                 id = cargarHomologacionId();
             }
 
@@ -3521,25 +3543,38 @@ function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
                 mostrarAlerta('No se pudo obtener el ID de homologación para guardar el PDF', 'warning');
             } else {
                 // Normalizar el ID si es necesario
-                const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(id) : id;
+                let apiHomologacionId = id;
+                if (typeof normalizarHomologacionId === 'function') {
+                    apiHomologacionId = normalizarHomologacionId(id);
+                } else if (typeof window.normalizarHomologacionId === 'function') {
+                    apiHomologacionId = window.normalizarHomologacionId(id);
+                }
 
-                // Crear archivo PDF para guardar
+                // Crear archivo PDF para guardar - Asegurarnos que sea el PDF completo con todas las firmas
                 const pdfBlob = doc.output('blob');
                 const fecha = new Date().toISOString().split('T')[0];
                 const nombreArchivo = `resolucion_homologacion_FINAL_${apiHomologacionId}_${fecha}.pdf`;
                 const pdfFile = new File([pdfBlob], nombreArchivo, { type: 'application/pdf' });
 
-                // Subir el PDF al servidor
-                subirSoloPDFResolucion(apiHomologacionId, pdfFile)
-                    .then(data => {
-                        console.log('PDF FINAL subido exitosamente:', data);
-                        actualizarInterfazConPDF(data);
-                        mostrarAlerta('PDF con firma de Vicerrector guardado correctamente en el sistema', 'success');
-                    })
-                    .catch(error => {
-                        console.error('Error al subir PDF FINAL:', error);
-                        mostrarAlerta(`Error al guardar el PDF en el sistema: ${error.message}`, 'danger');
-                    });
+                // Verificar que la función para subir existe
+                if (typeof subirSoloPDFResolucion !== 'function') {
+                    console.error('La función subirSoloPDFResolucion no está disponible');
+                    mostrarAlerta('No se pudo guardar el PDF final. La función de subida no está disponible.', 'danger');
+                } else {
+                    // Subir el PDF FINAL con TODAS LAS FIRMAS al servidor
+                    subirSoloPDFResolucion(apiHomologacionId, pdfFile)
+                        .then(data => {
+                            console.log('PDF FINAL con TODAS LAS FIRMAS subido exitosamente:', data);
+                            if (typeof actualizarInterfazConPDF === 'function') {
+                                actualizarInterfazConPDF(data);
+                            }
+                            mostrarAlerta('PDF con TODAS las firmas guardado correctamente en el sistema', 'success');
+                        })
+                        .catch(error => {
+                            console.error('Error al subir PDF FINAL:', error);
+                            mostrarAlerta(`Error al guardar el PDF en el sistema: ${error.message}`, 'danger');
+                        });
+                }
             }
         } else {
             console.log('Vista de coordinador: PDF mostrado pero NO guardado en el backend (se guardará en la fase final con vicerrector)');
@@ -3573,7 +3608,7 @@ function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
                             confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
                         } else {
                             // Intentar generar una firma por defecto
-                            const firmaDefault = generarFirmaDefault ? generarFirmaDefault('coordinador') : null;
+                            const firmaDefault = typeof generarFirmaDefault === 'function' ? generarFirmaDefault('coordinador') : null;
                             confirmarYEnviarAVicerrector(firmaDefault);
                         }
                     } else {
@@ -3623,6 +3658,451 @@ function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
             mostrarAlerta('No se pudo generar el PDF', 'danger');
             return false;
         }
+    }
+}
+
+/**
+ * Configura el botón de descargar PDF para guardar la ruta en la API
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
+    if (btnDescargarPDF) {
+        btnDescargarPDF.addEventListener('click', descargarPDF);
+        console.log('Botón de descargar PDF configurado correctamente');
+    } else {
+        console.log('Botón de descargar PDF no encontrado en esta página');
+    }
+});
+
+
+
+
+/**
+ * Sube solo el PDF de resolución al endpoint específico
+ * @param {string} homologacionId - ID de la homologación
+ * @param {File} pdfFile - El archivo PDF
+ * @returns {Promise} - Promesa con el resultado de la operación
+ */
+function subirSoloPDFResolucion(homologacionId, pdfFile) {
+    console.log('Iniciando subida de PDF de resolución...');
+
+    // Verificar que tengamos un ID válido
+    if (!homologacionId) {
+        // Define la función si no existe
+        if (typeof cargarHomologacionId !== 'function') {
+            window.cargarHomologacionId = function() {
+                return new URLSearchParams(window.location.search).get('id') ||
+                      document.querySelector('[data-homologacion-id]')?.dataset.homologacionId;
+            };
+        }
+        homologacionId = cargarHomologacionId();
+        console.log('ID cargado con cargarHomologacionId:', homologacionId);
+    }
+
+    if (!homologacionId) {
+        return Promise.reject(new Error('ID de homologación no válido. Debe guardar la homologación antes de generar el PDF.'));
+    }
+
+    // Define API_BASE_URL si no existe
+    if (typeof API_BASE_URL === 'undefined') {
+        window.API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
+        console.log('API_BASE_URL definido:', API_BASE_URL);
+    }
+
+    // Normalizar el ID para la API (si es necesario)
+    if (typeof normalizarHomologacionId !== 'function') {
+        window.normalizarHomologacionId = id => id;
+    }
+    const apiHomologacionId = normalizarHomologacionId(homologacionId);
+    console.log('ID normalizado para API:', apiHomologacionId);
+
+    // Verificar que tengamos un archivo válido
+    if (!pdfFile || !(pdfFile instanceof File)) {
+        return Promise.reject(new Error('Archivo PDF no válido'));
+    }
+
+    console.log('Subiendo PDF al servidor:', {
+        endpoint: `${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`,
+        fileName: pdfFile.name,
+        fileSize: pdfFile.size
+    });
+
+    // Crear FormData para el archivo
+    const formData = new FormData();
+    formData.append('ruta_pdf_resolucion', pdfFile);
+
+    // Obtener el token CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!csrfToken) {
+        console.warn('No se encontró token CSRF en el documento');
+    }
+
+    // Verificar conectividad con el servidor antes de la subida
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al verificar conectividad: ${response.status}`);
+        }
+        console.log('Conectividad con el servidor verificada, procediendo con la subida');
+
+        // Ahora intentar con el endpoint específico para PDF
+        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || ''
+            },
+            body: formData
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Respuesta del servidor:', text);
+                throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta exitosa:', data);
+        actualizarInterfazConPDF(data);
+        return data;
+    })
+    .catch(error => {
+        console.error('Error en la operación de subida:', error);
+        // Si el error es por conectividad, intentar el método completo
+        if (error.message.includes('conectividad') || error.message.includes('Failed to fetch')) {
+            console.log('Intentando método alternativo debido a problemas de conexión...');
+            return intentarMetodoCompleto(apiHomologacionId, pdfFile);
+        }
+        throw error;
+    });
+}
+/**
+ * Método que implementa la misma lógica de guardarHomologaciones para subir el PDF
+ * @param {string} homologacionId - ID de homologación
+ * @param {File} pdfFile - Archivo PDF
+ * @returns {Promise} - Promesa con el resultado
+ */
+function intentarMetodoCompleto(homologacionId, pdfFile) {
+    console.log('Utilizando método completo para subir PDF...');
+
+    // Obtener datos actuales de homologaciones
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data || !data.datos) {
+            throw new Error('No se pudieron obtener los datos de la homologación');
+        }
+
+        console.log('Datos obtenidos del servidor:', data.datos);
+
+        // Preparar un array válido de homologaciones basado en los datos existentes
+        let homologacionesArray = [];
+
+        if (data.datos.homologaciones && Array.isArray(data.datos.homologaciones)) {
+            homologacionesArray = data.datos.homologaciones.map(h => ({
+                asignatura_origen_id: h.asignatura_origen_id,
+                asignatura_destino_id: h.asignatura_destino_id || 1, // Asegurar que sea entero
+                nota_destino: h.nota_destino || "0",
+                comentarios: h.comentarios || ''
+            }));
+        } else if (data.datos.asignaturas_origen && data.datos.asignaturas_destino) {
+            homologacionesArray = data.datos.asignaturas_origen.map((asignatura, index) => {
+                const destino = data.datos.asignaturas_destino[index] || {};
+                return {
+                    asignatura_origen_id: asignatura.id,
+                    asignatura_destino_id: destino.id || 1, // Asegurar que sea entero
+                    nota_destino: destino.nota_destino || "0",
+                    comentarios: destino.comentarios || ''
+                };
+            });
+        }
+
+        // Si aún no tenemos homologaciones, crear una entrada mínima válida
+        if (homologacionesArray.length === 0) {
+            homologacionesArray = [{
+                asignatura_origen_id: 1,
+                asignatura_destino_id: 1, // Entero válido
+                nota_destino: "0",
+                comentarios: ''
+            }];
+        }
+
+        console.log('Homologaciones preparadas para enviar:', homologacionesArray);
+
+        // Crear FormData con los datos necesarios
+        const formData = new FormData();
+        formData.append('_method', 'PUT'); // Simular PUT para envío de archivos
+        formData.append('ruta_pdf_resolucion', pdfFile);
+
+        // Asegurar que homologaciones se envía correctamente como array
+        homologacionesArray.forEach((item, index) => {
+            Object.keys(item).forEach(key => {
+                formData.append(`homologaciones[${index}][${key}]`, item[key]);
+            });
+        });
+
+        // Verificar los datos del FormData (solo para debug)
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        // Enviar la solicitud con el archivo PDF y los datos existentes
+        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
+            method: 'POST', // Usando POST con _method=PUT
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: formData
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al subir PDF: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Crear un objeto de respuesta estandarizado
+        return {
+            mensaje: data.mensaje || 'PDF actualizado correctamente',
+            ruta_pdf_resolucion: data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion) || '',
+            url_pdf_resolucion: data.url_pdf_resolucion || (data.ruta_pdf_resolucion ? `/storage/${data.ruta_pdf_resolucion}` : '')
+        };
+    });
+}
+
+function descargarPDF() {
+    console.log('Iniciando generación de PDF de resolución...');
+
+    // Asegurarnos de tener el ID necesario
+    let id = null;
+
+    // Intentar obtener el ID de diferentes fuentes
+    if (typeof homologacionId !== 'undefined' && homologacionId) {
+        id = homologacionId;
+        console.log('Usando homologacionId global:', id);
+    } else {
+        id = cargarHomologacionId();
+        console.log('ID cargado con cargarHomologacionId:', id);
+    }
+
+    if (!id) {
+        console.error('No se pudo obtener el ID de homologación.');
+        alert('Error: Debe guardar la homologación antes de generar el PDF');
+        return;
+    }
+
+    // Normalizar el ID para la API (si es necesario)
+    const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(id) : id;
+    console.log('ID normalizado para API:', apiHomologacionId);
+
+    // Mostrar indicador de carga
+    const btnDescargar = document.getElementById('btn-descargar-pdf');
+    if (!btnDescargar) {
+        console.error('No se encontró el botón de descargar PDF');
+        return;
+    }
+
+    const textoOriginal = btnDescargar.innerHTML;
+    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+    btnDescargar.disabled = true;
+
+    try {
+        // Obtener datos de homologación para generar el PDF
+        fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos para generación de PDF obtenidos:', data);
+
+            if (!data || !data.datos) {
+                throw new Error('No se pudieron obtener los datos de la homologación');
+            }
+
+            const homologacionData = data.datos;
+
+            // Preparar datos para la generación del PDF
+            const datosEstudiante = {
+                nombre: homologacionData.estudiante || 'Estudiante',
+                identificacion: homologacionData.numero_identificacion || 'No disponible'
+            };
+
+            const datosSolicitud = {
+                universidad_origen: homologacionData.universidad_origen || 'Universidad Externa',
+                programa_destino: homologacionData.programa_destino || 'Programa Actual'
+            };
+
+            // Preparar datos de homologación
+            const homologaciones = [];
+            if (homologacionData.asignaturas_origen && homologacionData.asignaturas_destino) {
+                homologacionData.asignaturas_origen.forEach((asignatura, index) => {
+                    const destino = homologacionData.asignaturas_destino[index] || {};
+
+                    homologaciones.push({
+                        asignatura_origen_nombre: asignatura.nombre || 'No disponible',
+                        codigo_destino: destino.codigo || 'N/A',
+                        asignatura_destino_nombre: destino.nombre || 'No disponible',
+                        semestre: destino.semestre || 'N/A',
+                        creditos: asignatura.creditos || destino.creditos || 'N/A',
+                        nota_destino: destino.nota_destino || 'N/A'
+                    });
+                });
+            }
+
+            const datosHomologacion = {
+                homologaciones: homologaciones
+            };
+
+            // Crear las firmas si no existen
+            if (!window.firmaCoordinadorData) {
+                window.firmaCoordinadorData = generarFirmaDefault('coordinador');
+                console.log('Se generó una firma por defecto para el coordinador');
+            }
+
+            // Verificar si generarPDFConDatos está disponible
+            if (typeof generarPDFConDatos === 'function') {
+                // Generar el PDF con los datos - NO se sobrescribe mostrarPDFEnModal aquí
+                console.log('Llamando a generarPDFConDatos...');
+                const resultadoGeneracion = generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, false);
+
+                if (!resultadoGeneracion) {
+                    throw new Error('No se pudo generar el PDF con datos');
+                }
+            } else {
+                throw new Error('Función generarPDFConDatos no disponible');
+            }
+        })
+        .catch(error => {
+            console.error('Error al generar o procesar el PDF:', error);
+            alert(`Error: ${error.message}`);
+
+            // Restaurar botón
+            if (btnDescargar) {
+                btnDescargar.innerHTML = textoOriginal;
+                btnDescargar.disabled = false;
+            }
+        });
+    } catch (error) {
+        console.error('Error en la función descargarPDF:', error);
+        alert(`Error al generar el PDF: ${error.message}`);
+
+        // Restaurar botón
+        if (btnDescargar) {
+            btnDescargar.innerHTML = textoOriginal;
+            btnDescargar.disabled = false;
+        }
+    }
+}
+
+/**
+ * Actualiza la interfaz de usuario con la información del PDF
+ * @param {Object} data - Datos de respuesta del servidor
+ */
+function actualizarInterfazConPDF(data) {
+    try {
+        console.log('Actualizando interfaz con datos del PDF:', data);
+
+        // Actualizar link del PDF si existe en la interfaz
+        const pdfLink = document.getElementById('link-pdf-resolucion');
+        if (pdfLink) {
+            let rutaPDF = '';
+
+            if (data.url_pdf_resolucion) {
+                rutaPDF = data.url_pdf_resolucion;
+            } else if (data.ruta_pdf_resolucion) {
+                rutaPDF = `/storage/${data.ruta_pdf_resolucion}`;
+            } else if (data.datos && data.datos.ruta_pdf_resolucion) {
+                rutaPDF = `/storage/${data.datos.ruta_pdf_resolucion}`;
+            } else if (data.datos && data.datos.url_pdf_resolucion) {
+                rutaPDF = data.datos.url_pdf_resolucion;
+            }
+
+            if (rutaPDF) {
+                pdfLink.href = rutaPDF;
+                pdfLink.style.display = 'inline';
+
+                // Actualizar texto del enlace si tiene un span
+                const pdfLinkText = pdfLink.querySelector('span');
+                if (pdfLinkText) {
+                    pdfLinkText.textContent = 'Ver PDF de resolución';
+                }
+            }
+        }
+
+        // Actualizar campo oculto si existe
+        const pdfPathField = document.getElementById('ruta_pdf_resolucion');
+        const rutaPDF = data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion);
+        if (pdfPathField && rutaPDF) {
+            pdfPathField.value = rutaPDF;
+        }
+
+        // Actualizar cualquier elemento que muestre el nombre del archivo
+        const pdfFileName = document.getElementById('pdf-file-name');
+        if (pdfFileName && rutaPDF) {
+            const nombreArchivo = rutaPDF.split('/').pop();
+            pdfFileName.textContent = nombreArchivo;
+        }
+
+        // Actualizar estado visual en la interfaz
+        const estadoPDF = document.getElementById('estado-pdf');
+        if (estadoPDF) {
+            estadoPDF.innerHTML = '<span class="badge badge-success">PDF Cargado</span>';
+        }
+
+        // Mostrar contenedor de PDF si existe
+        const pdfContainer = document.getElementById('pdf-container');
+        if (pdfContainer) {
+            pdfContainer.style.display = 'block';
+        }
+    } catch (e) {
+        console.error('Error al actualizar interfaz con datos del PDF:', e);
+    }
+}
+
+/**
+ * Función para definir alertaEnProceso si no existe
+ */
+if (typeof alertaEnProceso !== 'function') {
+    function alertaEnProceso(mensaje) {
+        console.log('Alerta en proceso:', mensaje);
+        alert(mensaje);
     }
 }
 
@@ -4063,6 +4543,8 @@ function mostrarAlerta(mensaje, tipo) {
         }, 5000);
     }
 }
+
+
 
 /**
  * Función para configurar el botón de PDF cuando el DOM está listo

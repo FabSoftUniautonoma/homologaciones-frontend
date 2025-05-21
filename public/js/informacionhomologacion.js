@@ -14,7 +14,7 @@
             const baseUrl = "{{ url('/coordinador/admin/homologacionescoordinador/actualizar-estado') }}";
 
             // API URL for direct calls
-            const apiBaseUrl = "{{ config('services.api.url', 'http://127.0.0.1:8000/api') }}";
+            const apiBaseUrl = "{{ config('services.api.url', 'https://homologacionesback.educarenemociones.com/api') }}";
 
             // For debugging
             console.log('Número de radicado:', radicado);

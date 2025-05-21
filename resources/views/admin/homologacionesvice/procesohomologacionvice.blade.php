@@ -3,17 +3,530 @@
 @section('title', 'Proceso de Homologación Vicerrectoría')
 
 @section('content')
+<style>
+    :root {
+        --azul-oscuro: #19407b;
+        --azul-medio: #0075bf;
+        --azul-claro: #0e869b;
+        --azul-muy-claro: #e1f5fe;
+        --azul-contenedor: #f8fbff;
+        --blanco: #ffffff;
+        --negro: #000000;
+        --texto-oscuro: #212121;
+        --texto-medio: #424242;
+        --texto-claro: #757575;
+        --gris-claro: #f9f9f9;
+        --borde: #e0e0e0;
+        --sombra: rgba(0, 0, 0, 0.08);
+        --sombra-hover: rgba(25, 64, 123, 0.15);
+        --rojo-error: #ff4d4d;
+        --verde-success: #4CAF50;
+        --naranja-warning: #FF9800;
+        --azul-info: #2196F3;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    /* Estilos generales de tarjetas */
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px var(--sombra);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 16px var(--sombra-hover);
+        transform: translateY(-3px);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        background-color: var(--azul-contenedor) !important;
+        border-bottom: 1px solid var(--borde);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+        background-color: var(--blanco);
+    }
+
+    /* Encabezado principal */
+    .header {
+        background-color: var(--blanco);
+        border-left: 5px solid var(--azul-medio);
+    }
+
+    .header h1 {
+        color: var(--azul-oscuro);
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .header h5 {
+        color: var(--texto-medio);
+        font-weight: 500;
+    }
+
+    .header-badge {
+        font-size: 0.9rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem !important;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Títulos de secciones */
+    .section-title {
+        color: var(--azul-oscuro);
+        font-weight: 600;
+        font-size: 1.35rem;
+    }
+
+    .card-header .section-title {
+        display: flex;
+        align-items: center;
+    }
+
+    .card-header .section-title i {
+        margin-right: 0.75rem;
+        font-size: 1.2rem;
+        color: var(--azul-medio);
+    }
+
+    /* Filas de información */
+    .info-row {
+        margin-bottom: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .info-label {
+        display: inline-flex;
+        align-items: center;
+        min-width: 150px;
+        color: var(--texto-oscuro);
+        margin-right: 0.5rem;
+    }
+
+    .info-label i {
+        color: var(--azul-medio) !important;
+        margin-right: 0.5rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    /* Tabla de asignaturas */
+    .table {
+        width: 100%;
+        margin-bottom: 0;
+        color: var(--texto-medio);
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: var(--azul-muy-claro);
+        color: var(--azul-oscuro);
+        font-weight: 600;
+        padding: 1rem;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--azul-contenedor);
+    }
+
+    .table-header-group th {
+        background-color: var(--azul-muy-claro);
+        color: var(--azul-oscuro);
+        font-weight: 600;
+    }
+
+    .table td, .table th {
+        padding: 0.85rem;
+        vertical-align: middle;
+        border: 1px solid var(--borde);
+    }
+
+    .border-right {
+        border-right: 2px solid var(--azul-claro) !important;
+    }
+
+    .table tfoot {
+        background-color: var(--azul-muy-claro);
+        font-weight: 600;
+        color: var(--azul-oscuro);
+    }
+
+    /* Enlaces de asignaturas */
+    .asignatura-nombre-link {
+        color: var(--azul-medio);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-block;
+    }
+
+    .asignatura-nombre-link:hover {
+        color: var(--azul-oscuro);
+        text-decoration: underline;
+    }
+
+    /* Badges de estado */
+    .badge {
+        padding: 0.5em 1em;
+        font-weight: 500;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        letter-spacing: 0.3px;
+        text-transform: capitalize;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge i {
+        margin-right: 0.4rem;
+    }
+
+    .badge-pill {
+        border-radius: 50rem;
+    }
+
+    .status-aprobado {
+        background-color: var(--verde-success);
+        color: white;
+    }
+
+    .status-rechazado {
+        background-color: var(--rojo-error);
+        color: white;
+    }
+
+    .status-pendiente, .status-en-revisión {
+        background-color: var(--naranja-warning);
+        color: white;
+    }
+
+    /* Alertas */
+    .alert {
+        border: none;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .alert-danger {
+        background-color: rgba(255, 77, 77, 0.1);
+        color: var(--rojo-error);
+        border-left: 4px solid var(--rojo-error);
+    }
+
+    .alert-warning {
+        background-color: rgba(255, 152, 0, 0.1);
+        color: #e65100;
+        border-left: 4px solid var(--naranja-warning);
+    }
+
+    /* Formularios */
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid var(--borde);
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+        color: var(--texto-oscuro);
+        background-color: var(--blanco);
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: var(--azul-medio);
+        box-shadow: 0 0 0 0.2rem rgba(0, 117, 191, 0.15);
+    }
+
+    select.form-control {
+        appearance: none;
+        padding-right: 2rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230075bf' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    label {
+        font-weight: 500;
+        color: var(--texto-oscuro);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Botones */
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.6rem 1.25rem;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn i {
+        margin-right: 0.5rem;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-lg {
+        padding: 0.8rem 1.8rem;
+        font-size: 1.1rem;
+    }
+
+    .btn-sm {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-primary {
+        background-color: var(--azul-medio);
+        border-color: var(--azul-medio);
+    }
+
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: var(--azul-oscuro);
+        border-color: var(--azul-oscuro);
+    }
+
+    .btn-outline-info {
+        color: var(--azul-claro);
+        border-color: var(--azul-claro);
+    }
+
+    .btn-outline-info:hover {
+        background-color: var(--azul-claro);
+        color: white;
+    }
+
+    .btn-group {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .btn-group .btn {
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    /* Firmas */
+    .border-left-warning {
+        border-left: 4px solid var(--naranja-warning);
+    }
+
+    #firma-coordinador-preview-vice, #firma-vicerrector-preview {
+        height: 150px;
+        border: 2px dashed var(--azul-claro) !important;
+        background-color: var(--azul-muy-claro) !important;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    #firma-coordinador-preview-vice:hover, #firma-vicerrector-preview:hover {
+        border-color: var(--azul-medio) !important;
+        background-color: rgba(225, 245, 254, 0.7) !important;
+    }
+
+    /* Custom File Input */
+    .custom-file {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        height: calc(1.5em + 1.2rem + 2px);
+    }
+
+    .custom-file-input {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: calc(1.5em + 1.2rem + 2px);
+        margin: 0;
+        opacity: 0;
+    }
+
+    .custom-file-label {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        z-index: 1;
+        height: calc(1.5em + 1.2rem + 2px);
+        padding: 0.6rem 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--texto-medio);
+        background-color: var(--blanco);
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .custom-file-label::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        padding: 0.6rem 1rem;
+        color: white;
+        content: "Examinar";
+        background-color: var(--azul-medio);
+        border-left: 1px solid var(--borde);
+        border-radius: 0 8px 8px 0;
+    }
+
+    /* Modales */
+    .modal-content {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background-color: var(--azul-medio);
+        color: white;
+        border-bottom: none;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .modal-title i {
+        margin-right: 0.75rem;
+        font-size: 1.2rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--borde);
+        padding: 1rem 1.5rem;
+        background-color: var(--gris-claro);
+    }
+
+    .close {
+        color: white;
+        text-shadow: none;
+        opacity: 0.8;
+        transition: all 0.2s;
+    }
+
+    .close:hover {
+        opacity: 1;
+        color: white;
+    }
+
+    /* Cards en modal */
+    .origen-card .card-header, .destino-card .card-header {
+        background-color: var(--azul-muy-claro) !important;
+        color: var(--azul-oscuro);
+        font-weight: 600;
+    }
+
+    .origen-card, .destino-card {
+        border: 1px solid var(--borde);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Vista previa PDF */
+    #pdf-preview-content {
+        min-height: 400px;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .info-label {
+            min-width: 120px;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+        }
+    }
+
+    /* Estados específicos */
+    #firma-coordinador-status {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+    }
+
+    #firma-coordinador-status i {
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    /* Animaciones */
+    .fa-spin {
+        animation: fa-spin 1.2s infinite linear;
+    }
+
+    @keyframes fa-spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
     <div class="container">
-        <!-- Mensajes de error si existen -->
-        @if (isset($errors) && !empty($errors))
-            <div class="alert alert-danger shadow-sm rounded">
-                <ul class="mb-0">
-                    @foreach ($errors as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+       
 
         <!-- Encabezado -->
         <div class="header card shadow-sm mb-4">
@@ -285,102 +798,107 @@
             </div>
 
 
-     <div class="row">
-            <div class="col-12">
-                <!-- Estado de las firmas -->
-                <div class="card mb-4 shadow">
-                    <div class="card-header py-3 text-white bg-primary">
-                        <h5 class="m-0 font-weight-bold">
-                            <i class="fas fa-info-circle mr-2"></i>Estado del Proceso
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Estado firma coordinador -->
-                        <div id="firma-coordinador-status" class="alert alert-warning">
-                            <span id="firma-coordinador-mensaje">
-                                <i class="fas fa-spinner fa-spin mr-1"></i>
-                                Verificando firma del coordinador...
-                            </span>
+            <div class="row">
+                <div class="col-12">
+                    <!-- Estado de las firmas -->
+                    <div class="card mb-4 shadow">
+                        <div class="card-header py-3 text-white bg-primary">
+                            <h5 class="m-0 font-weight-bold">
+                                <i class="fas fa-info-circle mr-2"></i>Estado del Proceso
+                            </h5>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Firma del Coordinador (Solo visualización) -->
-                <div class="card mb-4 border-left-warning shadow">
-                    <div class="card-header py-3 text-white" style="background-color: #0277bd;">
-                        <h4 class="m-0 font-weight-bold">
-                            <i class="fas fa-signature mr-2"></i>Firma del Coordinador
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div id="firma-coordinador-preview-vice"
-                                    class="border rounded p-3 text-center d-flex align-items-center justify-content-center"
-                                    style="height: 150px; background-color: #e1f5fe; border-color: #6c8ebf;">
-                                    <p style="color: #19407b;" class="mb-0" id="firma-coordinador-placeholder-vice">
-                                        <i class="fas fa-spinner fa-spin mr-2"></i>Cargando firma del coordinador...
-                                    </p>
-                                    <img id="img-firma-coordinador" style="display: none; max-height: 140px; max-width: 100%;" />
-                                </div>
+                        <div class="card-body">
+                            <!-- Estado firma coordinador -->
+                            <div id="firma-coordinador-status" class="alert alert-warning">
+                                <span id="firma-coordinador-mensaje">
+                                    <i class="fas fa-spinner fa-spin mr-1"></i>
+                                    Verificando firma del coordinador...
+                                </span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Sección de firma vicerrector -->
-                <div id="seccion-firma-vicerrector-contenido" style="display: none;">
+                    <!-- Firma del Coordinador (Solo visualización) -->
                     <div class="card mb-4 border-left-warning shadow">
                         <div class="card-header py-3 text-white" style="background-color: #0277bd;">
                             <h4 class="m-0 font-weight-bold">
-                                <i class="fas fa-signature mr-2"></i>Firma del Vicerrector
+                                <i class="fas fa-signature mr-2"></i>Firma del Coordinador
                             </h4>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="firma-vicerrector" class="font-weight-bold" style="color: #19407b;">
-                                            <i class="fas fa-file-upload mr-1"></i> Subir Firma:
-                                        </label>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="firma-vicerrector"
-                                                accept="image/*">
-                                            <label class="custom-file-label" for="firma-vicerrector" style="color: #0277bd;">
-                                                Seleccionar archivo...
-                                            </label>
-                                        </div>
-                                        <small class="form-text" style="color: #6c8ebf;">
-                                            Formatos aceptados: JPG, PNG, GIF
-                                        </small>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div id="firma-vicerrector-preview"
+                                <div class="col-md-12">
+                                    <div id="firma-coordinador-preview-vice"
                                         class="border rounded p-3 text-center d-flex align-items-center justify-content-center"
                                         style="height: 150px; background-color: #e1f5fe; border-color: #6c8ebf;">
-                                        <p style="color: #19407b;" class="mb-0" id="firma-vicerrector-placeholder">
-                                            Vista previa de la firma
+                                        <p style="color: #19407b;" class="mb-0"
+                                            id="firma-coordinador-placeholder-vice">
+                                            <i class="fas fa-spinner fa-spin mr-2"></i>Cargando firma del coordinador...
                                         </p>
-                                        <img id="img-firma-vicerrector" style="display: none; max-height: 140px; max-width: 100%;" />
+                                        <img id="img-firma-coordinador"
+                                            style="display: none; max-height: 140px; max-width: 100%;" />
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <input type="hidden" id="firma_vicerrector_data" name="firma_vicerrector_data">
-                            <input type="hidden" id="firma_coordinador_data" name="firma_coordinador_data">
+                    <!-- Sección de firma vicerrector -->
+                    <div id="seccion-firma-vicerrector-contenido" style="display: none;">
+                        <div class="card mb-4 border-left-warning shadow">
+                            <div class="card-header py-3 text-white" style="background-color: #0277bd;">
+                                <h4 class="m-0 font-weight-bold">
+                                    <i class="fas fa-signature mr-2"></i>Firma del Vicerrector
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="firma-vicerrector" class="font-weight-bold"
+                                                style="color: #19407b;">
+                                                <i class="fas fa-file-upload mr-1"></i> Subir Firma:
+                                            </label>
+                                            <div class="custom-file">
+                                                <input type="file" class="custom-file-input" id="firma-vicerrector"
+                                                    accept="image/*">
+                                                <label class="custom-file-label" for="firma-vicerrector"
+                                                    style="color: #0277bd;">
+                                                    Seleccionar archivo...
+                                                </label>
+                                            </div>
+                                            <small class="form-text" style="color: #6c8ebf;">
+                                                Formatos aceptados: JPG, PNG, GIF
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="firma-vicerrector-preview"
+                                            class="border rounded p-3 text-center d-flex align-items-center justify-content-center"
+                                            style="height: 150px; background-color: #e1f5fe; border-color: #6c8ebf;">
+                                            <p style="color: #19407b;" class="mb-0" id="firma-vicerrector-placeholder">
+                                                Vista previa de la firma
+                                            </p>
+                                            <img id="img-firma-vicerrector"
+                                                style="display: none; max-height: 140px; max-width: 100%;" />
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div class="mt-3 text-center">
-                                <button type="button" id="btn-generar-pdf" class="btn btn-lg"
-                                    style="background-color: #0277bd; color: white;" disabled>
-                                    <i class="fas fa-file-pdf mr-2"></i> Generar PDF Final
-                                </button>
+                                <input type="hidden" id="firma_vicerrector_data" name="firma_vicerrector_data">
+                                <input type="hidden" id="firma_coordinador_data" name="firma_coordinador_data">
+
+                                <div class="mt-3 text-center">
+                                    <button type="button" id="btn-generar-pdf" class="btn btn-lg"
+                                        style="background-color: #0277bd; color: white;" disabled>
+                                        <i class="fas fa-file-pdf mr-2"></i> Generar PDF Final
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <!-- Modal de Vista Previa PDF Final -->
@@ -434,422 +952,419 @@
 
 
 
-        <!-- Modal para detalles de asignatura -->
-        <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="subjectModalLabel"><i class="fas fa-book text-primary mr-2"></i>
-                            Detalles
-                            de Asignatura</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card mb-3 origen-card h-100">
-                                    <div class="card-header bg-light">
-                                        <h5 class="mb-0">Asignatura de Origen</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Nombre:</span>
-                                            <span id="origen-nombre"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Código:</span>
-                                            <span id="origen-codigo"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Semestre:</span>
-                                            <span id="origen-semestre"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Créditos:</span>
-                                            <span id="origen-creditos"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Nota:</span>
-                                            <span id="origen-nota"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Programa:</span>
-                                            <span id="origen-programa"></span>
-                                        </div>
-                                    </div>
+    <!-- Modal para detalles de asignatura -->
+    <div class="modal fade" id="subjectModal" tabindex="-1" role="dialog" aria-labelledby="subjectModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="subjectModalLabel"><i class="fas fa-book text-primary mr-2"></i>
+                        Detalles
+                        de Asignatura</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3 origen-card h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Asignatura de Origen</h5>
                                 </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="card mb-3 destino-card h-100">
-                                    <div class="card-header bg-light">
-                                        <h5 class="mb-0">Asignatura de Destino</h5>
+                                <div class="card-body">
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Nombre:</span>
+                                        <span id="origen-nombre"></span>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Nombre:</span>
-                                            <span id="destino-nombre"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Código:</span>
-                                            <span id="destino-codigo"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Semestre:</span>
-                                            <span id="destino-semestre"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Créditos:</span>
-                                            <span id="destino-creditos"></span>
-                                        </div>
-                                        <div class="info-row mb-2">
-                                            <span class="info-label font-weight-bold">Nota Propuesta:</span>
-                                            <span id="destino-nota"></span>
-                                        </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Código:</span>
+                                        <span id="origen-codigo"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Semestre:</span>
+                                        <span id="origen-semestre"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Créditos:</span>
+                                        <span id="origen-creditos"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Nota:</span>
+                                        <span id="origen-nota"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Programa:</span>
+                                        <span id="origen-programa"></span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card mt-3">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0"><i class="fas fa-bookmark text-primary mr-2"></i> Contenido
-                                    Programático
-                                </h5>
-                            </div>
-                            <div class="card-body" id="contenido-programatico">
-                                <div class="info-row mb-2">
-                                    <span class="info-label font-weight-bold">Tema:</span>
-                                    <span id="cp-tema"></span>
+                        <div class="col-md-6">
+                            <div class="card mb-3 destino-card h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Asignatura de Destino</h5>
                                 </div>
-                                <div class="info-row mb-2">
-                                    <span class="info-label font-weight-bold">Resultados de Aprendizaje:</span>
-                                    <span id="cp-resultados"></span>
-                                </div>
-                                <div class="info-row mb-2">
-                                    <span class="info-label font-weight-bold">Descripción:</span>
-                                    <span id="cp-descripcion"></span>
+                                <div class="card-body">
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Nombre:</span>
+                                        <span id="destino-nombre"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Código:</span>
+                                        <span id="destino-codigo"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Semestre:</span>
+                                        <span id="destino-semestre"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Créditos:</span>
+                                        <span id="destino-creditos"></span>
+                                    </div>
+                                    <div class="info-row mb-2">
+                                        <span class="info-label font-weight-bold">Nota Propuesta:</span>
+                                        <span id="destino-nota"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            id="modalClose">Cerrar</button>
+
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-bookmark text-primary mr-2"></i> Contenido
+                                Programático
+                            </h5>
+                        </div>
+                        <div class="card-body" id="contenido-programatico">
+                            <div class="info-row mb-2">
+                                <span class="info-label font-weight-bold">Tema:</span>
+                                <span id="cp-tema"></span>
+                            </div>
+                            <div class="info-row mb-2">
+                                <span class="info-label font-weight-bold">Resultados de Aprendizaje:</span>
+                                <span id="cp-resultados"></span>
+                            </div>
+                            <div class="info-row mb-2">
+                                <span class="info-label font-weight-bold">Descripción:</span>
+                                <span id="cp-descripcion"></span>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        id="modalClose">Cerrar</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Modal para editar homologación -->
-        <div class="modal fade" id="editHomologacionModal" tabindex="-1" role="dialog"
-            aria-labelledby="editHomologacionModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editHomologacionModalLabel"><i
-                                class="fas fa-edit text-primary mr-2"></i>
-                            Editar Homologación</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="form-edit-homologacion">
-                            <input type="hidden" id="edit-index">
+    <!-- Modal para editar homologación -->
+    <div class="modal fade" id="editHomologacionModal" tabindex="-1" role="dialog"
+        aria-labelledby="editHomologacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editHomologacionModalLabel"><i class="fas fa-edit text-primary mr-2"></i>
+                        Editar Homologación</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-edit-homologacion">
+                        <input type="hidden" id="edit-index">
 
-                            <div class="form-group">
-                                <label class="font-weight-bold"><i class="fas fa-university text-secondary mr-2"></i>
-                                    Asignatura Origen:</label>
-                                <input type="text" id="edit-origen-nombre" class="form-control" readonly>
+                        <div class="form-group">
+                            <label class="font-weight-bold"><i class="fas fa-university text-secondary mr-2"></i>
+                                Asignatura Origen:</label>
+                            <input type="text" id="edit-origen-nombre" class="form-control" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold"><i class="fas fa-graduation-cap text-secondary mr-2"></i>
+                                Asignatura Destino:</label>
+                            <input type="text" id="edit-destino-nombre" class="form-control" readonly>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold"><i class="fas fa-star-half-alt text-secondary mr-2"></i>
+                                    Nota Origen:</label>
+                                <input type="number" id="edit-nota-origen" class="form-control" step="0.1"
+                                    min="0" max="5" readonly>
                             </div>
-
-                            <div class="form-group">
-                                <label class="font-weight-bold"><i class="fas fa-graduation-cap text-secondary mr-2"></i>
-                                    Asignatura Destino:</label>
-                                <input type="text" id="edit-destino-nombre" class="form-control" readonly>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold"><i class="fas fa-star text-secondary mr-2"></i>
+                                    Nota
+                                    Homologada:</label>
+                                <input type="number" id="edit-nota-homologada" class="form-control" step="0.1"
+                                    min="0" max="5" required>
                             </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label class="font-weight-bold"><i
-                                            class="fas fa-star-half-alt text-secondary mr-2"></i>
-                                        Nota Origen:</label>
-                                    <input type="number" id="edit-nota-origen" class="form-control" step="0.1"
-                                        min="0" max="5" readonly>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label class="font-weight-bold"><i class="fas fa-star text-secondary mr-2"></i>
-                                        Nota
-                                        Homologada:</label>
-                                    <input type="number" id="edit-nota-homologada" class="form-control" step="0.1"
-                                        min="0" max="5" required>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label class="font-weight-bold"><i
-                                            class="fas fa-check-circle text-secondary mr-2"></i>
-                                        Estado:</label>
-                                    <select id="edit-estado" class="form-control">
-                                        <option value="pendiente">Pendiente</option>
-                                        <option value="aprobado">Aprobado</option>
-                                        <option value="rechazado">Rechazado</option>
-                                    </select>
-                                </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold"><i class="fas fa-check-circle text-secondary mr-2"></i>
+                                    Estado:</label>
+                                <select id="edit-estado" class="form-control">
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aprobado">Aprobado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                </select>
                             </div>
+                        </div>
 
-                            <div class="form-group">
-                                <label class="font-weight-bold"><i class="fas fa-comment text-secondary mr-2"></i>
-                                    Observaciones:</label>
-                                <textarea id="edit-observaciones" class="form-control" rows="3"></textarea>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" id="btnCancelEditHomologacion"
-                            data-dismiss="modal">
-                            <i class="fas fa-times mr-1"></i> Cancelar
-                        </button>
-                        <button type="button" class="btn btn-primary" id="btnSaveEditHomologacion">
-                            <i class="fas fa-save mr-1"></i> Guardar Cambios
-                        </button>
-                    </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold"><i class="fas fa-comment text-secondary mr-2"></i>
+                                Observaciones:</label>
+                            <textarea id="edit-observaciones" class="form-control" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" id="btnCancelEditHomologacion" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnSaveEditHomologacion">
+                        <i class="fas fa-save mr-1"></i> Guardar Cambios
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
 
-    @endsection
+@endsection
 
-    @section('scripts')
-        <!-- Incluir jsPDF para generación de PDFs -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    <script src="{{ asset(path: 'js/proceso.js') }}"></script>
+@section('scripts')
+    <!-- Incluir jsPDF para generación de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    {{-- <script src="{{ asset(path: 'js/proceso.js') }}"></script> --}}
 
-        <!-- JS para cargar firmas -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log("Inicializando vista de vicerrector...");
+    <script src="{{ asset('js/procesohomologacion.js') }}"></script>
 
-                // Verificar firma del coordinador
-                const firmaCoordExiste = cargarFirmaCoordinador();
-                actualizarEstadoFirmaCoordinador(firmaCoordExiste);
+    <!-- JS para cargar firmas -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Inicializando vista de vicerrector...");
 
-                // Configurar input de firma vicerrector
-                const firmaVicerrectorInput = document.getElementById('firma-vicerrector');
-                if (firmaVicerrectorInput) {
-                    console.log("Configurando input de firma vicerrector");
+            // Verificar firma del coordinador
+            const firmaCoordExiste = cargarFirmaCoordinador();
+            actualizarEstadoFirmaCoordinador(firmaCoordExiste);
 
-                    // Remover event listeners anteriores y agregar nuevo
-                    const nuevoInput = firmaVicerrectorInput.cloneNode(true);
-                    firmaVicerrectorInput.parentNode.replaceChild(nuevoInput, firmaVicerrectorInput);
+            // Configurar input de firma vicerrector
+            const firmaVicerrectorInput = document.getElementById('firma-vicerrector');
+            if (firmaVicerrectorInput) {
+                console.log("Configurando input de firma vicerrector");
 
-                    nuevoInput.addEventListener('change', function(event) {
-                        console.log("Cambio en input de firma vicerrector");
-                        if (typeof handleFirmaVicerrectorUpload === 'function') {
-                            handleFirmaVicerrectorUpload(event);
-                        } else {
-                            console.error("Función handleFirmaVicerrectorUpload no disponible");
-                            mostrarAlerta("Error: No se pudo cargar el manejador de firma", "danger");
-                        }
-                    });
+                // Remover event listeners anteriores y agregar nuevo
+                const nuevoInput = firmaVicerrectorInput.cloneNode(true);
+                firmaVicerrectorInput.parentNode.replaceChild(nuevoInput, firmaVicerrectorInput);
 
-                    // Inicializar bootstrap file input si está disponible
-                    if (typeof bsCustomFileInput !== 'undefined') {
-                        bsCustomFileInput.init();
+                nuevoInput.addEventListener('change', function(event) {
+                    console.log("Cambio en input de firma vicerrector");
+                    if (typeof handleFirmaVicerrectorUpload === 'function') {
+                        handleFirmaVicerrectorUpload(event);
+                    } else {
+                        console.error("Función handleFirmaVicerrectorUpload no disponible");
+                        mostrarAlerta("Error: No se pudo cargar el manejador de firma", "danger");
                     }
+                });
+
+                // Inicializar bootstrap file input si está disponible
+                if (typeof bsCustomFileInput !== 'undefined') {
+                    bsCustomFileInput.init();
                 }
+            }
 
-                // Cargar firma del vicerrector si ya existe
-                if (typeof cargarFirmaVicerrector === 'function') {
-                    cargarFirmaVicerrector();
-                }
+            // Cargar firma del vicerrector si ya existe
+            if (typeof cargarFirmaVicerrector === 'function') {
+                cargarFirmaVicerrector();
+            }
 
-                // Configurar botón de generar PDF
-                const btnGenerarPDF = document.getElementById('btn-generar-pdf');
-                if (btnGenerarPDF) {
-                    console.log("Configurando botón de generar PDF en vista vicerrector");
+            // Configurar botón de generar PDF
+            const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+            if (btnGenerarPDF) {
+                console.log("Configurando botón de generar PDF en vista vicerrector");
 
-                    // Remover event listeners anteriores
-                    const nuevoBtn = btnGenerarPDF.cloneNode(true);
-                    btnGenerarPDF.parentNode.replaceChild(nuevoBtn, btnGenerarPDF);
+                // Remover event listeners anteriores
+                const nuevoBtn = btnGenerarPDF.cloneNode(true);
+                btnGenerarPDF.parentNode.replaceChild(nuevoBtn, btnGenerarPDF);
 
-                    // Agregar nuevo event listener
-                    nuevoBtn.addEventListener('click', function() {
-                        console.log("Botón generar PDF presionado en vista vicerrector");
-                        if (typeof generarPDF === 'function') {
-                            // Llamar a la función con parámetro true (vista vicerrector)
-                            generarPDF(true);
-                        } else {
-                            console.error("Función generarPDF no disponible");
-                            mostrarAlerta("Error: No se pudo generar el PDF", "danger");
+                // Agregar nuevo event listener
+                nuevoBtn.addEventListener('click', function() {
+                    console.log("Botón generar PDF presionado en vista vicerrector");
+                    if (typeof generarPDF === 'function') {
+                        // Llamar a la función con parámetro true (vista vicerrector)
+                        generarPDF(true);
+                    } else {
+                        console.error("Función generarPDF no disponible");
+                        mostrarAlerta("Error: No se pudo generar el PDF", "danger");
 
-                            // Fallback simple - mostrar modal
-                            if (typeof $ !== 'undefined' && $('#pdf-preview-modal').length) {
-                                $('#pdf-preview-modal').modal('show');
-                            }
+                        // Fallback simple - mostrar modal
+                        if (typeof $ !== 'undefined' && $('#pdf-preview-modal').length) {
+                            $('#pdf-preview-modal').modal('show');
                         }
-                    });
-
-                    // Habilitar botón si ambas firmas están disponibles
-                    if (window.firmaCoordinadorData && window.firmaVicerrectorData) {
-                        nuevoBtn.disabled = false;
                     }
+                });
+
+                // Habilitar botón si ambas firmas están disponibles
+                if (window.firmaCoordinadorData && window.firmaVicerrectorData) {
+                    nuevoBtn.disabled = false;
                 }
+            }
 
-                // Verificar función para mostrar alertas
-                if (typeof mostrarAlerta !== 'function') {
-                    window.mostrarAlerta = function(mensaje, tipo) {
-                        const alertContainer = document.getElementById('alert-container') ||
-                            document.createElement('div');
+            // Verificar función para mostrar alertas
+            if (typeof mostrarAlerta !== 'function') {
+                window.mostrarAlerta = function(mensaje, tipo) {
+                    const alertContainer = document.getElementById('alert-container') ||
+                        document.createElement('div');
 
-                        if (!document.getElementById('alert-container')) {
-                            alertContainer.id = 'alert-container';
-                            alertContainer.style.position = 'fixed';
-                            alertContainer.style.top = '20px';
-                            alertContainer.style.right = '20px';
-                            alertContainer.style.zIndex = '9999';
-                            document.body.appendChild(alertContainer);
-                        }
+                    if (!document.getElementById('alert-container')) {
+                        alertContainer.id = 'alert-container';
+                        alertContainer.style.position = 'fixed';
+                        alertContainer.style.top = '20px';
+                        alertContainer.style.right = '20px';
+                        alertContainer.style.zIndex = '9999';
+                        document.body.appendChild(alertContainer);
+                    }
 
-                        const alertEl = document.createElement('div');
-                        alertEl.className = `alert alert-${tipo} alert-dismissible fade show`;
-                        alertEl.innerHTML = `
+                    const alertEl = document.createElement('div');
+                    alertEl.className = `alert alert-${tipo} alert-dismissible fade show`;
+                    alertEl.innerHTML = `
                    ${mensaje}
                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                        <span aria-hidden="true">&times;</span>
                    </button>
                `;
 
-                        alertContainer.appendChild(alertEl);
+                    alertContainer.appendChild(alertEl);
 
-                        setTimeout(() => {
-                            alertEl.classList.remove('show');
-                            setTimeout(() => alertEl.remove(), 300);
-                        }, 5000);
-                    };
-                }
+                    setTimeout(() => {
+                        alertEl.classList.remove('show');
+                        setTimeout(() => alertEl.remove(), 300);
+                    }, 5000);
+                };
+            }
 
-                // Configurar botón guardar estado
-                const btnGuardarEstado = document.getElementById('btnguardarestado');
-                if (btnGuardarEstado) {
-                    btnGuardarEstado.addEventListener('click', function() {
-                        const estado = document.getElementById('estado').value;
-                        // Aquí podrías implementar la lógica para guardar solo el estado
-                        // Por ahora, mostramos una alerta de confirmación
-                        mostrarAlerta(`Estado de homologación actualizado a: ${estado}`, 'success');
-                    });
-                }
-
-                // Manejar el clic en el nombre de la asignatura
-                document.querySelectorAll('.asignatura-nombre-link').forEach(link => {
-                    link.addEventListener('click', function() {
-                        const row = this.closest('tr');
-                        const asignaturaOrigenData = row.getAttribute('data-asignatura-origen');
-                        const asignaturaDestinoData = row.querySelector('td[data-asignatura-destino]')
-                            ?.getAttribute('data-asignatura-destino');
-
-                        if (asignaturaOrigenData) {
-                            mostrarDetallesAsignatura(asignaturaOrigenData, asignaturaDestinoData);
-                        }
-                    });
+            // Configurar botón guardar estado
+            const btnGuardarEstado = document.getElementById('btnguardarestado');
+            if (btnGuardarEstado) {
+                btnGuardarEstado.addEventListener('click', function() {
+                    const estado = document.getElementById('estado').value;
+                    // Aquí podrías implementar la lógica para guardar solo el estado
+                    // Por ahora, mostramos una alerta de confirmación
+                    mostrarAlerta(`Estado de homologación actualizado a: ${estado}`, 'success');
                 });
+            }
 
-                // Manejar el clic en el botón de ver detalles
-                document.querySelectorAll('.view-subject').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const row = this.closest('tr');
-                        const asignaturaOrigenData = row.getAttribute('data-asignatura-origen');
-                        const asignaturaDestinoData = row.querySelector('td[data-asignatura-destino]')
-                            ?.getAttribute('data-asignatura-destino');
+            // Manejar el clic en el nombre de la asignatura
+            document.querySelectorAll('.asignatura-nombre-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const asignaturaOrigenData = row.getAttribute('data-asignatura-origen');
+                    const asignaturaDestinoData = row.querySelector('td[data-asignatura-destino]')
+                        ?.getAttribute('data-asignatura-destino');
 
-                        if (asignaturaOrigenData) {
-                            mostrarDetallesAsignatura(asignaturaOrigenData, asignaturaDestinoData);
-                        }
-                    });
+                    if (asignaturaOrigenData) {
+                        mostrarDetallesAsignatura(asignaturaOrigenData, asignaturaDestinoData);
+                    }
                 });
+            });
 
-                // Función para mostrar detalles de asignatura en el modal
-                function mostrarDetallesAsignatura(origenData, destinoData) {
-                    try {
-                        const asignaturaOrigen = JSON.parse(origenData);
+            // Manejar el clic en el botón de ver detalles
+            document.querySelectorAll('.view-subject').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const asignaturaOrigenData = row.getAttribute('data-asignatura-origen');
+                    const asignaturaDestinoData = row.querySelector('td[data-asignatura-destino]')
+                        ?.getAttribute('data-asignatura-destino');
 
-                        // Llenar datos de origen
-                        document.getElementById('origen-nombre').textContent = asignaturaOrigen.nombre || 'N/A';
-                        document.getElementById('origen-codigo').textContent = asignaturaOrigen.codigo || 'N/A';
-                        document.getElementById('origen-semestre').textContent = asignaturaOrigen.semestre || 'N/A';
-                        document.getElementById('origen-creditos').textContent = asignaturaOrigen.creditos || 'N/A';
-                        document.getElementById('origen-nota').textContent = asignaturaOrigen.nota_origen ||
-                            asignaturaOrigen.nota || 'N/A';
-                        document.getElementById('origen-programa').textContent = asignaturaOrigen.programa || 'N/A';
+                    if (asignaturaOrigenData) {
+                        mostrarDetallesAsignatura(asignaturaOrigenData, asignaturaDestinoData);
+                    }
+                });
+            });
 
-                        // Llenar datos de destino si existen
-                        if (destinoData) {
-                            const asignaturaDestino = JSON.parse(destinoData);
-                            document.getElementById('destino-nombre').textContent = asignaturaDestino.nombre || 'N/A';
-                            document.getElementById('destino-codigo').textContent = asignaturaDestino.codigo || 'N/A';
-                            document.getElementById('destino-semestre').textContent = asignaturaDestino.semestre ||
-                                'N/A';
-                            document.getElementById('destino-creditos').textContent = asignaturaDestino.creditos ||
-                                'N/A';
-                            document.getElementById('destino-nota').textContent = asignaturaDestino.nota_destino ||
-                                '3.0';
-                        } else {
-                            document.getElementById('destino-nombre').textContent = 'No asignado';
-                            document.getElementById('destino-codigo').textContent = 'N/A';
-                            document.getElementById('destino-semestre').textContent = 'N/A';
-                            document.getElementById('destino-creditos').textContent = 'N/A';
-                            document.getElementById('destino-nota').textContent = 'N/A';
-                        }
+            // Función para mostrar detalles de asignatura en el modal
+            function mostrarDetallesAsignatura(origenData, destinoData) {
+                try {
+                    const asignaturaOrigen = JSON.parse(origenData);
 
-                        // Llenar contenido programático si existe
-                        if (asignaturaOrigen.contenido_programatico || asignaturaOrigen.contenidos_programaticos) {
-                            const contenido = asignaturaOrigen.contenido_programatico ||
-                                (asignaturaOrigen.contenidos_programaticos && asignaturaOrigen.contenidos_programaticos
-                                    .length > 0 ?
-                                    asignaturaOrigen.contenidos_programaticos[0] : null);
+                    // Llenar datos de origen
+                    document.getElementById('origen-nombre').textContent = asignaturaOrigen.nombre || 'N/A';
+                    document.getElementById('origen-codigo').textContent = asignaturaOrigen.codigo || 'N/A';
+                    document.getElementById('origen-semestre').textContent = asignaturaOrigen.semestre || 'N/A';
+                    document.getElementById('origen-creditos').textContent = asignaturaOrigen.creditos || 'N/A';
+                    document.getElementById('origen-nota').textContent = asignaturaOrigen.nota_origen ||
+                        asignaturaOrigen.nota || 'N/A';
+                    document.getElementById('origen-programa').textContent = asignaturaOrigen.programa || 'N/A';
 
-                            if (contenido) {
-                                document.getElementById('cp-tema').textContent = contenido.tema || 'N/A';
-                                document.getElementById('cp-resultados').textContent = contenido
-                                    .resultados_aprendizaje || 'N/A';
-                                document.getElementById('cp-descripcion').textContent = contenido.descripcion || 'N/A';
-                                document.getElementById('contenido-programatico').style.display = 'block';
-                            } else {
-                                document.getElementById('contenido-programatico').style.display = 'none';
-                            }
+                    // Llenar datos de destino si existen
+                    if (destinoData) {
+                        const asignaturaDestino = JSON.parse(destinoData);
+                        document.getElementById('destino-nombre').textContent = asignaturaDestino.nombre || 'N/A';
+                        document.getElementById('destino-codigo').textContent = asignaturaDestino.codigo || 'N/A';
+                        document.getElementById('destino-semestre').textContent = asignaturaDestino.semestre ||
+                            'N/A';
+                        document.getElementById('destino-creditos').textContent = asignaturaDestino.creditos ||
+                            'N/A';
+                        document.getElementById('destino-nota').textContent = asignaturaDestino.nota_destino ||
+                            '3.0';
+                    } else {
+                        document.getElementById('destino-nombre').textContent = 'No asignado';
+                        document.getElementById('destino-codigo').textContent = 'N/A';
+                        document.getElementById('destino-semestre').textContent = 'N/A';
+                        document.getElementById('destino-creditos').textContent = 'N/A';
+                        document.getElementById('destino-nota').textContent = 'N/A';
+                    }
+
+                    // Llenar contenido programático si existe
+                    if (asignaturaOrigen.contenido_programatico || asignaturaOrigen.contenidos_programaticos) {
+                        const contenido = asignaturaOrigen.contenido_programatico ||
+                            (asignaturaOrigen.contenidos_programaticos && asignaturaOrigen.contenidos_programaticos
+                                .length > 0 ?
+                                asignaturaOrigen.contenidos_programaticos[0] : null);
+
+                        if (contenido) {
+                            document.getElementById('cp-tema').textContent = contenido.tema || 'N/A';
+                            document.getElementById('cp-resultados').textContent = contenido
+                                .resultados_aprendizaje || 'N/A';
+                            document.getElementById('cp-descripcion').textContent = contenido.descripcion || 'N/A';
+                            document.getElementById('contenido-programatico').style.display = 'block';
                         } else {
                             document.getElementById('contenido-programatico').style.display = 'none';
                         }
-
-                        // Mostrar el modal
-                        $('#subjectModal').modal('show');
-
-                    } catch (error) {
-                        console.error('Error al mostrar detalles de asignatura:', error);
-                        mostrarAlerta('Error al mostrar detalles de la asignatura', 'danger');
+                    } else {
+                        document.getElementById('contenido-programatico').style.display = 'none';
                     }
+
+                    // Mostrar el modal
+                    $('#subjectModal').modal('show');
+
+                } catch (error) {
+                    console.error('Error al mostrar detalles de asignatura:', error);
+                    mostrarAlerta('Error al mostrar detalles de la asignatura', 'danger');
                 }
-            });
-
-            // Definición de la función descargaPDFFinal si no existe
-            if (typeof descargaPDFFinal !== 'function') {
-                window.descargaPDFFinal = function() {
-                    try {
-                        $('#pdf-preview-modal').modal('hide');
-                        mostrarAlerta('Resolución final generada y descargada correctamente', 'success');
-                    } catch (error) {
-                        console.error('Error al descargar PDF final:', error);
-                        mostrarAlerta('Error al descargar la resolución final', 'danger');
-                    }
-                };
             }
-        </script>
+        });
 
-    <script src="{{ asset('js/procesohomologacion.js') }}"></script>
+        // Definición de la función descargaPDFFinal si no existe
+        if (typeof descargaPDFFinal !== 'function') {
+            window.descargaPDFFinal = function() {
+                try {
+                    $('#pdf-preview-modal').modal('hide');
+                    mostrarAlerta('Resolución final generada y descargada correctamente', 'success');
+                } catch (error) {
+                    console.error('Error al descargar PDF final:', error);
+                    mostrarAlerta('Error al descargar la resolución final', 'danger');
+                }
+            };
+        }
+    </script>
+
 
     <script>
         // Código específico para la vista del vicerrector
@@ -907,315 +1422,326 @@
             cargarFirmaVicerrector();
         });
     </script>
-  <script>
-// Script corregido para actualizar el estado de homologación de asignaturas
-(function() {
-    // Ejecutar inmediatamente
-    console.clear();
-    console.log('Iniciando script corregido para actualizar estado');
+    <script>
+        // Script corregido para actualizar el estado de homologación de asignaturas
+        (function() {
+            // Ejecutar inmediatamente
+            console.clear();
+            console.log('Iniciando script corregido para actualizar estado');
 
-    // Elementos DOM - Buscar con más robustez
-    const btnGuardar = document.getElementById('btnguardarestado') || document.querySelector('button[data-action="guardar-estado"]');
-    const estadoSelect = document.getElementById('estado') || document.querySelector('select[name="estado"]');
-    const alertasContainer = document.getElementById('alertas-container') || document.querySelector('.alertas-container') ||
-                            document.querySelector('.container').appendChild(document.createElement('div'));
+            // Elementos DOM - Buscar con más robustez
+            const btnGuardar = document.getElementById('btnguardarestado') || document.querySelector(
+                'button[data-action="guardar-estado"]');
+            const estadoSelect = document.getElementById('estado') || document.querySelector('select[name="estado"]');
+            const alertasContainer = document.getElementById('alertas-container') || document.querySelector(
+                    '.alertas-container') ||
+                document.querySelector('.container').appendChild(document.createElement('div'));
 
-    // Verificación de elementos críticos
-    if (!btnGuardar) {
-        console.error('Botón de guardar no encontrado');
-        return;
-    }
-
-    if (!estadoSelect) {
-        console.error('Selector de estado no encontrado');
-        return;
-    }
-
-    // Asegurarse de que el contenedor de alertas exista
-    if (!alertasContainer) {
-        const container = document.querySelector('.container, .content, main');
-        if (container) {
-            alertasContainer = document.createElement('div');
-            alertasContainer.id = 'alertas-container';
-            alertasContainer.className = 'alertas-container my-3';
-            container.insertBefore(alertasContainer, container.firstChild);
-        } else {
-            console.error('No se pudo crear el contenedor de alertas');
-            return;
-        }
-    }
-
-    // ID de homologación - búsqueda más flexible
-    let idHomologacion = null;
-    const idHomologacionEl = document.getElementById('id-homologacion') ||
-                           document.querySelector('[data-id-homologacion]') ||
-                           document.querySelector('.homologacion-id');
-
-    if (idHomologacionEl) {
-        idHomologacion = idHomologacionEl.textContent.trim() || idHomologacionEl.getAttribute('data-id-homologacion');
-    } else {
-        // Intentar extraer de la URL
-        const urlMatch = window.location.pathname.match(/homologacion(?:es)?[/-](\d+)/i);
-        if (urlMatch && urlMatch[1]) {
-            idHomologacion = urlMatch[1];
-        }
-    }
-
-    if (!idHomologacion) {
-        console.error('No se pudo determinar el ID de homologación');
-        showAlert('No se pudo determinar el ID de homologación', 'danger');
-        return;
-    }
-
-    console.log('ID de homologación detectado:', idHomologacion);
-
-    // Eliminar cualquier eventListener previo para evitar duplicados
-    btnGuardar.removeEventListener('click', handleGuardarClick);
-
-    // Asignar evento al botón de guardar
-    btnGuardar.addEventListener('click', handleGuardarClick);
-
-    // Función principal para manejar el click
-    function handleGuardarClick(event) {
-        event.preventDefault();
-
-        // Evitar múltiples clics
-        btnGuardar.disabled = true;
-
-        // Obtener nuevo estado
-        const nuevoEstado = estadoSelect.value;
-        console.log('Nuevo estado:', nuevoEstado);
-
-        // Confirmar cambio
-        if (!confirm(`¿Confirma que desea cambiar el estado a "${nuevoEstado}"?`)) {
-            btnGuardar.disabled = false;
-            return false;
-        }
-
-        // Mostrar alerta de procesamiento
-        showAlert('Procesando cambio de estado...', 'info');
-
-        // Obtener asignaturas de la tabla
-        const rows = document.querySelectorAll('tr[data-asignatura-origen]');
-        console.log(`Filas de asignaturas encontradas: ${rows.length}`);
-
-        if (rows.length === 0) {
-            showAlert('No se encontraron asignaturas para actualizar', 'danger');
-            btnGuardar.disabled = false;
-            return false;
-        }
-
-        // Extraer IDs y crear array de homologaciones
-        const homologaciones = [];
-
-        rows.forEach(function(row) {
-            try {
-                // Extraer datos de asignatura origen
-                const asignaturaOrigenStr = row.getAttribute('data-asignatura-origen');
-                const asignaturaOrigen = JSON.parse(asignaturaOrigenStr);
-
-                // Verificar si tiene ID válido
-                if (!asignaturaOrigen || !asignaturaOrigen.id) {
-                    console.warn('Asignatura sin ID válido:', asignaturaOrigen);
-                    return;
-                }
-
-                // Buscar celda de asignatura destino
-                const celdaDestino = row.querySelector('td[data-asignatura-destino]');
-                let asignaturaDestinoId = null;
-                let notaDestino = '3.0';
-
-                // Extraer datos de destino si existen
-                if (celdaDestino) {
-                    const asignaturaDestinoStr = celdaDestino.getAttribute('data-asignatura-destino');
-                    if (asignaturaDestinoStr) {
-                        const asignaturaDestino = JSON.parse(asignaturaDestinoStr);
-                        if (asignaturaDestino && asignaturaDestino.id) {
-                            asignaturaDestinoId = asignaturaDestino.id;
-                        }
-                        if (asignaturaDestino && asignaturaDestino.nota_destino) {
-                            notaDestino = asignaturaDestino.nota_destino;
-                        }
-                    }
-                }
-
-                // Crear objeto de homologación
-                homologaciones.push({
-                    asignatura_origen_id: asignaturaOrigen.id,
-                    asignatura_destino_id: asignaturaDestinoId,
-                    nota_destino: notaDestino,
-                    comentarios: ""
-                });
-
-                console.log(`Añadida homologación para: ${asignaturaOrigen.nombre} (ID: ${asignaturaOrigen.id})`);
-            } catch (error) {
-                console.error('Error procesando fila:', error);
-            }
-        });
-
-        // Verificar si tenemos homologaciones
-        if (homologaciones.length === 0) {
-            showAlert('No se pudieron procesar las asignaturas', 'danger');
-            btnGuardar.disabled = false;
-            return false;
-        }
-
-        console.log(`Homologaciones preparadas: ${homologaciones.length}`);
-
-        // Obtener comentarios
-        const comentariosEl = document.getElementById('comentarios');
-        const comentarios = comentariosEl ? comentariosEl.value : "";
-
-        // Token CSRF
-        const metaToken = document.querySelector('meta[name="csrf-token"]');
-        const csrfToken = metaToken ? metaToken.getAttribute('content') : '';
-
-        if (!csrfToken) {
-            console.warn('No se encontró token CSRF, intentando alternativas');
-        }
-
-        // Probar diferentes formatos de endpoints
-        const endpoints = [
-            `/api/homologaciones/${idHomologacion}/estado`,
-            `/api/homologacion/${idHomologacion}/actualizar-estado`,
-            `/api/homologacion-asignaturas/${idHomologacion}/estado`,
-            `/homologacion-asignaturas/${idHomologacion}/actualizar`
-        ];
-
-        // Datos para la solicitud
-        const requestData = {
-            id: idHomologacion,
-            homologacion_id: idHomologacion,
-            estado: nuevoEstado,
-            comentarios: comentarios,
-            homologaciones: homologaciones
-        };
-
-        console.log('Datos preparados para enviar:', requestData);
-
-        // Probar el primer endpoint
-        intentarEnviar(0);
-
-        // Función para intentar enviar a diferentes endpoints
-        function intentarEnviar(indice) {
-            if (indice >= endpoints.length) {
-                // Todos los endpoints fallaron
-                showAlert('No se pudo actualizar el estado. Por favor, contacte al administrador.', 'danger');
-                btnGuardar.disabled = false;
+            // Verificación de elementos críticos
+            if (!btnGuardar) {
+                console.error('Botón de guardar no encontrado');
                 return;
             }
 
-            const apiUrl = endpoints[indice];
-            console.log(`Intentando endpoint ${indice+1}/${endpoints.length}: ${apiUrl}`);
+            if (!estadoSelect) {
+                console.error('Selector de estado no encontrado');
+                return;
+            }
 
-            // Primero intentar con método PUT
-            enviarSolicitud('PUT', apiUrl, csrfToken, requestData, nuevoEstado)
-                .catch(error => {
-                    console.log(`Endpoint ${indice+1} falló con PUT:`, error);
+            // Asegurarse de que el contenedor de alertas exista
+            if (!alertasContainer) {
+                const container = document.querySelector('.container, .content, main');
+                if (container) {
+                    alertasContainer = document.createElement('div');
+                    alertasContainer.id = 'alertas-container';
+                    alertasContainer.className = 'alertas-container my-3';
+                    container.insertBefore(alertasContainer, container.firstChild);
+                } else {
+                    console.error('No se pudo crear el contenedor de alertas');
+                    return;
+                }
+            }
 
-                    // Intentar con POST si PUT falla
-                    return enviarSolicitud('POST', apiUrl, csrfToken, {
-                        ...requestData,
-                        _method: 'PUT' // Para simular PUT en formularios
-                    }, nuevoEstado);
-                })
-                .catch(error => {
-                    console.log(`Endpoint ${indice+1} falló con POST:`, error);
+            // ID de homologación - búsqueda más flexible
+            let idHomologacion = null;
+            const idHomologacionEl = document.getElementById('id-homologacion') ||
+                document.querySelector('[data-id-homologacion]') ||
+                document.querySelector('.homologacion-id');
 
-                    // Probar el siguiente endpoint
-                    intentarEnviar(indice + 1);
-                });
-        }
-    }
+            if (idHomologacionEl) {
+                idHomologacion = idHomologacionEl.textContent.trim() || idHomologacionEl.getAttribute(
+                    'data-id-homologacion');
+            } else {
+                // Intentar extraer de la URL
+                const urlMatch = window.location.pathname.match(/homologacion(?:es)?[/-](\d+)/i);
+                if (urlMatch && urlMatch[1]) {
+                    idHomologacion = urlMatch[1];
+                }
+            }
 
-    // Función para enviar solicitud con mejor manejo de promesas
-    function enviarSolicitud(metodo, url, token, datos, nuevoEstado) {
-        return new Promise((resolve, reject) => {
-            console.log(`Enviando ${metodo} a ${url}`);
+            if (!idHomologacion) {
+                console.error('No se pudo determinar el ID de homologación');
+                showAlert('No se pudo determinar el ID de homologación', 'danger');
+                return;
+            }
 
-            fetch(url, {
-                method: metodo,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(datos)
-            })
-            .then(response => {
-                console.log(`Respuesta de ${url}:`, response.status);
+            console.log('ID de homologación detectado:', idHomologacion);
 
-                // Manejar diferentes códigos de estado
-                if (response.status === 204 || response.status === 200) {
-                    // Respuesta exitosa
-                    return { success: true, mensaje: 'Estado actualizado correctamente' };
+            // Eliminar cualquier eventListener previo para evitar duplicados
+            btnGuardar.removeEventListener('click', handleGuardarClick);
+
+            // Asignar evento al botón de guardar
+            btnGuardar.addEventListener('click', handleGuardarClick);
+
+            // Función principal para manejar el click
+            function handleGuardarClick(event) {
+                event.preventDefault();
+
+                // Evitar múltiples clics
+                btnGuardar.disabled = true;
+
+                // Obtener nuevo estado
+                const nuevoEstado = estadoSelect.value;
+                console.log('Nuevo estado:', nuevoEstado);
+
+                // Confirmar cambio
+                if (!confirm(`¿Confirma que desea cambiar el estado a "${nuevoEstado}"?`)) {
+                    btnGuardar.disabled = false;
+                    return false;
                 }
 
-                if (response.status === 405 || response.status === 404) {
-                    // Método no permitido o recurso no encontrado
-                    reject(new Error(`Error ${response.status}: ${response.statusText}`));
-                    return null;
+                // Mostrar alerta de procesamiento
+                showAlert('Procesando cambio de estado...', 'info');
+
+                // Obtener asignaturas de la tabla
+                const rows = document.querySelectorAll('tr[data-asignatura-origen]');
+                console.log(`Filas de asignaturas encontradas: ${rows.length}`);
+
+                if (rows.length === 0) {
+                    showAlert('No se encontraron asignaturas para actualizar', 'danger');
+                    btnGuardar.disabled = false;
+                    return false;
                 }
 
-                return response.text().then(text => {
-                    if (!text) return { success: response.ok };
+                // Extraer IDs y crear array de homologaciones
+                const homologaciones = [];
 
+                rows.forEach(function(row) {
                     try {
-                        return JSON.parse(text);
-                    } catch(e) {
-                        return {
-                            success: response.ok,
-                            mensaje: response.ok ? 'Operación completada' : 'Error en la solicitud'
-                        };
+                        // Extraer datos de asignatura origen
+                        const asignaturaOrigenStr = row.getAttribute('data-asignatura-origen');
+                        const asignaturaOrigen = JSON.parse(asignaturaOrigenStr);
+
+                        // Verificar si tiene ID válido
+                        if (!asignaturaOrigen || !asignaturaOrigen.id) {
+                            console.warn('Asignatura sin ID válido:', asignaturaOrigen);
+                            return;
+                        }
+
+                        // Buscar celda de asignatura destino
+                        const celdaDestino = row.querySelector('td[data-asignatura-destino]');
+                        let asignaturaDestinoId = null;
+                        let notaDestino = '3.0';
+
+                        // Extraer datos de destino si existen
+                        if (celdaDestino) {
+                            const asignaturaDestinoStr = celdaDestino.getAttribute('data-asignatura-destino');
+                            if (asignaturaDestinoStr) {
+                                const asignaturaDestino = JSON.parse(asignaturaDestinoStr);
+                                if (asignaturaDestino && asignaturaDestino.id) {
+                                    asignaturaDestinoId = asignaturaDestino.id;
+                                }
+                                if (asignaturaDestino && asignaturaDestino.nota_destino) {
+                                    notaDestino = asignaturaDestino.nota_destino;
+                                }
+                            }
+                        }
+
+                        // Crear objeto de homologación
+                        homologaciones.push({
+                            asignatura_origen_id: asignaturaOrigen.id,
+                            asignatura_destino_id: asignaturaDestinoId,
+                            nota_destino: notaDestino,
+                            comentarios: ""
+                        });
+
+                        console.log(
+                            `Añadida homologación para: ${asignaturaOrigen.nombre} (ID: ${asignaturaOrigen.id})`
+                            );
+                    } catch (error) {
+                        console.error('Error procesando fila:', error);
                     }
                 });
-            })
-            .then(data => {
-                if (!data) return; // Ya manejado en el bloque anterior
 
-                console.log('Datos de respuesta:', data);
-
-                if (data && data.success !== false) {
-                    // Actualizar UI
-                    updateUI(nuevoEstado);
-
-                    // Mostrar mensaje de éxito
-                    showAlert(`Estado actualizado correctamente a "${nuevoEstado}"`, 'success');
-
-                    // Recargar página después de un tiempo
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-
-                    resolve(data);
-                } else {
-                    reject(new Error(data.mensaje || 'Error en la actualización'));
+                // Verificar si tenemos homologaciones
+                if (homologaciones.length === 0) {
+                    showAlert('No se pudieron procesar las asignaturas', 'danger');
+                    btnGuardar.disabled = false;
+                    return false;
                 }
-            })
-            .catch(error => {
-                console.error(`Error en solicitud ${metodo}:`, error);
-                reject(error);
-            });
-        });
-    }
 
-    // Función para mostrar alertas
-    function showAlert(message, type) {
-        console.log(`Alerta: ${message} (${type})`);
+                console.log(`Homologaciones preparadas: ${homologaciones.length}`);
 
-        // Evitar alertas duplicadas
-        const existingAlerts = alertasContainer.querySelectorAll('.alert');
-        for (let alert of existingAlerts) {
-            if (alert.textContent.includes(message)) {
-                return; // No mostrar alertas duplicadas
+                // Obtener comentarios
+                const comentariosEl = document.getElementById('comentarios');
+                const comentarios = comentariosEl ? comentariosEl.value : "";
+
+                // Token CSRF
+                const metaToken = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = metaToken ? metaToken.getAttribute('content') : '';
+
+                if (!csrfToken) {
+                    console.warn('No se encontró token CSRF, intentando alternativas');
+                }
+
+                // Probar diferentes formatos de endpoints
+                const endpoints = [
+                    `/api/homologaciones/${idHomologacion}/estado`,
+                    `/api/homologacion/${idHomologacion}/actualizar-estado`,
+                    `/api/homologacion-asignaturas/${idHomologacion}/estado`,
+                    `/homologacion-asignaturas/${idHomologacion}/actualizar`
+                ];
+
+                // Datos para la solicitud
+                const requestData = {
+                    id: idHomologacion,
+                    homologacion_id: idHomologacion,
+                    estado: nuevoEstado,
+                    comentarios: comentarios,
+                    homologaciones: homologaciones
+                };
+
+                console.log('Datos preparados para enviar:', requestData);
+
+                // Probar el primer endpoint
+                intentarEnviar(0);
+
+                // Función para intentar enviar a diferentes endpoints
+                function intentarEnviar(indice) {
+                    if (indice >= endpoints.length) {
+                        // Todos los endpoints fallaron
+                        showAlert('No se pudo actualizar el estado. Por favor, contacte al administrador.', 'danger');
+                        btnGuardar.disabled = false;
+                        return;
+                    }
+
+                    const apiUrl = endpoints[indice];
+                    console.log(`Intentando endpoint ${indice+1}/${endpoints.length}: ${apiUrl}`);
+
+                    // Primero intentar con método PUT
+                    enviarSolicitud('PUT', apiUrl, csrfToken, requestData, nuevoEstado)
+                        .catch(error => {
+                            console.log(`Endpoint ${indice+1} falló con PUT:`, error);
+
+                            // Intentar con POST si PUT falla
+                            return enviarSolicitud('POST', apiUrl, csrfToken, {
+                                ...requestData,
+                                _method: 'PUT' // Para simular PUT en formularios
+                            }, nuevoEstado);
+                        })
+                        .catch(error => {
+                            console.log(`Endpoint ${indice+1} falló con POST:`, error);
+
+                            // Probar el siguiente endpoint
+                            intentarEnviar(indice + 1);
+                        });
+                }
             }
-        }
 
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
+            // Función para enviar solicitud con mejor manejo de promesas
+            function enviarSolicitud(metodo, url, token, datos, nuevoEstado) {
+                return new Promise((resolve, reject) => {
+                    console.log(`Enviando ${metodo} a ${url}`);
 
-        alertDiv.innerHTML = `
+                    fetch(url, {
+                            method: metodo,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(datos)
+                        })
+                        .then(response => {
+                            console.log(`Respuesta de ${url}:`, response.status);
+
+                            // Manejar diferentes códigos de estado
+                            if (response.status === 204 || response.status === 200) {
+                                // Respuesta exitosa
+                                return {
+                                    success: true,
+                                    mensaje: 'Estado actualizado correctamente'
+                                };
+                            }
+
+                            if (response.status === 405 || response.status === 404) {
+                                // Método no permitido o recurso no encontrado
+                                reject(new Error(`Error ${response.status}: ${response.statusText}`));
+                                return null;
+                            }
+
+                            return response.text().then(text => {
+                                if (!text) return {
+                                    success: response.ok
+                                };
+
+                                try {
+                                    return JSON.parse(text);
+                                } catch (e) {
+                                    return {
+                                        success: response.ok,
+                                        mensaje: response.ok ? 'Operación completada' :
+                                            'Error en la solicitud'
+                                    };
+                                }
+                            });
+                        })
+                        .then(data => {
+                            if (!data) return; // Ya manejado en el bloque anterior
+
+                            console.log('Datos de respuesta:', data);
+
+                            if (data && data.success !== false) {
+                                // Actualizar UI
+                                updateUI(nuevoEstado);
+
+                                // Mostrar mensaje de éxito
+                                showAlert(`Estado actualizado correctamente a "${nuevoEstado}"`, 'success');
+
+                                // Recargar página después de un tiempo
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 2000);
+
+                                resolve(data);
+                            } else {
+                                reject(new Error(data.mensaje || 'Error en la actualización'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`Error en solicitud ${metodo}:`, error);
+                            reject(error);
+                        });
+                });
+            }
+
+            // Función para mostrar alertas
+            function showAlert(message, type) {
+                console.log(`Alerta: ${message} (${type})`);
+
+                // Evitar alertas duplicadas
+                const existingAlerts = alertasContainer.querySelectorAll('.alert');
+                for (let alert of existingAlerts) {
+                    if (alert.textContent.includes(message)) {
+                        return; // No mostrar alertas duplicadas
+                    }
+                }
+
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+                alertDiv.role = 'alert';
+
+                alertDiv.innerHTML = `
             <i class="fas fa-${type === 'danger' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} mr-2"></i>
             ${message}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -1223,41 +1749,41 @@
             </button>
         `;
 
-        // Insertar al principio
-        alertasContainer.insertBefore(alertDiv, alertasContainer.firstChild);
+                // Insertar al principio
+                alertasContainer.insertBefore(alertDiv, alertasContainer.firstChild);
 
-        // Auto-cerrar después de un tiempo
-        if (type !== 'danger') {
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-                setTimeout(() => alertDiv.remove(), 500);
-            }, 5000);
-        }
-    }
+                // Auto-cerrar después de un tiempo
+                if (type !== 'danger') {
+                    setTimeout(() => {
+                        alertDiv.classList.remove('show');
+                        setTimeout(() => alertDiv.remove(), 500);
+                    }, 5000);
+                }
+            }
 
-    // Función para actualizar la UI
-    function updateUI(nuevoEstado) {
-        // Deshabilitar controles
-        estadoSelect.disabled = true;
-        btnGuardar.disabled = true;
+            // Función para actualizar la UI
+            function updateUI(nuevoEstado) {
+                // Deshabilitar controles
+                estadoSelect.disabled = true;
+                btnGuardar.disabled = true;
 
-        // Actualizar badge
-        const headerBadge = document.querySelector('.header-badge, .badge-estado');
-        if (headerBadge) {
-            headerBadge.textContent = nuevoEstado;
-            headerBadge.className = `header-badge badge badge-pill status-${nuevoEstado.toLowerCase().replace(/\s+/g, '-')} px-3 py-2`;
-        }
+                // Actualizar badge
+                const headerBadge = document.querySelector('.header-badge, .badge-estado');
+                if (headerBadge) {
+                    headerBadge.textContent = nuevoEstado;
+                    headerBadge.className =
+                        `header-badge badge badge-pill status-${nuevoEstado.toLowerCase().replace(/\s+/g, '-')} px-3 py-2`;
+                }
 
-        // Actualizar el estado en el selector si existe
-        if (estadoSelect) {
-            estadoSelect.value = nuevoEstado;
-        }
+                // Actualizar el estado en el selector si existe
+                if (estadoSelect) {
+                    estadoSelect.value = nuevoEstado;
+                }
 
-        console.log('UI actualizada con nuevo estado:', nuevoEstado);
-    }
+                console.log('UI actualizada con nuevo estado:', nuevoEstado);
+            }
 
-    console.log('Script de actualización de estado inicializado correctamente');
-})();
-
- </script>
-    @endsection
+            console.log('Script de actualización de estado inicializado correctamente');
+        })();
+    </script>
+@endsection
