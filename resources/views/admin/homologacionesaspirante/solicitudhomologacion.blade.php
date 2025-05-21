@@ -7,11 +7,6 @@
     <title>Formulario de Homologación - Universidad Autónoma del Cauca</title>
     <link href="{{ asset('css/estiloformularioaspirante.css') }}" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-<<<<<<< HEAD
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-=======
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script>
         // Validación de acceso
@@ -33,7 +28,6 @@
             }
         }
     </script>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
 </head>
 
 <body>
@@ -68,141 +62,25 @@
         </div>
 
         <form id="homologacion-form">
-<<<<<<< HEAD
-            <!-- STEP 1: DATOS PERSONALES -->
-            <div class="step-content active" id="step-1">
-                <h2>Información personal</h2>
-
-                <!-- Tipo de Identificación y Número -->
-=======
             <!-- STEP 1: Información Personal -->
             <div class="step-content active" id="step-1">
                 <h2>Información personal</h2>
 
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                 <div class="row">
                     <div class="form-group">
                         <label>Tipo de identificación:</label>
                         <select id="tipo_identificacion" required>
                             <option value="">Seleccione</option>
-<<<<<<< HEAD
-                            <option value="TI">Tarjeta de Identidad (TI)</option>
-                            <option value="CC">Cédula de Ciudadanía (CC)</option>
-                            <option value="TE">Tarjeta de Extranjería (TE)</option>
-                        </select>
-                        <span class="error-message"></span>
-                    </div>
-
-=======
                             <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
                             <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
                             <option value="Cédula de Extranjería">Cédula de Extranjería</option>
                         </select>
                         <span class="error-message"></span>
                     </div>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                     <div class="form-group">
                         <label>Número de identificación:</label>
                         <input type="text" id="numero_identificacion" required>
                         <span class="error-message"></span>
-<<<<<<< HEAD
-                    </div>
-                </div>
-
-                <!-- Nombres -->
-                <div class="row">
-                    <div class="form-group">
-                        <label>Primer nombre:</label>
-                        <input type="text" id="primer_nombre" required>
-                        <span class="error-message"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Segundo nombre (Opcional):</label>
-                        <input type="text" id="segundo_nombre">
-                    </div>
-                </div>
-
-                <!-- Apellidos -->
-                <div class="row">
-                    <div class="form-group">
-                        <label>Primer apellido:</label>
-                        <input type="text" id="primer_apellido" required>
-                        <span class="error-message"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Segundo apellido (Opcional):</label>
-                        <input type="text" id="segundo_apellido">
-                    </div>
-                </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label>Correo electrónico:</label>
-                    <input type="email" id="email" required>
-                    <span class="error-message"></span>
-                </div>
-
-                <!-- Teléfono y direccion -->
-                <div class="row">
-                    <div class="form-group">
-                        <label>Teléfono:</label>
-                        <input type="tel" id="telefono" required>
-                        <span class="error-message"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Dirección:</label>
-                        <input type="text" id="direccion" required>
-                        <span class="error-message"></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="form-group">
-                        <label>País:</label>
-                        <select id="pais" required disabled>
-                            <option value="Colombia">Colombia</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Departamento:</label>
-                        <select id="departamento" required>
-                            <option value="">Seleccione un departamento</option>
-                            @foreach ($departamentos as $departamento)
-                            <option value="{{ $departamento['departamento'] }}">{{ $departamento['departamento'] }}</option>
-                            @endforeach
-                        </select>
-                        <span class="error-message"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Municipio:</label>
-                        <select id="municipio" required disabled>
-                            <option value="">Seleccione un Municipio</option>
-                        </select>
-                        <span class="error-message"></span>
-                    </div>
-                </div>
-
-                <div class="btn-container">
-                    <button type="button" class="next-button" onclick="changeStep(1, event)">Siguiente</button>
-                </div>
-            </div>
-
-            <!-- STEP 2: UNIVERSIDAD DE ORIGEN -->
-            <div class="step-content" id="step-2">
-                <h2>Instituto de educación superior de origen</h2>
-
-                <div class="row">
-                    <!-- Selección de País -->
-                    <div class="form-group">
-                        <label>País:</label>
-                        <select id="pais_origen" class="form-control" required disabled>
-                            <option value="Colombia">Colombia</option>
-=======
                     </div>
                 </div>
 
@@ -257,20 +135,9 @@
                             @foreach ($paises as $pais)
                                 <option value="{{ $pais['id_pais'] }}">{{ $pais['pais'] }}</option>
                             @endforeach
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                         </select>
                         <span class="error-message"></span>
                     </div>
-<<<<<<< HEAD
-
-                    <!-- Selección de Departamento -->
-                    <div class="form-group">
-                        <label>Departamento:</label>
-                        <select id="departamento_origen" required>
-                            <option value="">Seleccione un departamento</option>
-                            @foreach ($departamentos as $departamento)
-                            <option value="{{ $departamento['departamento'] }}">{{ $departamento['departamento'] }}</option>
-=======
                     <div class="form-group">
                         <label>Departamento:</label>
                         <select id="departamento" required onchange="updateMunicipios()" disabled>
@@ -280,42 +147,19 @@
                                     data-id="{{ $departamento['id_departamento'] }}">
                                     {{ $departamento['departamento'] }}
                                 </option>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                             @endforeach
                         </select>
                         <span class="error-message"></span>
                     </div>
-<<<<<<< HEAD
-
-                    <div class="form-group">
-                        <label>Municipio:</label>
-                        <select id="municipio_origen" required disabled>
-=======
                     <div class="form-group">
                         <label>Municipio:</label>
                         <select id="municipio" required disabled>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                             <option value="">Seleccione un Municipio</option>
                         </select>
                         <span class="error-message"></span>
                     </div>
                 </div>
 
-<<<<<<< HEAD
-                <!-- Parte del formulario a modificar - Institución y Programa -->
-                <div class="row">
-                    <!-- Institución de origen -->
-                    <div class="form-group">
-                        <label>Institución de origen:</label>
-                        <select id="institucion" class="form-control" required>
-                            <option value="">Seleccione una Institución</option>
-                            @foreach ($instituciones as $institucion)
-                            <option
-                                value="{{ $institucion['id_institucion'] }}"
-                                data-formacion="{{ $institucion['tipo'] }}">
-                                {{ $institucion['nombre'] }}
-                            </option>
-=======
                 <div class="btn-container">
                     <button type="button" class="next-button" onclick="validarFormularioStep1(1)">Siguiente</button>
                 </div>
@@ -335,40 +179,17 @@
                                     data-formacion="{{ $institucion['tipo'] }}">
                                     {{ $institucion['nombre'] }}
                                 </option>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                             @endforeach
                         </select>
                         <span class="error-message"></span>
                     </div>
-<<<<<<< HEAD
-
-                    <!-- Tipo de formación -->
-                    <div class="form-group">
-                        <label>Tipo de formación:</label>
-                        <input type="text" id="tipoFormacion" name="tipo" readonly>
-                    </div>
-
-                    <!-- Programa -->
-                    <div class="form-group">
-                        <label>Programa:</label>
-                        <select id="programa" name="programa" class="form-control" required disabled>
-                            <option value="">Seleccione un Programa</option>
-                        </select>
-=======
                     <div class="form-group">
                         <label>Tipo de formación:</label>
                         <input type="text" id="tipoFormacion" readonly>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                     </div>
                 </div>
 
                 <div class="row">
-<<<<<<< HEAD
-                    <!-- ¿Finalizó estudios? -->
-                    <div class="form-group">
-                        <label>¿Finalizó sus estudios?</label>
-                        <select id="finalizo_estudios" class="form-control" required>
-=======
                     <div class="form-group">
                         <label>Programa:</label>
                         <select id="programa" required disabled onchange="updateSemestres()">
@@ -392,65 +213,25 @@
                     <div class="form-group">
                         <label>¿Finalizó sus estudios?</label>
                         <select id="finalizo_estudios" required onchange="toggleFechaFinalizacion()">
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                             <option value="">Seleccione</option>
                             <option value="si">Sí</option>
                             <option value="no">No</option>
                         </select>
                         <span class="error-message"></span>
                     </div>
-<<<<<<< HEAD
-
-                    <!-- Fecha de Finalización (Se muestra si selecciona "Sí") -->
-=======
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                     <div class="form-group" id="fecha_finalizacion_container" style="display: none;">
                         <label>Fecha de finalización:</label>
                         <input type="date" id="fecha_finalizacion" required>
                         <span class="error-message"></span>
                     </div>
-<<<<<<< HEAD
-
-                    <!-- Fecha del Último Semestre Cursado (Se muestra si selecciona "No") -->
-                    <div class="form-group" id="fecha_ultimo_semestre_container" style="display: none;">
-                        <label>Fecha del último semestre cursado:</label>
-                        <input type="date" id="fecha_ultimo_semestre" class="form-control" required>
-=======
                     <div class="form-group" id="fecha_ultimo_semestre_container" style="display: none;">
                         <label>Fecha del ultimo semestre cursado:</label>
                         <input type="date" id="fecha_ultimo_semestre" required>
                         <span class="error-message"></span>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                     </div>
                 </div>
 
                 <div class="btn-container">
-<<<<<<< HEAD
-                    <button type="button" class="prev-button" onclick="changeStep(-1, event)">Anterior</button>
-                    <button type="button" class="next-button" onclick="changeStep(1, event)">Siguiente</button>
-                </div>
-            </div>
-
-            <!-- STEP 3: PROGRAMA ACADÉMICO -->
-            <div class="step-content" id="step-3">
-                <h2>Seleccionar Asignaturas</h2>
-
-                <div class="form-group">
-                    <label for="semestre">Semestre:</label>
-                    <select id="semestre" class="form-control" disabled>
-                        <option value="">Seleccione un semestre</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="materia">Asignatura:</label>
-                    <select id="materia" class="form-control" disabled>
-                        <option value="">Seleccione una asignatura</option>
-                    </select>
-                </div>
-
-                <button type="button" class="add-button" onclick="agregarMateria()">
-=======
                     <button class="prev-button" onclick="changeStep(-1, event)">Anterior</button>
                     <button class="next-button" onclick="validarFormularioStep2(1)">Siguiente</button>
                 </div>
@@ -476,7 +257,6 @@
                 </div>
 
                 <button class="add-button" onclick="agregarMateria()">
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                     <i class="fa-solid fa-plus"></i> Agregar Materia
                 </button>
 
@@ -489,14 +269,6 @@
                 </div>
 
                 <div class="btn-container">
-<<<<<<< HEAD
-                    <button type="button" class="prev-button" onclick="changeStep(-1, event)">Anterior</button>
-                    <button type="button" class="next-button" onclick="validacionStep3()">Siguiente</button>
-                </div>
-            </div>
-
-            <!-- STEP 4: DOCUMENTOS -->
-=======
                     <button class="prev-button" onclick="changeStep(-1, event)">Anterior</button>
                     <button class="next-button"
                         onclick="validacionStep3(); validarFormularioStep4();">Continuar</button>
@@ -504,57 +276,10 @@
             </div>
 
             <!-- STEP 4: Documentos -->
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
             <div class="step-content" id="step-4">
-                <h2>Documentos requeridos</h2>
-                <p>Adjunte los siguientes documentos para completar su solicitud de homologación:</p>
+                <h2>Documentos</h2>
 
                 <div class="form-group">
-<<<<<<< HEAD
-                    <label>Certificado de notas:</label>
-                    <input type="file" id="certificado_notas" accept=".pdf,.jpg,.jpeg,.png">
-                    <span class="error-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label>Contenidos programáticos:</label>
-                    <input type="file" id="contenidos_programaticos" accept=".pdf">
-                    <span class="error-message"></span>
-                </div>
-
-                <div class="form-group">
-                    <label>Documento de identidad:</label>
-                    <input type="file" id="documento_identidad" accept=".pdf,.jpg,.jpeg,.png">
-                    <span class="error-message"></span>
-                </div>
-
-                <div class="btn-container">
-                    <button type="button" class="prev-button" onclick="changeStep(-1, event)">Anterior</button>
-                    <button type="button" class="next-button" onclick="changeStep(1, event)">Siguiente</button>
-                </div>
-            </div>
-
-            <!-- STEP 5: CONFIRMACIÓN -->
-            <div class="step-content" id="step-5">
-                <h2>Confirmación de solicitud</h2>
-
-                <div class="resumen-container">
-                    <h3>Resumen de la solicitud</h3>
-                    <div id="resumen-datos"></div>
-                </div>
-
-                <div class="form-group">
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="terminos" required>
-                        <label for="terminos">Acepto los términos y condiciones del proceso de homologación</label>
-                    </div>
-                    <span class="error-message"></span>
-                </div>
-
-                <div class="btn-container">
-                    <button type="button" class="prev-button" onclick="changeStep(-1, event)">Anterior</button>
-                    <button type="submit" class="submit-button" onclick="enviarFormulario(event)">Enviar solicitud</button>
-=======
                     <label>Documento de identidad:</label>
                     <input type="file" id="documento_id" name="documento_id" accept=".pdf" required>
                     <span class="error-message"></span>
@@ -604,89 +329,12 @@
                 <div class="btn-container">
                     <button type="button" class="prev-button" onclick="changeStep(-1)">Anterior</button>
                     <button type="button" class="submit-button" onclick="confirmarDatos()">Enviar</button>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
                 </div>
             </div>
         </form>
     </div>
 
     <!-- Scripts -->
-<<<<<<< HEAD
-    <script src="{{ asset('js/homo.js') }}"></script>
-
-    <script>
-        // Inicializar variables globales con datos de la API
-        window.departamentos = @json($departamentos ?? []);
-        window.municipios = @json($municipios ?? []);
-        window.instituciones = @json($instituciones ?? []);
-        window.programas = @json($programas ?? []);
-        window.asignaturas = @json($asignaturas ?? []);
-
-        // Datos disponibles para debug
-        console.log("Datos cargados en la vista:");
-        console.log("Departamentos:", window.departamentos?.length);
-        console.log("Municipios:", window.municipios?.length);
-        console.log("Instituciones:", window.instituciones?.length);
-        console.log("Programas:", window.programas?.length);
-        console.log("Asignaturas:", window.asignaturas?.length);
-
-        // Configurar URL de la API en un atributo data
-        document.body.dataset.apiUrl = '{{ $apiUrl ?? "https://homologacionesback.educarenemociones.com/api" }}';
-
-        // Llamar a la función de inicialización cuando el script esté cargado
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar con todos los datos disponibles
-            inicializarDatosFormulario({
-                departamentos: window.departamentos,
-                municipios: window.municipios,
-                instituciones: window.instituciones,
-                programas: window.programas,
-                asignaturas: window.asignaturas
-            });
-
-            // Configurar event listeners
-            const departamento = document.getElementById('departamento');
-            if (departamento) {
-                departamento.addEventListener('change', updateMunicipios);
-            }
-
-            const departamentoOrigen = document.getElementById('departamento_origen');
-            if (departamentoOrigen) {
-                departamentoOrigen.addEventListener('change', updateMunicipiosOrigen);
-            }
-
-            const institucion = document.getElementById('institucion');
-            if (institucion) {
-                institucion.addEventListener('change', updateFormacion);
-            }
-
-            const programa = document.getElementById('programa');
-            if (programa) {
-                programa.addEventListener('change', updateSemestres);
-            }
-
-            const semestre = document.getElementById('semestre');
-            if (semestre) {
-                semestre.addEventListener('change', updateAsignaturas);
-            }
-
-            const finalizoEstudios = document.getElementById('finalizo_estudios');
-            if (finalizoEstudios) {
-                finalizoEstudios.addEventListener('change', toggleFechaFinalizacion);
-            }
-
-            // Inicializar estados
-            toggleFechaFinalizacion();
-        });
-
-        // Función para enviar el formulario (implementar según sea necesario)
-        function enviarFormulario(event) {
-            event.preventDefault();
-            // Implementar lógica de envío
-            alert('Formulario enviado correctamente');
-        }
-    </script>
-=======
     <script>
         // Variables globales
         const todasLasAsignaturas = @json($asignaturas);
@@ -894,6 +542,6 @@
     <script src="{{ asset('js/authService.js') }}"></script>
     <script src="{{ asset('js/authMiddleware.js') }}"></script>
     <script src="{{ asset('js/solicitudhomologacion.js') }}"></script>
->>>>>>> 6ee72232848682e84178845b68c8a544fd8977eb
 </body>
+
 </html>

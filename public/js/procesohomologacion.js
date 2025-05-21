@@ -1,5 +1,5 @@
 // Base URL para la API
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
 
 // Variables globales
 let asignaturasOrigen = [];
@@ -2005,9 +2005,6 @@ function verificarDatosHomologacion() {
    });
    console.groupEnd();
 }
-
-
-
 /**
 * Valida los datos de homologación antes de guardar
 * @returns {Array} Lista de errores encontrados
@@ -2474,8 +2471,6 @@ async function handleFirmaCoordinadorUpload(event) {
 
     reader.readAsDataURL(file);
 }
-
-
 // Función para manejar la subida de la firma del vicerrector
 async function handleFirmaVicerrectorUpload(event) {
     console.log("Función handleFirmaVicerrectorUpload iniciada");
@@ -2566,7 +2561,6 @@ async function handleFirmaVicerrectorUpload(event) {
 
     reader.readAsDataURL(file);
 }
-
 // Función para determinar en qué vista estamos
 function esVistaCoordinador() {
     const resultado = document.getElementById('firma') !== null &&
@@ -2773,8 +2767,6 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
     document.head.appendChild(style);
 });
-
-
 
 // Función de ayuda para obtener datos informativos sin usar :contains (que no es estándar)
 function obtenerDatoInformativo(etiqueta) {
@@ -4094,50 +4086,7 @@ if (document.readyState === 'loading') {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Reemplazar el event listener existente con esta versión actualizada
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 document.getElementById('btn-limpiar-homologaciones').addEventListener('click', limpiarHomologaciones);
