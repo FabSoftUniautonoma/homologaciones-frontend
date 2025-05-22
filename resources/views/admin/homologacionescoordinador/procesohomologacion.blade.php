@@ -296,9 +296,16 @@
                                     style="background-color: #19407b; color: white;">
                                     <i class="fas fa-save mr-1"></i> Guardar
                                 </button>
-                                <button id="btn-limpiar-homologaciones" class="btn"
-                                    style="background-color: #6c8ebf; color: white;">
-                                    <i class="fas fa-trash-alt mr-1"></i> Limpiar
+                                <!-- Botón para limpiar solo asignaturas destino -->
+                                <button id="btn-limpiar-destino" class="btn btn-warning"
+                                    onclick="limpiarAsignaturasDestino()">
+                                    <i class="fas fa-eraser"></i> Limpiar Asignaturas Destino
+                                </button>
+
+                                <!-- Botón para limpiar todas las homologaciones -->
+                                <button id="btn-limpiar-homologaciones" class="btn btn-danger"
+                                    onclick="limpiarHomologaciones()">
+                                    <i class="fas fa-trash"></i> Eliminar Todas las Homologaciones
                                 </button>
                             </div>
                         </div>
@@ -344,8 +351,7 @@
                             </div>
                         </div>
 
-
-                        {{-- Sección de Firma --}}
+                        {{-- Sección de Firma coordinador --}}
                         <div class="card mb-4 border-left-warning" style="border-left-color: #0277bd;">
                             <div class="card-header py-3 text-white" style="background-color: #0277bd;">
                                 <h4 class="m-0 font-weight-bold">
@@ -356,54 +362,82 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="firma" class="font-weight-bold" style="color: #19407b;"><i
-                                                    class="fas fa-file-upload mr-1"></i> Subir Firma:</label>
+                                            <label for="firma" class="font-weight-bold" style="color: #19407b;">
+                                                <i class="fas fa-file-upload mr-1"></i> Subir Firma:
+                                            </label>
                                             <div class="custom-file">
                                                 <input type="file" class="custom-file-input" id="firma"
-                                                    accept="image/*">
-                                                <label class="custom-file-label" for="firma"
-                                                    style="color: #0277bd;">Seleccionar
-                                                    archivo...</label>
+                                                    accept="image/*" onchange="handleFirmaCoordinadorUpload(event)">
+                                                <label class="custom-file-label" for="firma" style="color: #0277bd;">
+                                                    Seleccionar archivo...
+                                                </label>
                                             </div>
-                                            <small class="form-text" style="color: #6c8ebf;">Formatos aceptados: JPG, PNG,
-                                                GIF</small>
+                                            <small class="form-text" style="color: #6c8ebf;">
+                                                Formatos aceptados: JPG, PNG, GIF
+                                            </small>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div id="firma-preview"
                                             class="border rounded p-3 text-center d-flex align-items-center justify-content-center"
                                             style="height: 150px; background-color: #e1f5fe; border-color: #6c8ebf;">
-                                            <p style="color: #19407b;" class="mb-0">Vista previa de la firma</p>
+                                            <p style="color: #19407b;" class="mb-0" id="firma-coordinador-placeholder">
+                                                Vista previa de la firma
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        {{-- Botones de Acción --}}
-                        <div class="action-buttons text-center mb-4">
-                            <div class="card border-left-primary" style="border-left-color: #19407b;">
-                                <div class="card-body py-4">
-                                    <button id="btn-guardar" class="btn btn-lg mx-2"
-                                        style="background-color: #19407b; color: white;">
-                                        <i class="fas fa-save mr-1"></i> Guardar Cambios
-                                    </button>
-                                    <button id="btn-generar-pdf" class="btn btn-lg mx-2"
-                                        style="background-color: #0277bd; color: white;">
-                                        <i class="fas fa-file-pdf mr-1"></i> Generar PDF
-                                    </button>
-                                    <button id="btn-cerrar-homologacion" class="btn btn-lg mx-2"
-                                        style="background-color: #6c8ebf; color: white;">
-                                        <i class="fas fa-times-circle mr-1"></i> Cerrar Homologación
+                                <input type="hidden" id="firma_coordinador_data" name="firma_coordinador_data">
+
+                                <div class="mt-3 text-center">
+                                    <button type="button" id="btn-generar-pdf" class="btn btn-lg"
+                                        style="background-color: #0277bd; color: white;" disabled>
+                                        <i class="fas fa-file-pdf mr-2"></i> Generar PDF
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Botón de guardar cambios -->
+                <button id="btn-guardar-homologaciones" class="btn btn-primary" onclick="guardarHomologaciones()">
+                    <i class="fas fa-save"></i> Guardar cambios
+                </button>
             </div>
         </div>
-
+        {{-- Modal de Vista Previa PDF --}}
+        <div class="modal fade" id="pdf-preview-modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #0277bd; color: white;">
+                        <h5 class="modal-title">
+                            <i class="fas fa-file-pdf mr-2"></i>Vista Previa del PDF
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="pdf-preview-content" style="background-color: #f8f9fc;">
+                        <div class="text-center p-5 bg-light" style="border-radius: 5px; border: 1px dashed #6c8ebf;">
+                            <i class="fas fa-file-pdf fa-3x mb-3" style="color: #19407b;"></i>
+                            <h5 style="color: #19407b;">Visualización del documento</h5>
+                            <p style="color: #0277bd;">El documento se está generando...</p>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="background-color: #e6f0ff;">
+                        <button type="button" class="btn" data-dismiss="modal"
+                            style="background-color: #6c8ebf; color: white;">
+                            <i class="fas fa-times mr-1"></i> Cerrar
+                        </button>
+                        <button type="button" class="btn" id="btn-confirmar-pdf"
+                            style="background-color: #0277bd; color: white;">
+                            <i class="fas fa-paper-plane mr-1"></i> Confirmar y Enviar a Vicerrector
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         {{-- Modal para agregar/editar homologación --}}
         <div class="modal fade" id="modal-agregar-homologacion" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
@@ -519,39 +553,9 @@
             </div>
         </div>
 
-        {{-- Modal de Vista Previa PDF --}}
-        <div class="modal fade" id="pdf-preview-modal" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header" style="background-color: #0277bd; color: white;">
-                        <h5 class="modal-title" style="background-color: #19407b; color: #ffffff;">
-                            <i class="fas fa-file-pdf mr-2"></i>Vista Previa del PDF
-                        </h5>
 
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="pdf-preview-content" style="background-color: #f8f9fc;">
-                        <div class="text-center p-5 bg-light" style="border-radius: 5px; border: 1px dashed #6c8ebf;">
-                            <i class="fas fa-file-pdf fa-3x mb-3" style="color: #19407b;"></i>
-                            <h5 style="color: #19407b;">Visualización del documento</h5>
-                            <p style="color: #0277bd;">El documento se está generando...</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer" style="background-color: #e6f0ff;">
-                        <button type="button" class="btn" data-dismiss="modal"
-                            style="background-color: #6c8ebf; color: white;">
-                            <i class="fas fa-times mr-1"></i> Cerrar
-                        </button>
-                        <button type="button" class="btn" id="btn-confirmar-pdf"
-                            style="background-color: #0277bd; color: white;">
-                            <i class="fas fa-download mr-1"></i> Confirmar y Descargar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+
 
         {{-- Modal de alertas --}}
         <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -1002,7 +1006,7 @@
 
                 let url = '';
                 if (tipo === 'destino') {
-                    url = `http://127.0.0.1:8000/api/asignaturas/${id}`;
+                    url = `https://homologacionesback.educarenemociones.com/api/asignaturas/${id}`;
                 } else {
                     // Para asignaturas de origen, podríamos crear un endpoint específico
                     return Promise.reject('No hay API específica para asignaturas de origen individuales');
@@ -1192,5 +1196,295 @@
         });
     </script>
     <!-- Cargar el script principal de la aplicación -->
-    <script src="{{ asset('js/procesohomologacion.js') }}"></script>
+     <script src="{{ asset('js/procesohomologacion.js') }}"></script>
+    <script>
+        // Intenta recuperar datos de todas las fuentes posibles
+        function recuperarDatosPersistentes() {
+            console.log('Intentando recuperar datos persistentes...');
+
+            // Paso 1: Verificar localStorage
+            if (verificarLocalStorage()) {
+                // Intentar recuperar última solicitud usada
+                const ultimaSolicitudId = localStorage.getItem('ultimaSolicitudId');
+
+                if (ultimaSolicitudId) {
+                    console.log('Última solicitud encontrada:', ultimaSolicitudId);
+
+                    // Si no tenemos solicitudId asignado, usar el último
+                    if (!solicitudId) {
+                        solicitudId = ultimaSolicitudId;
+                    }
+
+                    // Intentar cargar homologaciones
+                    try {
+                        const datosGuardados = localStorage.getItem(`homologaciones_${solicitudId}`);
+                        if (datosGuardados) {
+                            const datosParseados = JSON.parse(datosGuardados);
+
+                            if (Array.isArray(datosParseados) && datosParseados.length > 0) {
+                                console.log('Datos recuperados de localStorage:', datosParseados.length);
+                                homologaciones = datosParseados;
+
+                                // Intentar recuperar homologacionId también
+                                homologacionId = localStorage.getItem(`homologacionId_${solicitudId}`) || null;
+
+                                // Actualizar campos ocultos si es necesario
+                                actualizarCamposOcultos();
+
+                                // Renderizar datos recuperados
+                                actualizarInterfazCompleta();
+                                return true;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error al recuperar datos de localStorage:', e);
+                        // Limpiar datos potencialmente corruptos
+                        limpiarLocalStorageCorrupto(solicitudId);
+                    }
+                }
+            }
+
+            // Paso 2: Verificar datos precargados (variables Blade)
+            if (Array.isArray(window._homologacionesExistentes) && window._homologacionesExistentes.length > 0) {
+                console.log('Usando datos precargados desde variables Blade');
+                homologaciones = window._homologacionesExistentes;
+
+                // Recuperar otros datos precargados si existen
+                if (window._homologacionId) {
+                    homologacionId = window._homologacionId;
+                }
+
+                if (window._solicitudId) {
+                    solicitudId = window._solicitudId;
+                }
+
+                // Actualizar interfaz
+                actualizarInterfazCompleta();
+                return true;
+            }
+
+            console.log('No se encontraron datos persistentes');
+            return false;
+        }
+
+        // Actualiza los campos ocultos en el DOM con los valores actuales
+        function actualizarCamposOcultos() {
+            if (solicitudId) {
+                const inputSolicitudId = document.getElementById('solicitud_id');
+                if (inputSolicitudId) {
+                    inputSolicitudId.value = solicitudId;
+                }
+            }
+
+            if (homologacionId) {
+                const inputHomologacionId = document.getElementById('homologacion_id');
+                if (inputHomologacionId) {
+                    inputHomologacionId.value = homologacionId;
+                }
+            }
+        }
+        // Verificar la disponibilidad y buen funcionamiento del localStorage
+        function verificarLocalStorage() {
+            try {
+                // Intenta guardar y leer un valor de prueba
+                const testKey = 'test_storage_' + Date.now();
+                localStorage.setItem(testKey, '1');
+                const testValue = localStorage.getItem(testKey);
+                localStorage.removeItem(testKey);
+
+                // Verificar si el valor se guardó y recuperó correctamente
+                if (testValue !== '1') {
+                    console.error('localStorage disponible pero no funciona correctamente');
+                    return false;
+                }
+
+                return true;
+            } catch (e) {
+                console.error('localStorage no está disponible:', e);
+                mostrarAlerta(
+                    'Advertencia: El almacenamiento local no está disponible. El guardado automático no funcionará.',
+                    'warning');
+                return false;
+            }
+        }
+
+        // Función para limpiar localStorage potencialmente dañado
+        function limpiarLocalStorageCorrupto(solicitudIdALimpiar) {
+            try {
+                if (solicitudIdALimpiar) {
+                    localStorage.removeItem(`homologaciones_${solicitudIdALimpiar}`);
+                    localStorage.removeItem(`homologacionId_${solicitudIdALimpiar}`);
+                    console.log(`localStorage limpiado para solicitud ${solicitudIdALimpiar}`);
+                }
+            } catch (e) {
+                console.error('Error al limpiar localStorage corrupto:', e);
+            }
+        }
+    </script>
+
+    <script>
+        // Función para mostrar alertas si no está definida
+        function mostrarAlerta(mensaje, tipo) {
+            if (typeof window.mostrarAlerta !== 'function') {
+                // Crear contenedor de alerta si no existe
+                let alertContainer = document.getElementById('alert-container');
+                if (!alertContainer) {
+                    alertContainer = document.createElement('div');
+                    alertContainer.id = 'alert-container';
+                    alertContainer.style.position = 'fixed';
+                    alertContainer.style.top = '20px';
+                    alertContainer.style.right = '20px';
+                    alertContainer.style.zIndex = '9999';
+                    document.body.appendChild(alertContainer);
+                }
+
+                // Crear alerta
+                const alertEl = document.createElement('div');
+                alertEl.className = `alert alert-${tipo} alert-dismissible fade show`;
+                alertEl.innerHTML = `
+                ${mensaje}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            `;
+
+                alertContainer.appendChild(alertEl);
+
+                // Auto eliminar después de 5 segundos
+                setTimeout(() => {
+                    alertEl.classList.remove('show');
+                    setTimeout(() => alertEl.remove(), 300);
+                }, 5000);
+            } else {
+                window.mostrarAlerta(mensaje, tipo);
+            }
+        }
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Inicializando página...");
+
+            // Cargar firma si existe
+            if (typeof cargarFirmaCoordinador === 'function') {
+                console.log("Cargando firma del coordinador...");
+                cargarFirmaCoordinador();
+            } else {
+                console.error("Función cargarFirmaCoordinador no encontrada");
+            }
+
+            // Inicializar bs-custom-file-input para mostrar el nombre del archivo seleccionado
+            if (typeof bsCustomFileInput !== 'undefined') {
+                console.log("Inicializando bootstrap file input...");
+                bsCustomFileInput.init();
+            }
+
+            // Asegurarnos que los event listeners estén configurados
+            const firmaInput = document.getElementById('firma');
+            if (firmaInput) {
+                console.log("Configurando input de firma...");
+                // Asegurar que el evento onchange funcione
+                firmaInput.addEventListener('change', function(event) {
+                    console.log("Evento change en input firma");
+                    if (typeof handleFirmaCoordinadorUpload === 'function') {
+                        handleFirmaCoordinadorUpload(event);
+                    } else {
+                        console.error("Función handleFirmaCoordinadorUpload no encontrada");
+                        mostrarAlerta("Error: No se pudo cargar el manejador de firma", "danger");
+                    }
+                });
+            }
+
+            // Evento para el botón de generar PDF
+            const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+            if (btnGenerarPDF) {
+                console.log("Configurando botón generar PDF...");
+
+                // Remover cualquier event listener previo
+                const nuevoBtn = btnGenerarPDF.cloneNode(true);
+                btnGenerarPDF.parentNode.replaceChild(nuevoBtn, btnGenerarPDF);
+
+                // Agregar nuevo event listener
+                nuevoBtn.addEventListener('click', function() {
+                    console.log("Botón generar PDF presionado");
+
+                    // Verificar si tenemos la función generarPDF
+                    if (typeof generarPDF === 'function') {
+                        // Determinar qué versión generar
+                        const esVistaVice = typeof esVistaVicerrector === 'function' ?
+                            esVistaVicerrector() : false;
+
+                        // Generar PDF
+                        generarPDF(esVistaVice);
+                    } else {
+                        // Fallback básico si no está la función principal
+                        console.log("Función generarPDF no encontrada, usando fallback");
+
+                        // Mostrar modal
+                        $('#pdf-preview-modal').modal('show');
+
+                        // Simular carga
+                        setTimeout(function() {
+                            const previewContent = document.getElementById('pdf-preview-content');
+                            if (previewContent) {
+                                previewContent.innerHTML =
+                                    '<div class="alert alert-warning text-center"><i class="fas fa-exclamation-circle mr-2"></i>La función de generación de PDF no está disponible. Por favor, contacte al administrador.</div>';
+                            }
+                        }, 1000);
+
+                        mostrarAlerta("La función de generación de PDF no está disponible", "warning");
+                    }
+                });
+
+                // Si la firma está cargada, habilitar el botón
+                if (window.firmaCoordinadorData) {
+                    nuevoBtn.disabled = false;
+                    console.log("Botón generar PDF habilitado (firma encontrada)");
+                } else {
+                    console.log("Botón generar PDF deshabilitado (sin firma)");
+                }
+            }
+
+            // Inicializar manejadores completos si está disponible la función
+            if (typeof initSignatureHandlers === 'function') {
+                console.log("Inicializando manejadores de firma...");
+                initSignatureHandlers();
+            }
+
+            console.log("Inicialización completada.");
+        });
+
+        // Asegurar que la función para habilitar el botón exista
+        if (typeof habilitarBotonGenerarPDF !== 'function') {
+            window.habilitarBotonGenerarPDF = function() {
+                const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+                if (btnGenerarPDF) {
+                    btnGenerarPDF.disabled = false;
+                    console.log("Botón de generar PDF habilitado");
+
+                    // Añadir efecto visual
+                    btnGenerarPDF.classList.add('btn-pulse');
+                    setTimeout(() => {
+                        btnGenerarPDF.classList.remove('btn-pulse');
+                    }, 1000);
+                }
+            };
+        }
+
+        // Añadir clase CSS para el efecto si no existe
+        if (!document.getElementById('btn-pulse-style')) {
+            const style = document.createElement('style');
+            style.id = 'btn-pulse-style';
+            style.innerHTML = `
+            .btn-pulse {
+                animation: pulse 1s;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+            document.head.appendChild(style);
+        }
+    </script>
 @endsection

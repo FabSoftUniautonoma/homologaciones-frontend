@@ -3,10 +3,10 @@
 @section('content')
     <div class="container mt-5 position-relative">
         @php
-            // Obtener datos del estudiante del primer documento
+            // Obtener datos del estudiante del primer documento (ya no necesitamos buscar en ['datos'])
             $estudiante = null;
-            if (isset($documentos['datos']) && count($documentos['datos']) > 0) {
-                $estudiante = $documentos['datos'][0];
+            if (count($documentos) > 0) {
+                $estudiante = $documentos[0];
             }
         @endphp
 
@@ -14,7 +14,7 @@
         @if ($estudiante)
             <div class="card mb-4 shadow-lg border-0 position-relative" style="border-radius: 15px; overflow: hidden;">
                 {{-- Botón de Cerrar (dentro del contenedor) --}}
-                <a href="{{ route('homologacion.documentos', ['id' => $id]) }}" id="btn-cerrar"
+                <a href="{{ route('admin.homologacionescoordinador.index', ['radicado' => $radicado]) }}" id="btn-cerrar"
                     class="btn btn-danger shadow position-absolute"
                     style="top: 10px; right: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; transition: all 0.3s ease;">
                     <i class="fas fa-times"></i>
@@ -23,7 +23,7 @@
                 <div class="card-header bg-primary text-white p-3" style="border-radius: 15px 15px 0 0;">
                     <h2 class="mb-0 fw-bold text-white" style="font-size: 1.8rem;">
                         Documentos de {{ $nombreEstudiante }}
-                        <span style="font-size: 1.1rem; opacity: 0.8;">({{ $id }})</span>
+                        <span style="font-size: 1.1rem; opacity: 0.8;">({{ $radicado }})</span>
                     </h2>
                 </div>
 
@@ -66,18 +66,10 @@
             </div>
         @endif
 
-        @php
-            // Determinar qué estructura de datos estamos recibiendo
-            $documentosList = isset($documentos['datos'])
-                ? $documentos['datos']
-                : (is_array($documentos)
-                    ? $documentos
-                    : []);
-        @endphp
-
+        {{-- Ya no necesitamos esta parte, simplemente usamos $documentos directamente --}}
         {{-- Navegación por pestañas --}}
         <ul class="nav nav-tabs mb-3" id="documentsTabs" role="tablist">
-            @foreach ($documentosList as $index => $documento)
+            @foreach ($documentos as $index => $documento)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $index === 0 ? 'active' : '' }}" id="doc-{{ $index }}-tab"
                         data-bs-toggle="tab" data-bs-target="#doc-{{ $index }}" type="button" role="tab"
@@ -91,8 +83,8 @@
 
         {{-- Contenido de pestañas --}}
         <div class="tab-content" id="documentsTabsContent">
-            @if (count($documentosList) > 0)
-                @foreach ($documentosList as $index => $documento)
+            @if (count($documentos) > 0)
+                @foreach ($documentos as $index => $documento)
                     <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="doc-{{ $index }}"
                         role="tabpanel" aria-labelledby="doc-{{ $index }}-tab">
                         <div class="card shadow-sm" style="border-radius: 10px; overflow: hidden;">
@@ -110,11 +102,11 @@
 
                                 @if (isset($documento['ruta']) && $documento['ruta'])
                                     <div>
-                                        <a href="{{ $documento['ruta'] }}" download
+                                        <a href="{{ asset($documento['ruta']) }}" download
                                             class="btn btn-sm btn-outline-primary me-2" style="transition: all 0.3s ease;">
                                             <i class="fas fa-download me-1"></i> Descargar
                                         </a>
-                                        <a href="{{ $documento['ruta'] }}" target="_blank" class="btn btn-sm btn-primary"
+                                        <a href="{{ asset($documento['ruta']) }}" target="_blank" class="btn btn-sm btn-primary"
                                             style="transition: all 0.3s ease;">
                                             <i class="fas fa-external-link-alt me-1"></i> Abrir en nueva pestaña
                                         </a>
@@ -138,7 +130,7 @@
                                         </div>
                                         <p class="mb-0">Cargando documento...</p>
                                     </div>
-                                    <iframe src="{{ $documento['ruta'] }}" width="100%" height="600px"
+                                    <iframe src="{{ asset($documento['ruta']) }}" width="100%" height="600px"
                                         style="border: none;"
                                         onload="document.getElementById('loading-{{ $index }}').style.display='none'">
                                     </iframe>
@@ -207,7 +199,7 @@
     <script>
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
-                window.location.href = "{{ route('homologacion.documentos', ['id' => $id]) }}";
+                window.location.href = "{{ route('admin.homologacionescoordinador.index', ['radicado' => $radicado]) }}";
             }
         });
 
@@ -246,7 +238,7 @@
         // Navegación por teclado entre pestañas
         document.addEventListener('keydown', function(event) {
             if (event.altKey) {
-                const numTabs = {{ count($documentosList) }};
+                const numTabs = {{ count($documentos) }};
 
                 if (event.key === "ArrowRight") {
                     let activeTabIndex = getActiveTabIndex();

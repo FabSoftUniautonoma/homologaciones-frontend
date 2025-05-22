@@ -1,5 +1,5 @@
 // Base URL para la API
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
 
 // Variables globales
 let asignaturasOrigen = [];
@@ -13,7 +13,7 @@ let firmaUploadData = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     // Obtener ID de solicitud
-    solicitudId = document.getElementById('solicitud_id').value;
+    solicitudId = document.getElementById('solicitud_id')?.value;
 
     // Extraer datos que vienen del controlador (disponibles en las variables Blade)
     if (typeof window._asignaturasOrigen !== 'undefined') {
@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Inicializar
     inicializarEventos();
     cargarDatos();
+    inicializarValidacionNotas();
 });
 
 function inicializarEventos() {
@@ -48,9 +49,16 @@ function inicializarEventos() {
     // ==== BOTONES DE LA TABLA DE HOMOLOGACIONES ====
     document.getElementById('btn-guardar-homologaciones').addEventListener('click', () => guardarHomologaciones());
     document.getElementById('btn-limpiar-homologaciones').addEventListener('click', limpiarHomologaciones);
+
+    // Asegurarse de que el botón de limpiar destinos existe y agregar el evento
+    const btnLimpiarDestino = document.getElementById('btn-limpiar-destino');
+    if (btnLimpiarDestino) {
+        btnLimpiarDestino.addEventListener('click', limpiarAsignaturasDestino);
+    }
+
     document.getElementById('btn-confirmar-homologacion').addEventListener('click', confirmarHomologacion);
-    document.getElementById('btn-cerrar-homologacion').addEventListener('click', cerrarHomologacion);
-    document.getElementById('btn-generar-pdf').addEventListener('click', generarPDF);
+    document.getElementById('btn-cerrar-homologacion')?.addEventListener('click', cerrarHomologacion);
+    document.getElementById('btn-generar-pdf')?.addEventListener('click', generarPDF);
 
     // ==== EVENT DELEGATION PARA TODOS LOS CLICKEABLES ====
     document.addEventListener('click', function (e) {
@@ -136,90 +144,53 @@ function inicializarEventos() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Intentar obtener el ID de solicitud de múltiples fuentes
-    solicitudId = document.getElementById('solicitud_id')?.value;
-
-    // Si no está disponible en el campo oculto, verificar en las variables JavaScript globales
-    if (!solicitudId && window._solicitudId) {
-        solicitudId = window._solicitudId;
-    }
-
-    // También obtener el homologacionId
-    homologacionId = document.getElementById('homologacion_id')?.value;
-    if (!homologacionId && window._homologacionId) {
-        homologacionId = window._homologacionId;
-    }
-
-    console.log('Valores iniciales:', {
-        solicitudId: solicitudId,
-        homologacionId: homologacionId
-    });
-
-    // Extraer datos que vienen del controlador (disponibles en las variables Blade)
-    if (typeof window._asignaturasOrigen !== 'undefined') {
-        asignaturasOrigen = window._asignaturasOrigen || [];
-    }
-
-    if (typeof window._asignaturasDestino !== 'undefined') {
-        asignaturasDestino = window._asignaturasDestino || [];
-    }
-
-    if (typeof window._homologacionesExistentes !== 'undefined') {
-        homologaciones = window._homologacionesExistentes || [];
-
-        // Si tenemos homologaciones y no tenemos solicitudId, intentar extraerlo
-        if (homologaciones.length > 0 && !solicitudId) {
-            // Buscar el solicitudId en la primera homologación o en cualquier estructura anidada
-            if (homologaciones[0].solicitud_id) {
-                solicitudId = homologaciones[0].solicitud_id;
-                console.log('solicitudId extraído de homologaciones:', solicitudId);
-            } else if (homologaciones[0].solicitud && homologaciones[0].solicitud.id) {
-                solicitudId = homologaciones[0].solicitud.id;
-                console.log('solicitudId extraído de estructura anidada en homologaciones:', solicitudId);
-            }
-        }
-    }
-
-    // Si hay solicitudId extraído de homologaciones, guardarlo en el campo hidden
-    if (solicitudId) {
-        const inputSolicitudId = document.getElementById('solicitud_id');
-        if (inputSolicitudId) {
-            inputSolicitudId.value = solicitudId;
-        } else {
-            // Si el campo no existe, crearlo
-            const hiddenField = document.createElement('input');
-            hiddenField.type = 'hidden';
-            hiddenField.id = 'solicitud_id';
-            hiddenField.value = solicitudId;
-            document.body.appendChild(hiddenField);
-            console.log('Campo oculto de solicitudId creado con valor:', solicitudId);
-        }
-    }
-
-    // Inicializar
-    inicializarEventos();
-    cargarDatos();
-});
-
 /**
- * Carga los datos de homologaciones con estrategia de múltiples fuentes
- * @returns {Promise} Promesa que se resuelve cuando termina la carga
+ * Función mejorada para cargar datos iniciales
  */
 function cargarDatos() {
-    console.log('Iniciando cargarDatos...');
+    console.log('Iniciando cargarDatos con estrategia mejorada...');
+
+    // Iniciar diagnóstico de localStorage
+    diagnosticoLocalStorage();
 
     // Estrategia exhaustiva para recuperar los IDs
-    solicitudId = solicitudId || extraerSolicitudId();
-    homologacionId = homologacionId || cargarHomologacionId();
+    if (!solicitudId) {
+        solicitudId = extraerSolicitudId();
+    }
+
+    if (!homologacionId) {
+        homologacionId = cargarHomologacionId();
+    }
 
     console.log('IDs recuperados:', {
         solicitudId: solicitudId,
         homologacionId: homologacionId
     });
 
-    // Si ya tenemos homologaciones desde el controlador, cargarlas directamente
-    if (homologaciones.length > 0) {
+    // Intentar cargar desde localStorage primero SIEMPRE
+    if (solicitudId) {
+        const datosLocalStorage = cargarDesdeLocalStorage();
+        if (datosLocalStorage && datosLocalStorage.length > 0) {
+            console.log('Usando datos de localStorage:', datosLocalStorage.length, 'homologaciones');
+            homologaciones = datosLocalStorage;
+            renderizarTablaHomologaciones();
+            actualizarEstadoUI();
+
+            // Si tenemos homologacionId, verificar con el servidor para mantener sincronización
+            if (homologacionId) {
+                sincronizarConServidor().then(actualizado => {
+                    if (actualizado) {
+                        console.log('Datos actualizados desde el servidor');
+                    }
+                });
+            }
+
+            return Promise.resolve(homologaciones);
+        }
+    }
+
+    // Si ya tenemos homologaciones desde el controlador, cargarlas después de intentar localStorage
+    if (Array.isArray(homologaciones) && homologaciones.length > 0) {
         console.log('Usando homologaciones precargadas desde controlador:', homologaciones.length);
         renderizarTablaHomologaciones();
         actualizarEstadoUI();
@@ -227,52 +198,27 @@ function cargarDatos() {
         // Guardar en localStorage como respaldo
         if (solicitudId) {
             try {
-                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologaciones));
+                // Crear una copia limpia para localStorage
+                const homologacionesLimpio = homologaciones.map(h => ({
+                    asignatura_origen_id: h.asignatura_origen_id,
+                    asignatura_destino_id: h.asignatura_destino_id,
+                    asignatura_origen_nombre: h.asignatura_origen_nombre,
+                    asignatura_destino_nombre: h.asignatura_destino_nombre,
+                    nota_origen: h.nota_origen,
+                    nota_destino: h.nota_destino,
+                    creditos: h.creditos,
+                    comentarios: h.comentarios || ''
+                }));
+
+                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologacionesLimpio));
                 localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId || '');
                 localStorage.setItem('ultimaSolicitudId', solicitudId);
             } catch (e) {
-                console.warn('Error al guardar en localStorage:', e);
+                console.error('Error al guardar en localStorage:', e);
             }
         }
 
         return Promise.resolve(homologaciones);
-    }
-
-    // Si tenemos solicitudId, intentar cargar desde localStorage primero
-    if (solicitudId) {
-        try {
-            const datosGuardados = localStorage.getItem(`homologaciones_${solicitudId}`);
-            const idGuardado = localStorage.getItem(`homologacionId_${solicitudId}`);
-
-            if (datosGuardados) {
-                console.log('Encontrados datos en localStorage para solicitud:', solicitudId);
-                homologaciones = JSON.parse(datosGuardados) || [];
-
-                if (idGuardado && !homologacionId) {
-                    homologacionId = idGuardado;
-                    console.log('ID de homologación recuperado de localStorage:', homologacionId);
-
-                    // Actualizar el campo oculto
-                    const inputHomologacionId = document.getElementById('homologacion_id');
-                    if (inputHomologacionId) {
-                        inputHomologacionId.value = homologacionId;
-                    }
-                }
-
-                if (homologaciones.length > 0) {
-                    console.log('Cargadas homologaciones desde localStorage:', homologaciones.length);
-                    renderizarTablaHomologaciones();
-                    actualizarEstadoUI();
-
-                    // Intentar sincronizar con el servidor en segundo plano
-                    sincronizarConServidor();
-
-                    return Promise.resolve(homologaciones);
-                }
-            }
-        } catch (e) {
-            console.warn('Error al cargar desde localStorage:', e);
-        }
     }
 
     // Si tenemos homologacionId, cargar del servidor
@@ -282,10 +228,14 @@ function cargarDatos() {
         // Mostrar indicador de carga
         const loadingIndicator = document.createElement('div');
         loadingIndicator.className = 'text-center my-4';
+        loadingIndicator.id = 'loading-indicator';
         loadingIndicator.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Cargando homologaciones...</p>';
-        document.querySelector('.container').appendChild(loadingIndicator);
+        document.querySelector('.container')?.appendChild(loadingIndicator);
 
-        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`)
+        // Normalizar el ID para la API
+        const apiHomologacionId = normalizarHomologacionId(homologacionId);
+
+        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -297,9 +247,20 @@ function cargarDatos() {
 
                 if (data.datos) {
                     // Actualizar datos globales
-                    asignaturasOrigen = data.datos.asignaturas_origen || [];
-                    asignaturasDestino = data.datos.asignaturas_destino || [];
-                    homologaciones = data.datos.homologaciones || [];
+                    if (Array.isArray(data.datos.asignaturas_origen)) {
+                        asignaturasOrigen = data.datos.asignaturas_origen;
+                    }
+
+                    if (Array.isArray(data.datos.asignaturas_destino)) {
+                        asignaturasDestino = data.datos.asignaturas_destino;
+                    }
+
+                    if (Array.isArray(data.datos.homologaciones)) {
+                        homologaciones = data.datos.homologaciones;
+                    } else {
+                        // Si no es array, inicializarlo como vacío
+                        homologaciones = [];
+                    }
 
                     // Actualizar el solicitudId si no lo teníamos todavía
                     if (!solicitudId && data.datos.solicitud_id) {
@@ -318,11 +279,29 @@ function cargarDatos() {
                     // Guardar en localStorage como respaldo
                     if (solicitudId) {
                         try {
-                            localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologaciones));
+                            // Crear una copia limpia para localStorage
+                            const homologacionesLimpio = homologaciones.map(h => ({
+                                asignatura_origen_id: h.asignatura_origen_id,
+                                asignatura_destino_id: h.asignatura_destino_id,
+                                asignatura_origen_nombre: h.asignatura_origen_nombre,
+                                asignatura_destino_nombre: h.asignatura_destino_nombre,
+                                nota_origen: h.nota_origen,
+                                nota_destino: h.nota_destino,
+                                creditos: h.creditos,
+                                comentarios: h.comentarios || ''
+                            }));
+
+                            localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologacionesLimpio));
                             localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId || '');
                             localStorage.setItem('ultimaSolicitudId', solicitudId);
+
+                            // Verificar almacenamiento
+                            const guardado = localStorage.getItem(`homologaciones_${solicitudId}`);
+                            if (!guardado) {
+                                console.error('Verificación de almacenamiento fallida después de cargar del servidor');
+                            }
                         } catch (e) {
-                            console.warn('Error al guardar en localStorage:', e);
+                            console.error('Error al guardar en localStorage:', e);
                         }
                     }
 
@@ -339,20 +318,32 @@ function cargarDatos() {
                 console.error('Error al cargar datos de homologación:', error);
                 mostrarAlerta('Error al cargar datos. Intentando usar datos locales.', 'warning');
 
-                // Intentar cargar desde localStorage como último recurso
-                return cargarDesdeLocalStorage();
+                // Intentar cargar desde localStorage nuevamente como respaldo
+                const datosLocales = cargarDesdeLocalStorage();
+                if (datosLocales && datosLocales.length > 0) {
+                    homologaciones = datosLocales;
+                    renderizarTablaHomologaciones();
+                    actualizarEstadoUI();
+                    return homologaciones;
+                } else {
+                    // Si no hay datos locales, inicializar vacío
+                    homologaciones = [];
+                    renderizarTablaHomologaciones();
+                    actualizarEstadoUI();
+                    return homologaciones;
+                }
             })
             .finally(() => {
                 // Eliminar indicador de carga
-                if (loadingIndicator.parentNode) {
-                    loadingIndicator.parentNode.removeChild(loadingIndicator);
+                const indicator = document.getElementById('loading-indicator');
+                if (indicator && indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
                 }
             });
     }
-    // Si no tenemos homologacionId pero sí solicitudId, intentar obtener datos de la solicitud
-    else if (solicitudId) {
-        console.log('Buscando homologaciones para solicitud:', solicitudId);
 
+    // Si tenemos solicitudId pero no homologacionId
+    if (solicitudId) {
         return fetch(`${API_BASE_URL}/solicitudes/${solicitudId}`)
             .then(response => {
                 if (!response.ok) {
@@ -378,16 +369,22 @@ function cargarDatos() {
                         }
 
                         // Guardar en localStorage
-                        localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId);
+                        try {
+                            localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId);
+                        } catch (e) {
+                            console.error('Error al guardar homologacionId en localStorage:', e);
+                        }
 
                         // Ahora que tenemos el homologacionId, cargar los datos de homologación
                         return cargarDatos();
                     } else {
                         console.warn('La solicitud no tiene homologación asociada');
                         mostrarAlerta('La solicitud no tiene homologación asociada. Se creará una nueva al guardar.', 'info');
-
-                        // Intentar cargar desde localStorage como último recurso
-                        return cargarDesdeLocalStorage();
+                        // Inicializar homologaciones como array vacío
+                        homologaciones = [];
+                        renderizarTablaHomologaciones();
+                        actualizarEstadoUI();
+                        return homologaciones;
                     }
                 } else {
                     console.warn('El servidor no devolvió datos válidos de solicitud');
@@ -397,15 +394,216 @@ function cargarDatos() {
             .catch(error => {
                 console.error('Error al cargar datos de solicitud:', error);
                 mostrarAlerta('Error al cargar datos de solicitud', 'danger');
-
-                // Intentar cargar desde localStorage como último recurso
-                return cargarDesdeLocalStorage();
+                // Inicializar homologaciones como array vacío
+                homologaciones = [];
+                renderizarTablaHomologaciones();
+                actualizarEstadoUI();
+                return homologaciones;
             });
-    } else {
-        mostrarAlerta('Error: No se pudo obtener el ID de solicitud o de homologación', 'danger');
-        return Promise.reject('No se pudieron obtener los IDs necesarios');
+    }
+
+    // Si no tenemos ni solicitudId ni homologacionId, no podemos hacer nada
+    mostrarAlerta('Error: No se pudo obtener el ID de solicitud o de homologación', 'danger');
+    homologaciones = [];
+    renderizarTablaHomologaciones();
+    actualizarEstadoUI();
+    return Promise.reject('No se pudieron obtener los IDs necesarios');
+}
+
+/**
+ * Función mejorada para cargar datos desde localStorage
+ */
+function cargarDesdeLocalStorage() {
+    if (!solicitudId) {
+        // Intentar obtener la última solicitud utilizada
+        solicitudId = localStorage.getItem('ultimaSolicitudId');
+        if (!solicitudId) {
+            console.warn('No se encontró ID de solicitud para cargar desde localStorage');
+            return [];
+        }
+    }
+
+    try {
+        const datosGuardados = localStorage.getItem(`homologaciones_${solicitudId}`);
+        const idGuardado = localStorage.getItem(`homologacionId_${solicitudId}`);
+
+        console.log('Intentando cargar datos para solicitud ID:', solicitudId);
+        console.log('Datos encontrados en localStorage:', datosGuardados ? 'Sí' : 'No');
+
+        if (datosGuardados) {
+            try {
+                const datosParseados = JSON.parse(datosGuardados);
+                if (Array.isArray(datosParseados)) {
+                    console.log('Cargadas homologaciones desde localStorage:', datosParseados.length);
+
+                    if (idGuardado && !homologacionId) {
+                        homologacionId = idGuardado;
+                        console.log('ID de homologación recuperado de localStorage:', homologacionId);
+
+                        // Actualizar el campo oculto
+                        const inputHomologacionId = document.getElementById('homologacion_id');
+                        if (inputHomologacionId) {
+                            inputHomologacionId.value = homologacionId;
+                        }
+                    }
+
+                    return datosParseados;
+                } else {
+                    console.warn('Los datos recuperados no son un array:', datosParseados);
+                    return [];
+                }
+            } catch (error) {
+                console.error('Error al parsear datos de localStorage:', error);
+                // Si hay error de parseo, intentar limpiar los datos corruptos
+                localStorage.removeItem(`homologaciones_${solicitudId}`);
+                return [];
+            }
+        } else {
+            console.log('No se encontraron datos en localStorage para solicitudId:', solicitudId);
+        }
+    } catch (e) {
+        console.error('Error al cargar desde localStorage:', e);
+    }
+
+    return [];
+}
+
+/**
+ * Función para verificar si hay suficiente espacio de almacenamiento
+ */
+function verificarAlmacenamientoDisponible() {
+    try {
+        // Intentar almacenar un valor de prueba para verificar si localStorage funciona
+        localStorage.setItem('test_storage', '1');
+        localStorage.removeItem('test_storage');
+
+        // Verificar espacio disponible si el navegador lo soporta
+        if (navigator.storage && navigator.storage.estimate) {
+            navigator.storage.estimate().then(estimate => {
+                const percentUsed = (estimate.usage / estimate.quota) * 100;
+                console.log(`Almacenamiento utilizado: ${percentUsed.toFixed(2)}%`);
+
+                // Advertir si queda poco espacio
+                if (percentUsed > 90) {
+                    console.warn('Queda poco espacio de almacenamiento');
+                    mostrarAlerta('Advertencia: Queda poco espacio de almacenamiento local. Podría afectar al guardado automático.', 'warning');
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Error al verificar almacenamiento:', e);
+        mostrarAlerta('Error: No se puede acceder al almacenamiento local. El guardado automático podría no funcionar.', 'danger');
     }
 }
+
+/**
+ * Función mejorada para diagnosticar el estado del localStorage
+ */
+function diagnosticoLocalStorage() {
+    console.group('Diagnóstico de localStorage');
+
+    try {
+        // Verificar disponibilidad de localStorage
+        const testKey = 'test_' + Math.random();
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+        console.log('✓ localStorage está disponible y funcionando');
+
+        const ultimaSolicitudId = localStorage.getItem('ultimaSolicitudId');
+        console.log('Última solicitud ID:', ultimaSolicitudId);
+
+        // Mostrar todas las claves de homologaciones
+        const homologacionesKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('homologaciones_')) {
+                homologacionesKeys.push(key);
+            }
+        }
+
+        console.log('Claves de homologaciones:', homologacionesKeys);
+
+        // Mostrar información de la solicitud actual
+        if (solicitudId) {
+            const homologacionesKey = `homologaciones_${solicitudId}`;
+            const homologacionIdKey = `homologacionId_${solicitudId}`;
+
+            console.log('Clave actual:', homologacionesKey);
+            console.log('Datos encontrados:', localStorage.getItem(homologacionesKey) ? 'Sí' : 'No');
+            console.log('ID de homologación guardado:', localStorage.getItem(homologacionIdKey));
+
+            try {
+                const datos = JSON.parse(localStorage.getItem(homologacionesKey) || '[]');
+                console.log('Cantidad de homologaciones en localStorage:', datos.length);
+
+                // Verificar integridad de los datos
+                const datosValidos = datos.every(h =>
+                    h && typeof h === 'object' &&
+                    (h.asignatura_origen_id || h.asignatura_origen_id === null)
+                );
+
+                console.log('Integridad de datos:', datosValidos ? '✓ OK' : '❌ Problemas detectados');
+
+                if (!datosValidos) {
+                    console.warn('Se detectaron problemas en los datos almacenados. Considere limpiar el caché.');
+                }
+            } catch (e) {
+                console.error('Error al parsear datos:', e);
+            }
+        } else {
+            console.warn('No hay solicitudId definido para buscar en localStorage');
+        }
+
+        // Comprobar tamaño total aproximado
+        let totalSize = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key) {
+                const value = localStorage.getItem(key) || '';
+                totalSize += (key.length + value.length) * 2; // Aproximación en bytes para strings UTF-16
+            }
+        }
+
+        console.log(`Tamaño total aproximado: ${(totalSize / 1024).toFixed(2)} KB`);
+
+    } catch (e) {
+        console.error('Error durante el diagnóstico de localStorage:', e);
+    }
+
+    console.groupEnd();
+}
+/**
+ * Actualiza la interfaz según el estado actual de los datos
+ */
+function actualizarEstadoUI() {
+    // Esta función podría cambiar estado de botones, mostrar/ocultar elementos, etc.
+    // según el estado actual de homologaciones
+    const hayHomologaciones = homologaciones.length > 0;
+
+    // Actualizar botones según corresponda
+    const btnLimpiarHomologaciones = document.getElementById('btn-limpiar-homologaciones');
+    const btnLimpiarDestino = document.getElementById('btn-limpiar-destino');
+    const btnGuardarHomologaciones = document.getElementById('btn-guardar-homologaciones');
+
+    if (btnLimpiarHomologaciones) {
+        btnLimpiarHomologaciones.disabled = !hayHomologaciones;
+    }
+
+    if (btnLimpiarDestino) {
+        btnLimpiarDestino.disabled = !hayHomologaciones;
+    }
+
+    if (btnGuardarHomologaciones) {
+        btnGuardarHomologaciones.disabled = !hayHomologaciones && !homologacionId;
+    }
+
+    // Actualizar el ID de homologación visible en la interfaz si existe
+    const idHomologacionElement = document.getElementById('id-homologacion');
+    if (idHomologacionElement && homologacionId) {
+        idHomologacionElement.textContent = homologacionId;
+    }
+}
+
 /**
  * Función auxiliar para extraer el ID de solicitud de múltiples fuentes
  * @returns {string|null} El ID de solicitud o null si no se encuentra
@@ -445,6 +643,53 @@ function extraerSolicitudId() {
     // Si llegamos aquí, no pudimos encontrar el ID
     return null;
 }
+
+/**
+ * Carga el ID de homologación desde el input hidden o la URL
+ * @returns {string|null} El ID de homologación o null si no se encuentra
+ */
+function cargarHomologacionId() {
+    // Intenta obtener el ID desde el elemento hidden en el DOM
+    let id = document.getElementById('homologacion_id')?.value;
+
+    // Si no existe en el DOM, intenta obtenerlo de una variable global
+    if (!id && typeof homologacionId !== 'undefined' && homologacionId) {
+        id = homologacionId;
+    }
+
+    // Verificar variable global de Blade
+    if (!id && window._homologacionId) {
+        id = window._homologacionId;
+    }
+
+    // Si aún no se encuentra, intenta extraerlo de la URL
+    if (!id) {
+        const urlParams = new URLSearchParams(window.location.search);
+        id = urlParams.get('homologacion_id') || urlParams.get('id');
+
+        // Buscar en la ruta de la URL si tiene formato /homologacion/{id}
+        if (!id) {
+            const pathParts = window.location.pathname.split('/');
+            const homIndex = pathParts.findIndex(part => part === 'homologacion' || part === 'homologaciones');
+            if (homIndex !== -1 && pathParts[homIndex + 1]) {
+                id = pathParts[homIndex + 1];
+            }
+        }
+    }
+
+    // Normalizar el ID: eliminar prefijo HOM-YYYY- si existe
+    if (id && id.includes('HOM-')) {
+        // Extraer solo el número después del último guión
+        const parts = id.split('-');
+        if (parts.length > 0) {
+            id = parts[parts.length - 1]; // Obtener la última parte (el número)
+        }
+    }
+
+    console.log('ID de homologación cargado y normalizado:', id);
+    return id || null;
+}
+
 function seleccionarAsignatura(asignatura, tipo) {
     // Limpiar selecciones previas del mismo tipo
     document.querySelectorAll('.asignatura-row').forEach(row => {
@@ -457,10 +702,12 @@ function seleccionarAsignatura(asignatura, tipo) {
 
     // Marcar la fila actual como seleccionada
     const fila = event.target.closest('.asignatura-row');
-    if (tipo === 'origen') {
-        fila.classList.add('table-primary');
-    } else {
-        fila.classList.add('table-success');
+    if (fila) {
+        if (tipo === 'origen') {
+            fila.classList.add('table-primary');
+        } else {
+            fila.classList.add('table-success');
+        }
     }
 
     // Guardar la asignatura seleccionada
@@ -489,7 +736,15 @@ function actualizarResumenSeleccion() {
 
         // Insertar antes de los botones de acción
         const botonesAccion = document.querySelector('.btn-group-lg');
-        botonesAccion?.parentNode.insertBefore(panelResumen, botonesAccion);
+        if (botonesAccion) {
+            botonesAccion.parentNode.insertBefore(panelResumen, botonesAccion);
+        } else {
+            // Si no encontramos los botones, intentar con otra ubicación
+            const cardBody = document.querySelector('.card-body');
+            if (cardBody) {
+                cardBody.appendChild(panelResumen);
+            }
+        }
     }
 
     // Construir contenido del panel
@@ -547,7 +802,7 @@ function actualizarResumenSeleccion() {
                         Asignatura de Destino
                     </h6>
                     <p class="mb-1"><strong>${asignaturaSeleccionadaDestino.nombre}</strong></p>
-                    <small class="d-block">Código: ${asignaturaSeleccionadaDestino.codigo || 'N/A'}</small>
+                    <small class="d-block">Código: ${asignaturaSeleccionadaDestino.codigo || asignaturaSeleccionadaDestino.codigo_asignatura || 'N/A'}</small>
                     <small class="d-block">Créditos: ${asignaturaSeleccionadaDestino.creditos || '—'}</small>
                 </div>
             </div>
@@ -581,6 +836,11 @@ function actualizarResumenSeleccion() {
 
 function abrirModalAgregarHomologacion() {
     const modal = document.getElementById('modal-agregar-homologacion');
+    if (!modal) {
+        console.error('No se encontró el modal para agregar homologación');
+        return;
+    }
+
     modal.querySelector('#modal-titulo').textContent = 'Agregar Homologación';
     modal.querySelector('#homologacion-index').value = '';
 
@@ -596,7 +856,10 @@ function abrirModalAgregarHomologacion() {
         const origenSelect = document.getElementById('asignatura-origen');
         if (origenSelect) {
             origenSelect.value = asignaturaSeleccionadaOrigen.id_asignatura || asignaturaSeleccionadaOrigen.id;
-            document.getElementById('nota-origen').value = asignaturaSeleccionadaOrigen.nota_origen || asignaturaSeleccionadaOrigen.nota || '';
+            const notaOrigenInput = document.getElementById('nota-origen');
+            if (notaOrigenInput) {
+                notaOrigenInput.value = asignaturaSeleccionadaOrigen.nota_origen || asignaturaSeleccionadaOrigen.nota || '';
+            }
         }
     }
 
@@ -604,13 +867,48 @@ function abrirModalAgregarHomologacion() {
         const destinoSelect = document.getElementById('asignatura-destino');
         if (destinoSelect) {
             destinoSelect.value = asignaturaSeleccionadaDestino.id_asignatura || asignaturaSeleccionadaDestino.id;
-            document.getElementById('creditos-homologados').value = asignaturaSeleccionadaDestino.creditos || '';
+            const creditosInput = document.getElementById('creditos-homologados');
+            if (creditosInput) {
+                creditosInput.value = asignaturaSeleccionadaDestino.creditos || '';
+            }
         }
+    }
+
+    // Inicializar nota homologada por defecto si está vacía
+    const notaHomologadaInput = document.getElementById('nota-homologada');
+    if (notaHomologadaInput && notaHomologadaInput.value === '') {
+        notaHomologadaInput.value = '3.0';
     }
 
     $('#modal-agregar-homologacion').modal('show');
 }
-// Modificar la función confirmarHomologacion para asegurar que se guarden los datos correctos
+
+function abrirModalEditarHomologacion(index) {
+    const homologacion = homologaciones[index];
+    if (!homologacion) {
+        console.error('No se encontró la homologación con índice', index);
+        return;
+    }
+
+    abrirModalAgregarHomologacion();
+    document.querySelector('#modal-titulo').textContent = 'Editar Homologación';
+    document.querySelector('#homologacion-index').value = index;
+
+    // Llenar campos con datos de la homologación
+    const fields = {
+        'asignatura-origen': homologacion.asignatura_origen_id,
+        'asignatura-destino': homologacion.asignatura_destino_id,
+        'nota-origen': homologacion.nota_origen,
+        'nota-homologada': homologacion.nota_destino || '3.0',
+        'creditos-homologados': homologacion.creditos,
+        'observacion': homologacion.comentarios || ''
+    };
+
+    for (const [id, value] of Object.entries(fields)) {
+        const element = document.getElementById(id);
+        if (element) element.value = value;
+    }
+}
 
 // Función para validar que una nota esté entre 3.0 y 5.0
 function validarNota(valor) {
@@ -633,287 +931,647 @@ function validarNota(valor) {
     return Math.round(nota * 10) / 10;
 }
 /**
- * Función principal para confirmar una homologación
- */
+* Función principal para confirmar una homologación
+*/
 function confirmarHomologacion() {
-    const form = document.getElementById('form-homologacion');
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
+   const form = document.getElementById('form-homologacion');
+   if (!form || !form.checkValidity()) {
+       form?.reportValidity();
+       return;
+   }
 
-    const index = document.getElementById('homologacion-index').value;
+   const index = document.getElementById('homologacion-index').value;
 
-    // Obtener y validar la nota destino
-    const notaDestinoInput = document.getElementById('nota-homologada');
-    const notaDestino = validarNota(notaDestinoInput.value);
-    notaDestinoInput.value = notaDestino; // Actualizar el campo con el valor validado
+   // Obtener y validar la nota destino
+   const notaDestinoInput = document.getElementById('nota-homologada');
+   const notaDestino = validarNota(notaDestinoInput.value);
+   notaDestinoInput.value = notaDestino; // Actualizar el campo con el valor validado
 
-    const homologacion = {
-        asignatura_origen_id: document.getElementById('asignatura-origen').value,
-        asignatura_destino_id: document.getElementById('asignatura-destino').value,
-        nota_origen: document.getElementById('nota-origen').value,
-        nota_destino: notaDestino, // Usar el valor validado
-        creditos: document.getElementById('creditos-homologados').value,
-        comentarios: document.getElementById('observacion').value
-    };
+   const homologacion = {
+       asignatura_origen_id: document.getElementById('asignatura-origen').value,
+       asignatura_destino_id: document.getElementById('asignatura-destino').value,
+       nota_origen: document.getElementById('nota-origen').value,
+       nota_destino: notaDestino, // Usar el valor validado
+       creditos: document.getElementById('creditos-homologados').value,
+       comentarios: document.getElementById('observacion').value
+   };
 
-    // Debug: Verificar datos
-    console.log('Datos de homologación a guardar:', homologacion);
+   // Debug: Verificar datos
+   console.log('Datos de homologación a guardar:', homologacion);
 
-    // Verificar que los campos requeridos estén presentes
-    if (!homologacion.asignatura_origen_id || !homologacion.asignatura_destino_id) {
-        mostrarAlerta('Debes seleccionar asignaturas de origen y destino', 'danger');
-        return;
-    }
+   // Verificar que los campos requeridos estén presentes
+   if (!homologacion.asignatura_origen_id || !homologacion.asignatura_destino_id) {
+       mostrarAlerta('Debes seleccionar asignaturas de origen y destino', 'danger');
+       return;
+   }
 
-    // Obtener nombres de asignaturas
-    const origenOption = document.querySelector(`#asignatura-origen option[value="${homologacion.asignatura_origen_id}"]`);
-    const destinoOption = document.querySelector(`#asignatura-destino option[value="${homologacion.asignatura_destino_id}"]`);
+   // Obtener nombres de asignaturas
+   const origenOption = document.querySelector(`#asignatura-origen option[value="${homologacion.asignatura_origen_id}"]`);
+   const destinoOption = document.querySelector(`#asignatura-destino option[value="${homologacion.asignatura_destino_id}"]`);
 
-    homologacion.asignatura_origen_nombre = origenOption ? origenOption.text : 'Sin nombre';
-    homologacion.asignatura_destino_nombre = destinoOption ? destinoOption.text : 'Sin nombre';
+   homologacion.asignatura_origen_nombre = origenOption ? origenOption.text : 'Sin nombre';
+   homologacion.asignatura_destino_nombre = destinoOption ? destinoOption.text : 'Sin nombre';
 
-    if (index !== '') {
-        // Editar existente
-        homologaciones[index] = homologacion;
-    } else {
-        // Agregar nueva
-        homologaciones.push(homologacion);
-    }
+   if (index !== '') {
+       // Editar existente
+       homologaciones[index] = homologacion;
+   } else {
+       // Agregar nueva
+       homologaciones.push(homologacion);
+   }
 
-    renderizarTablaHomologaciones();
-    $('#modal-agregar-homologacion').modal('hide');
+   renderizarTablaHomologaciones();
+   $('#modal-agregar-homologacion').modal('hide');
 
-    // Limpiar selección
-    asignaturaSeleccionadaOrigen = null;
-    asignaturaSeleccionadaDestino = null;
-    actualizarResumenSeleccion();
+   // Limpiar selección
+   asignaturaSeleccionadaOrigen = null;
+   asignaturaSeleccionadaDestino = null;
+   actualizarResumenSeleccion();
 
-    // Mostrar notificación sin guardar automáticamente
-    //mostrarAlerta('Homologación agregada. Recuerda guardar los cambios', 'info');
-}
-// Función separada para guardar homologaciones que puedes llamar desde un botón específico
-function guardarCambiosHomologaciones() {
-    guardarHomologaciones(false, (exito) => {
-        if (exito) {
-            //   mostrarAlerta('Homologación guardada exitosamente', 'success');
-        } else {
-            mostrarAlerta('Hubo un problema al guardar, pero los datos están respaldados localmente', 'warning');
-        }
-    });
+   // Mostrar notificación sin guardar automáticamente
+   mostrarAlerta('Homologación agregada. Recuerda guardar los cambios', 'info');
 }
 /**
- * Renderiza la tabla de homologaciones con los datos actuales
+ * Función para renderizar la tabla de homologaciones con mejor manejo de errores
  */
 function renderizarTablaHomologaciones() {
-    const tbody = document.getElementById('homologaciones-body');
+   const tbody = document.getElementById('homologaciones-body');
 
-    if (!tbody) {
-        console.error('No se encontró el elemento homologaciones-body');
-        return;
-    }
+   if (!tbody) {
+       console.error('No se encontró el elemento homologaciones-body');
+       return;
+   }
 
-    if (homologaciones.length === 0) {
-        tbody.innerHTML = `
-            <tr id="no-homologaciones">
-                <td colspan="6" class="text-center py-4">
-                    <i class="fas fa-info-circle text-muted mr-2"></i>
-                    No hay asignaturas homologadas
-                </td>
-            </tr>
-        `;
-        const totalCreditosElement = document.getElementById('total-creditos');
-        if (totalCreditosElement) {
-            totalCreditosElement.textContent = '0';
-        }
-        return;
-    }
+   // Verificar que homologaciones sea un array
+   if (!Array.isArray(homologaciones)) {
+       console.error('Error: homologaciones no es un array', homologaciones);
+       homologaciones = [];
+   }
 
-    tbody.innerHTML = '';
-    let totalCreditos = 0;
+   console.log('Renderizando tabla con', homologaciones.length, 'homologaciones');
 
-    homologaciones.forEach((h, index) => {
-        const row = document.createElement('tr');
-        totalCreditos += parseInt(h.creditos || 0);
+   if (homologaciones.length === 0) {
+       tbody.innerHTML = `
+           <tr id="no-homologaciones">
+               <td colspan="6" class="text-center py-4">
+                   <i class="fas fa-info-circle text-muted mr-2"></i>
+                   No hay asignaturas homologadas
+               </td>
+           </tr>
+       `;
+       const totalCreditosElement = document.getElementById('total-creditos');
+       if (totalCreditosElement) {
+           totalCreditosElement.textContent = '0';
+       }
+       return;
+   }
 
-        // Asegurar que la nota_destino esté en el rango válido
-        if (h.nota_destino) {
-            h.nota_destino = validarNota(h.nota_destino);
-        }
+   // Limpiar tabla existente para evitar duplicados
+   tbody.innerHTML = '';
+   let totalCreditos = 0;
 
-        row.innerHTML = `
-            <td>${h.asignatura_origen_nombre || 'Sin nombre'}</td>
-            <td>${h.asignatura_destino_nombre || 'Sin nombre'}</td>
-            <td>${h.nota_origen || '—'}</td>
-            <td>
-                <input type="number"
-                       class="form-control form-control-sm nota-input"
-                       value="${h.nota_destino || ''}"
-                       min="3.0" max="5.0" step="0.1"
-                       data-index="${index}">
-            </td>
-            <td>${h.creditos || '—'}</td>
-            <td class="text-center">
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary btn-sm btn-editar-homologacion"
-                            data-index="${index}" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm btn-eliminar-homologacion"
-                            data-index="${index}" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `;
+   homologaciones.forEach((h, index) => {
+       // Verificar que la homologación es un objeto válido
+       if (!h || typeof h !== 'object') {
+           console.warn('Homologación inválida en índice', index, h);
+           return;
+       }
 
-        tbody.appendChild(row);
-    });
+       const row = document.createElement('tr');
 
-    const totalCreditosElement = document.getElementById('total-creditos');
-    if (totalCreditosElement) {
-        totalCreditosElement.textContent = totalCreditos;
-    }
+       // Asegurar que tenemos valores predeterminados para evitar errores
+       const creditos = parseInt(h.creditos || 0);
+       totalCreditos += isNaN(creditos) ? 0 : creditos;
 
-    // Agregar evento para actualizar notas inline
-    document.querySelectorAll('.nota-input').forEach(input => {
-        // Establecer atributos min y max
-        input.min = 3.0;
-        input.max = 5.0;
+       // Asegurar que la nota_destino esté en el rango válido
+       if (h.nota_destino) {
+           h.nota_destino = validarNota(h.nota_destino);
+       } else {
+           h.nota_destino = '3.0'; // Valor por defecto
+       }
 
-        // Validar el valor actual
-        if (input.value) {
-            input.value = validarNota(input.value);
-        }
+       row.innerHTML = `
+           <td>${h.asignatura_origen_nombre || 'Sin nombre'}</td>
+           <td>${h.asignatura_destino_nombre || 'Sin nombre'}</td>
+           <td class="text-center">${h.nota_origen || '—'}</td>
+           <td>
+               <input type="number"
+                      class="form-control form-control-sm nota-input"
+                      value="${h.nota_destino}"
+                      min="3.0" max="5.0" step="0.1"
+                      data-index="${index}">
+           </td>
+           <td class="text-center">${h.creditos || '—'}</td>
+           <td class="text-center">
+               <div class="btn-group btn-group-sm">
+                   <button class="btn btn-outline-primary btn-sm btn-editar-homologacion"
+                           data-index="${index}" title="Editar">
+                       <i class="fas fa-edit"></i>
+                   </button>
+                   <button class="btn btn-outline-danger btn-sm btn-eliminar-homologacion"
+                           data-index="${index}" title="Eliminar">
+                       <i class="fas fa-trash"></i>
+                   </button>
+               </div>
+           </td>
+       `;
 
-        // Evento para validar durante la entrada
-        input.addEventListener('input', function () {
-            let valor = parseFloat(this.value);
-            if (!isNaN(valor)) {
-                // Solo aplicar restricciones si es un número válido
-                if (valor < 3.0) {
-                    this.value = 3.0;
-                } else if (valor > 5.0) {
-                    this.value = 5.0;
-                }
-            }
-        });
+       tbody.appendChild(row);
+   });
 
-        // Evento cuando cambia el valor (al perder el foco o cambio)
-        input.addEventListener('change', function () {
-            const index = this.dataset.index;
-            const notaValidada = validarNota(this.value);
-            this.value = notaValidada; // Actualizar el campo con el valor validado
-            homologaciones[index].nota_destino = notaValidada;
+   const totalCreditosElement = document.getElementById('total-creditos');
+   if (totalCreditosElement) {
+       totalCreditosElement.textContent = totalCreditos;
+   }
 
-            // Auto-guardar cuando se cambia una nota
-            guardarSilencioso();
-        });
+   // Agregar evento para actualizar notas inline
+   document.querySelectorAll('.nota-input').forEach(input => {
+       // Establecer atributos min y max
+       input.min = 3.0;
+       input.max = 5.0;
 
-        // Validar también cuando el usuario pierde el foco
-        input.addEventListener('blur', function () {
-            if (this.value === '' || isNaN(parseFloat(this.value))) {
-                this.value = 3.0;
-                const index = this.dataset.index;
-                homologaciones[index].nota_destino = 3.0;
-                guardarSilencioso();
-            }
-        });
-    });
+       // Validar el valor actual
+       if (input.value) {
+           input.value = validarNota(input.value);
+       }
+
+       // Evento para validar durante la entrada
+       input.addEventListener('input', function () {
+           let valor = parseFloat(this.value);
+           if (!isNaN(valor)) {
+               // Solo aplicar restricciones si es un número válido
+               if (valor < 3.0) {
+                   this.value = 3.0;
+               } else if (valor > 5.0) {
+                   this.value = 5.0;
+               }
+           }
+       });
+
+       // Evento cuando cambia el valor (al perder el foco o cambio)
+       input.addEventListener('change', function () {
+           const index = parseInt(this.dataset.index);
+           if (isNaN(index) || index < 0 || index >= homologaciones.length) return;
+
+           const notaValidada = validarNota(this.value);
+           this.value = notaValidada; // Actualizar el campo con el valor validado
+           homologaciones[index].nota_destino = notaValidada;
+
+           // Auto-guardar cuando se cambia una nota
+           guardarSilencioso();
+       });
+
+       // Validar también cuando el usuario pierde el foco
+       input.addEventListener('blur', function () {
+           if (this.value === '' || isNaN(parseFloat(this.value))) {
+               this.value = 3.0;
+               const index = parseInt(this.dataset.index);
+               if (!isNaN(index) && index >= 0 && index < homologaciones.length) {
+                   homologaciones[index].nota_destino = 3.0;
+                   guardarSilencioso();
+               }
+           }
+       });
+   });
+
+   // Actualizar el estado de la UI después de renderizar
+   actualizarEstadoUI();
 }
-
 // Inicializar validación para el campo nota-homologada
 function inicializarValidacionNotas() {
-    // Obtener el elemento input
-    const notaHomologadaInput = document.getElementById('nota-homologada');
+   // Obtener el elemento input
+   const notaHomologadaInput = document.getElementById('nota-homologada');
 
-    if (notaHomologadaInput) {
-        // Establecer los valores mínimo y máximo permitidos
-        notaHomologadaInput.min = 3.0;
-        notaHomologadaInput.max = 5.0;
+   if (notaHomologadaInput) {
+       // Establecer los valores mínimo y máximo permitidos
+       notaHomologadaInput.min = 3.0;
+       notaHomologadaInput.max = 5.0;
 
-        // Agregar validación cuando el usuario cambia el valor
-        notaHomologadaInput.addEventListener('input', function () {
-            let valor = parseFloat(this.value);
-            if (!isNaN(valor)) {
-                // Solo aplicar restricciones si es un número válido
-                if (valor < 3.0) {
-                    this.value = 3.0;
-                } else if (valor > 5.0) {
-                    this.value = 5.0;
+       // Agregar validación cuando el usuario cambia el valor
+       notaHomologadaInput.addEventListener('input', function () {
+           let valor = parseFloat(this.value);
+           if (!isNaN(valor)) {
+               // Solo aplicar restricciones si es un número válido
+               if (valor < 3.0) {
+                   this.value = 3.0;
+               } else if (valor > 5.0) {
+                   this.value = 5.0;
+               }
+           }
+       });
+
+       // Validar también cuando el usuario pierde el foco del campo
+       notaHomologadaInput.addEventListener('blur', function () {
+           if (this.value === '' || isNaN(parseFloat(this.value))) {
+               this.value = 3.0;
+           } else {
+               this.value = validarNota(this.value);
+           }
+       });
+   }
+}
+function actualizarNotasDesdeInputs() {
+   document.querySelectorAll('.nota-input').forEach(input => {
+       const index = parseInt(input.dataset.index);
+       if (isNaN(index) || index < 0 || index >= homologaciones.length) return;
+
+       // Obtener y validar el valor
+       let valor = input.value.trim();
+       if (valor === '') valor = '3.0'; // Valor por defecto
+
+       // Convertir a número y validar rango
+       let notaNumero = parseFloat(valor);
+       if (isNaN(notaNumero)) notaNumero = 3.0;
+       if (notaNumero < 3.0) notaNumero = 3.0;
+       if (notaNumero > 5.0) notaNumero = 5.0;
+
+       // Formatear con un decimal
+       const notaFormateada = notaNumero.toFixed(1);
+
+       // Actualizar tanto el input como el objeto
+       input.value = notaFormateada;
+       homologaciones[index].nota_destino = notaFormateada;
+   });
+}
+
+
+/**
+ * Función para limpiar las asignaturas destino de la homologación actual
+ * Mantiene las asignaturas origen en la API pero elimina destinos, notas y comentarios
+ */
+function limpiarAsignaturasDestino() {
+    // Verificar que tenemos datos para limpiar
+    if (!homologaciones || homologaciones.length === 0) {
+        mostrarAlerta('No hay asignaturas para limpiar', 'info');
+        return Promise.resolve(false);
+    }
+
+    // Mostrar confirmación con mensaje claro
+    if (!confirm('¿Está seguro de eliminar todas las homologaciones de destino? Esta acción no se puede deshacer.')) {
+        return Promise.resolve(false);
+    }
+
+    // Mostrar indicador de carga
+    const btnLimpiar = document.getElementById('btn-limpiar-destino');
+    const textoOriginal = btnLimpiar ? btnLimpiar.innerHTML : '';
+    if (btnLimpiar) {
+        btnLimpiar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Limpiando...';
+        btnLimpiar.disabled = true;
+    }
+
+    // Guardar solo las asignaturas origen para mantenerlas
+    const asignaturasOrigenOriginal = [];
+
+    // Extraer solo las asignaturas origen antes de vaciar el array de homologaciones
+    if (Array.isArray(homologaciones)) {
+        homologaciones.forEach(h => {
+            if (h && h.asignatura_origen_id && h.asignatura_origen_nombre) {
+                asignaturasOrigenOriginal.push({
+                    id: h.asignatura_origen_id,
+                    nombre: h.asignatura_origen_nombre,
+                    nota: h.nota_origen
+                });
+            }
+        });
+    }
+
+    // Vaciar el array de homologaciones local
+    homologaciones = [];
+
+    // Actualizar la visualización inmediatamente
+    renderizarTablaHomologaciones();
+
+    // Si no tenemos ID de homologación, solo limpiar localmente
+    if (!homologacionId || !solicitudId) {
+        if (btnLimpiar) {
+            btnLimpiar.innerHTML = textoOriginal;
+            btnLimpiar.disabled = false;
+        }
+
+        // Guardar el array vacío en localStorage
+        if (solicitudId) {
+            try {
+                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify([]));
+                console.log('Homologaciones vacías guardadas en localStorage');
+            } catch (e) {
+                console.error('Error al guardar en localStorage:', e);
+            }
+        }
+
+        mostrarAlerta('Homologaciones de destino eliminadas. Recuerda guardar para sincronizar con el servidor.', 'warning');
+        return Promise.resolve(true);
+    }
+
+    // Normalizar el ID para la API
+    const apiHomologacionId = normalizarHomologacionId(homologacionId);
+
+    // Comprobar si el ID es válido
+    if (!apiHomologacionId) {
+        console.error('ID de homologación no válido después de normalizar:', homologacionId);
+        if (btnLimpiar) {
+            btnLimpiar.innerHTML = textoOriginal;
+            btnLimpiar.disabled = false;
+        }
+        mostrarAlerta('Error: ID de homologación no válido.', 'danger');
+        return Promise.reject('ID de homologación no válido');
+    }
+
+    console.log('ID de homologación normalizado:', apiHomologacionId);
+    console.log('Asignaturas origen preservadas:', asignaturasOrigenOriginal);
+
+    // Preparar los datos para enviar a la API
+    // IMPORTANTE: La API espera un array de homologaciones donde solo se conservan los datos de origen
+    const homologacionesModificadas = asignaturasOrigenOriginal.map(origen => {
+        return {
+            asignatura_origen_id: origen.id,
+            nota_origen: origen.nota,
+            // Campos destino que serán nulos
+            asignatura_destino_id: null,
+            nota_destino: null,
+            creditos: null,
+            comentarios: null
+        };
+    });
+
+    const datosHomologacion = {
+        homologaciones: homologacionesModificadas // El backend espera exactamente este campo
+    };
+
+    console.log('Enviando solicitud para eliminar homologaciones de destino:', datosHomologacion);
+
+    // Verificar la URL antes de enviar
+    const url = `${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`;
+    console.log('URL para actualizar homologaciones:', url);
+
+    return fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify(datosHomologacion)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Respuesta de error completa:', text);
+                throw new Error(`Error del servidor: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta del servidor tras eliminar homologaciones de destino:', data);
+
+        // Verificar la respuesta del servidor
+        if (data.datos && Array.isArray(data.datos.homologaciones)) {
+            // Actualizar homologaciones con lo que devuelve el servidor
+            homologaciones = data.datos.homologaciones;
+            renderizarTablaHomologaciones();
+
+            // Guardar en localStorage
+            if (solicitudId) {
+                try {
+                    localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologaciones));
+                    console.log('Homologaciones actualizadas guardadas en localStorage');
+                } catch (e) {
+                    console.error('Error al guardar en localStorage:', e);
                 }
             }
-        });
 
-        // Validar también cuando el usuario pierde el foco del campo
-        notaHomologadaInput.addEventListener('blur', function () {
-            if (this.value === '' || isNaN(parseFloat(this.value))) {
-                this.value = 3.0;
-            } else {
-                this.value = validarNota(this.value);
-            }
-        });
-    }
-}
+            mostrarAlerta('Homologaciones de destino eliminadas correctamente', 'success');
+        } else {
+            mostrarAlerta('Homologaciones de destino eliminadas. La respuesta del servidor no incluyó los datos actualizados.', 'info');
 
-// Resto del código sin cambios
-/**
- * Carga el ID de homologación desde el input hidden o la URL
- * @returns {string|null} El ID de homologación o null si no se encuentra
- */
-function cargarHomologacionId() {
-    // Intenta obtener el ID desde el elemento hidden en el DOM
-    let id = document.getElementById('homologacion_id')?.value;
+            // Mantener el array vacío localmente
+            homologaciones = [];
+            renderizarTablaHomologaciones();
 
-    // Si no existe en el DOM, intenta obtenerlo de una variable global
-    if (!id && typeof homologacionId !== 'undefined') {
-        id = homologacionId;
-    }
-
-    // Si aún no se encuentra, intenta extraerlo de la URL
-    if (!id) {
-        const urlParams = new URLSearchParams(window.location.search);
-        id = urlParams.get('homologacion_id') || urlParams.get('id');
-
-        // Buscar en la ruta de la URL si tiene formato /homologacion/{id}
-        if (!id) {
-            const pathParts = window.location.pathname.split('/');
-            const homIndex = pathParts.findIndex(part => part === 'homologacion' || part === 'homologaciones');
-            if (homIndex !== -1 && pathParts[homIndex + 1]) {
-                id = pathParts[homIndex + 1];
+            if (solicitudId) {
+                try {
+                    localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify([]));
+                    console.log('Array vacío guardado en localStorage después de la eliminación');
+                } catch (e) {
+                    console.error('Error al guardar en localStorage:', e);
+                }
             }
         }
-    }
 
-    // Normalizar el ID: eliminar prefijo HOM-YYYY- si existe
-    if (id && id.includes('HOM-')) {
-        // Extraer solo el número después del último guión
+        return true;
+    })
+    .catch(error => {
+        console.error('Error al eliminar homologaciones de destino:', error);
+        mostrarAlerta(`Error: ${error.message}. Las homologaciones se han eliminado localmente.`, 'warning');
+
+        // Mantener el array vacío localmente a pesar del error
+        homologaciones = [];
+        renderizarTablaHomologaciones();
+
+        if (solicitudId) {
+            try {
+                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify([]));
+                console.log('Array vacío guardado en localStorage después del error');
+            } catch (e) {
+                console.error('Error al guardar en localStorage:', e);
+            }
+        }
+
+        return false;
+    })
+    .finally(() => {
+        // Restaurar botón
+        if (btnLimpiar) {
+            btnLimpiar.innerHTML = textoOriginal;
+            btnLimpiar.disabled = false;
+        }
+    });
+}
+
+/**
+ * Normaliza el ID de homologación para llamadas a la API
+ * Corregido para manejar correctamente formatos de ID
+ */
+function normalizarHomologacionId(id) {
+    if (!id) return null;
+
+    // Si tiene formato HOM-XXXX, extraer solo la parte numérica
+    if (typeof id === 'string' && id.includes('HOM-')) {
         const parts = id.split('-');
-        if (parts.length > 0) {
-            id = parts[parts.length - 1]; // Obtener la última parte (el número)
+        if (parts.length > 1) {
+            return parts[parts.length - 1];
         }
     }
 
-    console.log('ID de homologación cargado y normalizado:', id);
-    return id || null;
+    // Si el ID es numérico pero tiene ceros al inicio (como '0001'), convertirlo a número y luego a string
+    if (typeof id === 'string' && /^0+\d+$/.test(id)) {
+        return parseInt(id, 10).toString();
+    }
+
+    return id;
 }
-
-// Llamar a inicializarValidacionNotas cuando el DOM esté cargado
-document.addEventListener('DOMContentLoaded', inicializarValidacionNotas);
-
 /**
- * Guarda las homologaciones en el servidor y localStorage para asegurar persistencia
- * @param {boolean} confirmado Si es una confirmación final de homologación
- * @param {function} callback Función a ejecutar al terminar
- * @returns {Promise} Promesa que se resuelve cuando termina la operación
+ * Función mejorada para verificar si los cambios fueron aplicados correctamente
  */
-function guardarHomologaciones(confirmado = false, callback = () => { }) {
+function verificarCambiosAplicados() {
+    if (!homologacionId || !solicitudId) return Promise.resolve(false);
+
+    const apiHomologacionId = normalizarHomologacionId(homologacionId);
+
+    console.log('Verificando cambios aplicados para homologación:', apiHomologacionId);
+
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al verificar cambios: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Estado actual en servidor:', data);
+
+        if (data.datos && Array.isArray(data.datos.homologaciones)) {
+            const serverState = data.datos.homologaciones;
+
+            // Verificar si alguna asignatura destino sigue teniendo valores
+            const destinosNoLimpios = serverState.filter(h => h.asignatura_destino_id !== null);
+
+            if (destinosNoLimpios.length > 0) {
+                console.warn('¡Atención! Algunas asignaturas destino no fueron eliminadas:', destinosNoLimpios);
+
+                // Intentar corregir la discrepancia
+                if (confirm('Se detectaron inconsistencias en la eliminación. ¿Desea intentar sincronizar nuevamente?')) {
+                    // Forzar una nueva sincronización
+                    return limpiarAsignaturasDestino();
+                }
+            } else {
+                console.log('Verificación exitosa: Todas las asignaturas destino fueron eliminadas correctamente');
+            }
+        }
+        return true;
+    })
+    .catch(error => {
+        console.error('Error al verificar cambios:', error);
+        return false;
+    });
+}
+/**
+ * Función para limpiar homologaciones con mejor manejo de localStorage
+ */
+function limpiarHomologaciones() {
+    if (!confirm('¿Está seguro de eliminar todas las homologaciones? Esta acción no se puede deshacer.')) {
+        return Promise.resolve(false);
+    }
+
+    // Mostrar indicador de carga
+    const btnLimpiar = document.getElementById('btn-limpiar-homologaciones');
+    const textoOriginal = btnLimpiar ? btnLimpiar.innerHTML : '';
+
+    if (btnLimpiar) {
+        btnLimpiar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Limpiando...';
+        btnLimpiar.disabled = true;
+    }
+
+    // Limpiar array de homologaciones
+    homologaciones = [];
+    renderizarTablaHomologaciones();
+
+    // Limpiar en localStorage
+    try {
+        if (solicitudId) {
+            // Guardar array vacío en localStorage
+            localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify([]));
+        }
+    } catch (e) {
+        console.error('Error al limpiar localStorage:', e);
+    }
+
+    // Si no hay ID de homologación, no necesitamos contactar al servidor
+    if (!homologacionId) {
+        if (btnLimpiar) {
+            btnLimpiar.innerHTML = textoOriginal;
+            btnLimpiar.disabled = false;
+        }
+        mostrarAlerta('Todas las homologaciones han sido eliminadas localmente.', 'success');
+        return Promise.resolve(true);
+    }
+
+    // Normalizar ID para la API
+    const apiHomologacionId = normalizarHomologacionId(homologacionId);
+
+    // Llamar a la API para eliminar en el servidor
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error del servidor: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Homologaciones eliminadas en el servidor:', data);
+        mostrarAlerta('Todas las homologaciones han sido eliminadas correctamente', 'success');
+
+        // Opcionalmente, limpiar también el homologacionId
+        homologacionId = null;
+
+        // Actualizar elemento en el DOM si existe
+        const inputHomologacionId = document.getElementById('homologacion_id');
+        if (inputHomologacionId) {
+            inputHomologacionId.value = '';
+        }
+
+        // Limpiar en localStorage
+        try {
+            if (solicitudId) {
+                localStorage.removeItem(`homologacionId_${solicitudId}`);
+            }
+        } catch (e) {
+            console.error('Error al limpiar homologacionId de localStorage:', e);
+        }
+
+        return true;
+    })
+    .catch(error => {
+        console.error('Error al eliminar homologaciones en el servidor:', error);
+        mostrarAlerta(`Error al eliminar en el servidor: ${error.message}. Las homologaciones se han eliminado localmente.`, 'warning');
+        return false;
+    })
+    .finally(() => {
+        // Restaurar botón
+        if (btnLimpiar) {
+            btnLimpiar.innerHTML = textoOriginal;
+            btnLimpiar.disabled = false;
+        }
+    });
+}
+/**
+ * Versión corregida de guardarHomologaciones que asegura la correcta sincronización con localStorage
+ */
+function guardarHomologaciones(confirmado = false, callback = () => {}) {
     console.log('Iniciando guardarHomologaciones...');
 
-    // Asegurarnos de tener IDs necesarios
-    homologacionId = homologacionId || cargarHomologacionId();
-    solicitudId = solicitudId || extraerSolicitudId();
+    // Asegurarnos de tener IDs necesarios y que sean válidos
+    if (!solicitudId) {
+        solicitudId = extraerSolicitudId();
+    }
+
+    if (!homologacionId) {
+        homologacionId = cargarHomologacionId();
+    }
 
     console.log('IDs para guardar:', {
         homologacionId: homologacionId,
@@ -932,13 +1590,6 @@ function guardarHomologaciones(confirmado = false, callback = () => { }) {
         return Promise.reject(errores);
     }
 
-    // Si no hay homologaciones, no hay nada que guardar
-    if (homologaciones.length === 0) {
-        mostrarAlerta('No hay homologaciones para guardar', 'warning');
-        if (callback) callback(false);
-        return Promise.resolve(false);
-    }
-
     // Verificar ID de solicitud
     if (!solicitudId) {
         mostrarAlerta('Error: No se encontró el ID de solicitud', 'danger');
@@ -947,60 +1598,98 @@ function guardarHomologaciones(confirmado = false, callback = () => { }) {
     }
 
     // Mostrar indicador de carga
-    const btnGuardar = document.getElementById('btn-guardar-homologaciones');
+    const btnGuardar = document.getElementById('btn-guardar-homologaciones') || document.getElementById('btn-guardar');
+    if (!btnGuardar) {
+        console.error('No se encontró el botón de guardar');
+        if (callback) callback(false);
+        return Promise.reject('No se encontró el botón de guardar');
+    }
+
     const textoOriginal = btnGuardar.innerHTML;
     btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
     btnGuardar.disabled = true;
 
-    // Guardar en localStorage como respaldo, incluso antes de intentar el servidor
+    // CRUCIAL: Guardar en localStorage de manera confiable, con manejo de errores
     try {
-        localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologaciones));
-        localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId || '');
-        localStorage.setItem('ultimaSolicitudId', solicitudId);
-        console.log('Datos guardados en localStorage como respaldo');
+        // Verificar que tenemos datos válidos antes de guardar
+        if (Array.isArray(homologaciones)) {
+            console.log('Guardando en localStorage:', homologaciones.length, 'homologaciones');
+
+            // Crear una copia limpia de las homologaciones para evitar problemas de serialización
+            const homologacionesLimpio = homologaciones.map(h => ({
+                asignatura_origen_id: h.asignatura_origen_id,
+                asignatura_destino_id: h.asignatura_destino_id,
+                asignatura_origen_nombre: h.asignatura_origen_nombre,
+                asignatura_destino_nombre: h.asignatura_destino_nombre,
+                nota_origen: h.nota_origen,
+                nota_destino: h.nota_destino,
+                creditos: h.creditos,
+                comentarios: h.comentarios || ''
+            }));
+
+            localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologacionesLimpio));
+
+            if (homologacionId) {
+                localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId);
+            }
+
+            localStorage.setItem('ultimaSolicitudId', solicitudId);
+
+            // Verificar que se haya guardado correctamente
+            const guardado = localStorage.getItem(`homologaciones_${solicitudId}`);
+            if (!guardado) {
+                console.error('No se pudo guardar en localStorage - verificación fallida');
+            }
+        } else {
+            console.error('Error: homologaciones no es un array válido', homologaciones);
+        }
     } catch (e) {
-        console.warn('Error al guardar en localStorage:', e);
+        console.error('Error crítico al guardar en localStorage:', e);
+        mostrarAlerta('Error al guardar datos localmente. El navegador puede estar en modo privado o sin espacio.', 'warning');
     }
 
-    // Preparar datos para enviar al servidor
+    // Si no hay homologaciones y tenemos un ID existente, confirmar eliminar todo
+    if (homologaciones.length === 0 && homologacionId && !confirmado) {
+        // Restaurar botón
+        btnGuardar.innerHTML = textoOriginal;
+        btnGuardar.disabled = false;
+
+        if (confirm('No hay asignaturas homologadas. ¿Deseas eliminar todas las homologaciones existentes?')) {
+            return limpiarHomologaciones();
+        } else {
+            // El usuario canceló la operación
+            if (callback) callback(false);
+            return Promise.reject('Operación cancelada por el usuario');
+        }
+    }
+
+    // Normalizar el ID para la API
+    const apiHomologacionId = normalizarHomologacionId(homologacionId);
+
+    // Preparar datos para enviar al servidor - asegurarse de que todas las propiedades estén correctamente formateadas
     const datosHomologacion = {
         solicitud_id: solicitudId,
         homologacion_id: homologacionId || null,
         asignaturas_origen: homologaciones.map(h => h.asignatura_origen_id),
-        asignaturas_destino: homologaciones.map(h => h.asignatura_destino_id),
-        notas_destino: homologaciones.map(h => h.nota_destino),
+        asignaturas_destino: homologaciones.map(h => h.asignatura_destino_id || null),
+        notas_destino: homologaciones.map(h => h.nota_destino || null),
         comentarios_asignaturas: homologaciones.map(h => h.comentarios || ''),
         comentarios: document.getElementById('comentarios_generales')?.value || '',
-        homologaciones: homologaciones.map(h => ({
-            asignatura_origen_id: h.asignatura_origen_id,
-            asignatura_destino_id: h.asignatura_destino_id,
-            nota_destino: h.nota_destino,
-            nota_origen: h.nota_origen,
-            creditos: h.creditos,
-            comentarios: h.comentarios || '',
-            solicitud_id: solicitudId
-        })),
-        confirmado: confirmado
+        homologaciones: homologaciones,
+        confirmado: confirmado === true
     };
 
     console.log('Datos a enviar al servidor:', datosHomologacion);
+    console.log('Estado de asignaturas destino:', homologaciones.map(h => ({
+        origen: h.asignatura_origen_id,
+        destino: h.asignatura_destino_id
+    })));
 
     // Determinar URL y método basado en si tenemos homologacionId
     const esActualizacion = !!homologacionId;
-
-    // Normalizar el ID para la API: eliminar prefijo si existe
-    let apiHomologacionId = homologacionId;
-    if (apiHomologacionId && apiHomologacionId.includes('HOM-')) {
-        const parts = apiHomologacionId.split('-');
-        if (parts.length > 0) {
-            apiHomologacionId = parts[parts.length - 1];
-        }
-    }
-
     const url = esActualizacion
         ? `${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`
         : `${API_BASE_URL}/homologacion-asignaturas`;
-
     const metodo = esActualizacion ? 'PUT' : 'POST';
 
     console.log(`Enviando ${metodo} a ${url}`);
@@ -1015,142 +1704,560 @@ function guardarHomologaciones(confirmado = false, callback = () => { }) {
         },
         body: JSON.stringify(datosHomologacion)
     })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Error del servidor: ${response.status} - ${text}`);
-                });
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error del servidor: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta del servidor:', data);
+
+        // Verificar específicamente si las asignaturas destino han sido procesadas correctamente
+        if (data.datos && Array.isArray(data.datos.homologaciones)) {
+            console.log('Verificando asignaturas destino recibidas del servidor:',
+                data.datos.homologaciones.map(h => ({
+                    origen: h.asignatura_origen_id,
+                    destino: h.asignatura_destino_id
+                }))
+            );
+
+            // Actualizar con los datos del servidor para garantizar consistencia
+            homologaciones = data.datos.homologaciones;
+            renderizarTablaHomologaciones();
+
+            // Actualizar en localStorage con los datos más recientes del servidor
+            try {
+                const homologacionesLimpio = homologaciones.map(h => ({
+                    asignatura_origen_id: h.asignatura_origen_id,
+                    asignatura_destino_id: h.asignatura_destino_id,
+                    asignatura_origen_nombre: h.asignatura_origen_nombre,
+                    asignatura_destino_nombre: h.asignatura_destino_nombre,
+                    nota_origen: h.nota_origen,
+                    nota_destino: h.nota_destino,
+                    creditos: h.creditos,
+                    comentarios: h.comentarios || ''
+                }));
+
+                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologacionesLimpio));
+            } catch (e) {
+                console.error('Error al actualizar localStorage después de servidor:', e);
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Respuesta del servidor:', data);
+        }
 
-            // Actualizar el ID de homologación si es una nueva
-            if (data.datos && data.datos.id) {
-                homologacionId = data.datos.id;
-
-                // Actualizar el campo oculto
-                const inputHomologacionId = document.getElementById('homologacion_id');
-                if (inputHomologacionId) {
-                    inputHomologacionId.value = homologacionId;
-                } else {
-                    // Crear el campo si no existe
-                    const hiddenField = document.createElement('input');
-                    hiddenField.type = 'hidden';
-                    hiddenField.id = 'homologacion_id';
-                    hiddenField.value = homologacionId;
-                    document.body.appendChild(hiddenField);
-                }
-
-                // Actualizar también en localStorage
+        // Actualizar el ID de homologación si es una nueva
+        if (data.datos && data.datos.id) {
+            homologacionId = data.datos.id;
+            try {
                 localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId);
+            } catch (e) {
+                console.error('Error al guardar homologacionId en localStorage:', e);
             }
 
-            // Si recibimos homologaciones actualizadas, actualizar nuestro array
-            if (data.datos && Array.isArray(data.datos.homologaciones)) {
-                homologaciones = data.datos.homologaciones;
-                renderizarTablaHomologaciones();
-
-                // Actualizar en localStorage
-                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologaciones));
+            // Actualizar el campo oculto
+            const inputHomologacionId = document.getElementById('homologacion_id');
+            if (inputHomologacionId) {
+                inputHomologacionId.value = homologacionId;
+            } else {
+                // Crear el campo si no existe
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.id = 'homologacion_id';
+                hiddenField.value = homologacionId;
+                document.body.appendChild(hiddenField);
             }
+        }
 
-            // mostrarAlerta(data.message || 'Homologaciones guardadas exitosamente', 'success');
-            actualizarEstadoUI();
+        // Verificar si los cambios se aplicaron correctamente
+        verificarCambiosAplicados();
 
-            if (callback) callback(true);
-            return data;
-        })
-        .catch(error => {
-            console.error('Error al guardar homologaciones:', error);
-            mostrarAlerta(`Error al guardar: ${error.message}. Los datos se han guardado localmente.`, 'warning');
+        actualizarEstadoUI();
+        mostrarAlerta('Homologaciones guardadas correctamente', 'success');
 
-            if (callback) callback(false);
-        })
-        .finally(() => {
-            // Restaurar botón
+        if (callback) callback(true);
+        return data;
+    })
+    .catch(error => {
+        console.error('Error al guardar homologaciones:', error);
+        mostrarAlerta(`Error al guardar: ${error.message}. Los datos se han guardado localmente.`, 'warning');
+
+        if (callback) callback(false);
+        return null;
+    })
+    .finally(() => {
+        // Restaurar botón
+        if (btnGuardar) {
             btnGuardar.innerHTML = textoOriginal;
             btnGuardar.disabled = false;
-        });
-}
-
-// Función auxiliar para verificar los datos antes de enviar
-function verificarDatosHomologacion() {
-    console.group('Verificación de Datos de Homologación');
-    console.log('solicitudId:', solicitudId);
-    console.log('homologacionId:', homologacionId);
-    console.log('Total de homologaciones:', homologaciones.length);
-
-    homologaciones.forEach((h, index) => {
-        console.log(`Homologación ${index}:`, {
-            asignatura_origen_id: h.asignatura_origen_id,
-            asignatura_destino_id: h.asignatura_destino_id,
-            nota_destino: h.nota_destino,
-            comentarios: h.comentarios
-        });
+        }
     });
-    console.groupEnd();
 }
 /**
- * Valida los datos de homologación antes de guardar
- * @returns {Array} Lista de errores encontrados
+ * Función para agregar un evento de cierre de ventana que guarde los datos
  */
-function validarDatosHomologacion() {
-    let errores = [];
+function inicializarGuardadoAlCerrar() {
+    window.addEventListener('beforeunload', function(e) {
+        // Guardar datos antes de cerrar/recargar la página
+        if (solicitudId && Array.isArray(homologaciones)) {
+            try {
+                console.log('Guardando datos antes de cerrar/recargar la página...');
 
-    // Validar IDs necesarios
-    if (!solicitudId) {
-        errores.push('No se encontró el ID de solicitud');
-    }
+                // Crear una copia limpia para localStorage
+                const homologacionesLimpio = homologaciones.map(h => ({
+                    asignatura_origen_id: h.asignatura_origen_id,
+                    asignatura_destino_id: h.asignatura_destino_id,
+                    asignatura_origen_nombre: h.asignatura_origen_nombre,
+                    asignatura_destino_nombre: h.asignatura_destino_nombre,
+                    nota_origen: h.nota_origen,
+                    nota_destino: h.nota_destino,
+                    creditos: h.creditos,
+                    comentarios: h.comentarios || ''
+                }));
 
-    // Validar contenido de homologaciones
-    homologaciones.forEach((h, index) => {
-        // Validar campos obligatorios
-        if (!h.asignatura_origen_id) {
-            errores.push(`Homologación ${index + 1}: Falta asignatura origen`);
-        }
+                localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologacionesLimpio));
 
-        if (!h.asignatura_destino_id) {
-            errores.push(`Homologación ${index + 1}: Falta asignatura destino`);
-        }
+                if (homologacionId) {
+                    localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId);
+                }
 
-        // Validar nota destino
-        if (h.nota_destino === undefined || h.nota_destino === null || h.nota_destino === '') {
-            // Si no hay nota, asignar valor por defecto
-            h.nota_destino = '3.0';
-        } else {
-            // Validar que la nota sea un número en el rango permitido
-            const nota = parseFloat(h.nota_destino);
-            if (isNaN(nota)) {
-                h.nota_destino = '3.0';
-            } else if (nota < 3.0) {
-                h.nota_destino = '3.0';
-            } else if (nota > 5.0) {
-                h.nota_destino = '5.0';
-            } else {
-                // Formato con un decimal
-                h.nota_destino = nota.toFixed(1);
+                localStorage.setItem('ultimaSolicitudId', solicitudId);
+
+                // Verificar que se guardó correctamente
+                const verificacion = localStorage.getItem(`homologaciones_${solicitudId}`);
+                if (!verificacion) {
+                    console.error('Fallo en la verificación del guardado al cerrar');
+                }
+            } catch (error) {
+                console.error('Error al guardar datos antes de cerrar:', error);
             }
         }
     });
+}
+/**
+ * Versión corregida de guardarSilencioso con mejor manejo de datos locales
+ */
+function guardarSilencioso() {
+    // Solo sincronizar si tenemos los IDs necesarios
+    if (!solicitudId) {
+        solicitudId = extraerSolicitudId();
+        if (!solicitudId) {
+            console.warn('No se pudo determinar el ID de solicitud para guardado silencioso');
+            return;
+        }
+    }
 
-    return errores;
+    console.log('Sincronizando cambios silenciosamente...');
+
+    // Actualizar notas desde los inputs
+    actualizarNotasDesdeInputs();
+
+    // Actualizar UI para reflejar los cambios actuales
+    renderizarTablaHomologaciones();
+
+    // CRÍTICO: Guardar en localStorage siempre, independientemente del ID de homologación
+    try {
+        // Verificar que homologaciones sea un array válido
+        if (!Array.isArray(homologaciones)) {
+            console.error('Error en guardarSilencioso: homologaciones no es un array', homologaciones);
+            homologaciones = [];
+            return;
+        }
+
+        console.log('Guardado silencioso en localStorage:', homologaciones.length, 'homologaciones');
+
+        // Crear una copia limpia para evitar problemas de circular references
+        const homologacionesLimpio = homologaciones.map(h => ({
+            asignatura_origen_id: h.asignatura_origen_id,
+            asignatura_destino_id: h.asignatura_destino_id,
+            asignatura_origen_nombre: h.asignatura_origen_nombre,
+            asignatura_destino_nombre: h.asignatura_destino_nombre,
+            nota_origen: h.nota_origen,
+            nota_destino: h.nota_destino,
+            creditos: h.creditos,
+            comentarios: h.comentarios || ''
+        }));
+
+        localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologacionesLimpio));
+
+        if (homologacionId) {
+            localStorage.setItem(`homologacionId_${solicitudId}`, homologacionId);
+        }
+
+        localStorage.setItem('ultimaSolicitudId', solicitudId);
+
+        // Verificar almacenamiento
+        const guardado = localStorage.getItem(`homologaciones_${solicitudId}`);
+        if (!guardado) {
+            console.error('Verificación de guardado silencioso fallida');
+        }
+    } catch (e) {
+        console.error('Error crítico al guardar silenciosamente en localStorage:', e);
+    }
+
+    // Si no tenemos ID de homologación, no podemos sincronizar con el servidor
+    if (!homologacionId) {
+        console.log('No hay ID de homologación, guardado sólo local');
+        return;
+    }
+
+    // Preparar datos para enviar al servidor
+    const datosHomologacion = {
+        solicitud_id: solicitudId,
+        homologacion_id: homologacionId,
+        // Incluir todos los campos necesarios
+        asignaturas_origen: homologaciones.map(h => h.asignatura_origen_id),
+        asignaturas_destino: homologaciones.map(h => h.asignatura_destino_id || null),
+        notas_destino: homologaciones.map(h => h.nota_destino || null),
+        comentarios_asignaturas: homologaciones.map(h => h.comentarios || ''),
+        homologaciones: homologaciones,
+        confirmado: false
+    };
+
+    // Normalizar el ID para la API
+    let apiHomologacionId = normalizarHomologacionId(homologacionId);
+
+    // Enviar al servidor sin bloquear la interfaz
+    fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify(datosHomologacion)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`Error ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Sincronización silenciosa completada:', data);
+        // No actualizar homologaciones desde la respuesta para evitar sobreescribir cambios locales
+    })
+    .catch(error => {
+        console.warn('Error en sincronización silenciosa:', error);
+    });
+}
+function sincronizarConServidor() {
+   if (!homologacionId || !solicitudId) return Promise.resolve(false);
+
+   console.log('Sincronizando con el servidor...');
+
+   return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`)
+       .then(response => {
+           if (!response.ok) throw new Error(`Error ${response.status}`);
+           return response.json();
+       })
+       .then(data => {
+           console.log('Datos del servidor recibidos:', data);
+
+           if (data.datos && Array.isArray(data.datos.homologaciones)) {
+               // Comparar homologaciones del servidor con las locales
+               const serverHomologaciones = data.datos.homologaciones;
+
+               // Si las homologaciones locales están vacías pero el servidor tiene datos,
+               // usar los datos del servidor
+               if (homologaciones.length === 0 && serverHomologaciones.length > 0) {
+                   homologaciones = serverHomologaciones;
+                   renderizarTablaHomologaciones();
+
+                   // Actualizar localStorage
+                   try {
+                       localStorage.setItem(`homologaciones_${solicitudId}`, JSON.stringify(homologaciones));
+                   } catch (e) {
+                       console.warn('Error al guardar en localStorage:', e);
+                   }
+
+                   console.log('Homologaciones restauradas desde el servidor');
+                   return true;
+               }
+               // Si las homologaciones locales tienen datos pero el servidor está vacío,
+               // sincronizar los datos locales al servidor
+               else if (homologaciones.length > 0 && serverHomologaciones.length === 0) {
+                   guardarSilencioso();
+                   return true;
+               }
+           }
+
+           return false;
+       })
+       .catch(error => {
+           console.warn('Error al sincronizar con el servidor:', error);
+           return false;
+       });
+}
+// Función auxiliar para verificar los datos antes de enviar
+function verificarDatosHomologacion() {
+   console.group('Verificación de Datos de Homologación');
+   console.log('solicitudId:', solicitudId);
+   console.log('homologacionId:', homologacionId);
+   console.log('Total de homologaciones:', homologaciones.length);
+
+   homologaciones.forEach((h, index) => {
+       console.log(`Homologación ${index}:`, {
+           asignatura_origen_id: h.asignatura_origen_id,
+           asignatura_destino_id: h.asignatura_destino_id,
+           nota_destino: h.nota_destino,
+           comentarios: h.comentarios
+       });
+   });
+   console.groupEnd();
 }
 
-// Variables globales para almacenar las firmas
+/**
+* Valida los datos de homologación antes de guardar
+* @returns {Array} Lista de errores encontrados
+*/
+function validarDatosHomologacion() {
+   let errores = [];
+
+   // Validar IDs necesarios
+   if (!solicitudId) {
+       errores.push('No se encontró el ID de solicitud');
+   }
+
+   // Validar contenido de homologaciones
+   homologaciones.forEach((h, index) => {
+       // Validar campos obligatorios
+       if (!h.asignatura_origen_id) {
+           errores.push(`Homologación ${index + 1}: Falta asignatura origen`);
+       }
+// Validar campos obligatorios
+       if (!h.asignatura_origen_id) {
+           errores.push(`Homologación ${index + 1}: Falta asignatura origen`);
+       }
+
+       if (!h.asignatura_destino_id) {
+           errores.push(`Homologación ${index + 1}: Falta asignatura destino`);
+       }
+
+       // Validar nota destino
+       if (h.nota_destino === undefined || h.nota_destino === null || h.nota_destino === '') {
+           // Si no hay nota, asignar valor por defecto
+           h.nota_destino = '3.0';
+       } else {
+           // Validar que la nota sea un número en el rango permitido
+           const nota = parseFloat(h.nota_destino);
+           if (isNaN(nota)) {
+               h.nota_destino = '3.0';
+           } else if (nota < 3.0) {
+               h.nota_destino = '3.0';
+           } else if (nota > 5.0) {
+               h.nota_destino = '5.0';
+           } else {
+               // Formato con un decimal
+               h.nota_destino = nota.toFixed(1);
+           }
+       }
+   });
+
+   return errores;
+}
+
+
+
+
+
+
+
+
+// Variables globales para almacenar los datos de las firmas
 window.firmaCoordinadorData = null;
 window.firmaVicerrectorData = null;
 
-// Función para recuperar firma del coordinador desde localStorage si está disponible
+// Función para cargar firma del coordinador desde URL o localStorage (fallback)
 function cargarFirmaCoordinador() {
     try {
-        const firmaGuardada = localStorage.getItem('firmaCoordinadorData');
-        if (firmaGuardada) {
-            window.firmaCoordinadorData = firmaGuardada;
+        console.log("Intentando cargar firma del coordinador desde URL o localStorage");
+
+        // NUEVO: Primero intentamos cargar desde parámetros URL
+        const params = new URLSearchParams(window.location.search);
+        const firmaUrl = params.get('firma');
+
+        let firmaData = null;
+
+        if (firmaUrl) {
+            console.log("Firma del coordinador encontrada en URL");
+            // Decodificar la firma desde la URL
+            try {
+                firmaData = decodeURIComponent(firmaUrl);
+                console.log("Firma decodificada correctamente desde URL");
+            } catch (error) {
+                console.error("Error al decodificar firma desde URL:", error);
+            }
+        }
+
+        // Si no hay firma en URL, intentamos localStorage como fallback
+        if (!firmaData) {
+            console.log("Intentando cargar desde localStorage como fallback");
+            firmaData = localStorage.getItem('firmaCoordinadorData');
+            if (firmaData) {
+                console.log("Firma del coordinador encontrada en localStorage");
+            }
+        }
+
+        if (firmaData) {
+            window.firmaCoordinadorData = firmaData;
 
             // Actualizar vista previa si estamos en la vista del coordinador
             const firmaPreview = document.getElementById('firma-preview');
+            if (firmaPreview) {
+                firmaPreview.innerHTML = '';
+
+                const img = document.createElement('img');
+                img.src = firmaData;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '140px';
+                firmaPreview.appendChild(img);
+
+                // Ocultar placeholder si existe
+                const placeholder = document.getElementById('firma-coordinador-placeholder');
+                if (placeholder) placeholder.style.display = 'none';
+            }
+
+            // Mostrar firma coordinador en vista vicerrector
+            const firmaCoordinadorPreviewVice = document.getElementById('firma-coordinador-preview-vice');
+            if (firmaCoordinadorPreviewVice) {
+                firmaCoordinadorPreviewVice.innerHTML = '';
+
+                const img = document.createElement('img');
+                img.src = firmaData;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '140px';
+                firmaCoordinadorPreviewVice.appendChild(img);
+
+                // Ocultar el placeholder de carga y mostrar la imagen de firma
+                const placeholderVice = document.getElementById('firma-coordinador-placeholder-vice');
+                if (placeholderVice) placeholderVice.style.display = 'none';
+
+                const imgFirmaCoordinador = document.getElementById('img-firma-coordinador');
+                if (imgFirmaCoordinador) {
+                    imgFirmaCoordinador.src = firmaData;
+                    imgFirmaCoordinador.style.display = 'block';
+                }
+            }
+
+            // Actualizar el estado de la firma del coordinador
+            actualizarEstadoFirmaCoordinador(true);
+
+            // Actualizar campo oculto si existe
+            const campoOculto = document.getElementById('firma_coordinador_data');
+            if (campoOculto) campoOculto.value = firmaData;
+
+            // Guardar también en localStorage para respaldo
+            try {
+                localStorage.setItem('firmaCoordinadorData', firmaData);
+            } catch (error) {
+                console.warn('No se pudo guardar la firma en localStorage:', error);
+            }
+
+            return true;
+        } else {
+            console.log("No se encontró firma del coordinador");
+        }
+    } catch (error) {
+        console.error('Error al cargar firma del coordinador:', error);
+    }
+    return false;
+}
+
+// Y ahora mejoramos la función confirmarYEnviarAVicerrector para asegurar su correcto funcionamiento
+function confirmarYEnviarAVicerrector(firmaData) {
+    // Mostrar modal de confirmación
+    if (confirm('¿Está seguro de que desea enviar la firma al vicerrector?')) {
+        console.log("Enviando firma a vista de vicerrector...");
+
+        try {
+            // Codificar la firma optimizada para URL
+            const firmaEncoded = encodeURIComponent(firmaData);
+
+            // Verificar si la URL no es demasiado larga
+            if (firmaEncoded.length > 1500) {
+                console.warn("La firma es muy grande para URL, intentando comprimir más");
+
+                // Si es demasiado grande, volvemos a optimizar con mayor compresión
+                optimizarImagen(firmaData, 300, 150, 0.5).then(firmaComprimida => {
+                    const urlBase = document.getElementById('btn-continuar').getAttribute('data-url') || 'vista-vicerrector.html';
+                    const urlCompleta = `${urlBase}?firma=${encodeURIComponent(firmaComprimida)}`;
+
+                    // Guardar también en localStorage como respaldo
+                    try {
+                        localStorage.setItem('firmaCoordinadorData', firmaComprimida);
+                        console.log("Firma comprimida guardada en localStorage");
+                    } catch (error) {
+                        console.warn("No se pudo guardar en localStorage, continuando de todos modos");
+                    }
+
+                    // Mostrar mensaje de redirección
+                    mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
+
+                    // Esperar un momento para que se vea la alerta
+                    setTimeout(() => {
+                        // Redirigir a la vista del vicerrector
+                        window.location.href = urlCompleta;
+                    }, 1000);
+                }).catch(error => {
+                    console.error("Error al comprimir imagen:", error);
+                    mostrarAlerta('Error al comprimir la imagen. Intente con una firma más pequeña.', 'danger');
+                });
+            } else {
+                // La URL no es demasiado larga, podemos usarla directamente
+                const urlBase = document.getElementById('btn-continuar').getAttribute('data-url') || 'vista-vicerrector.html';
+                const urlCompleta = `${urlBase}?firma=${firmaEncoded}`;
+
+                // Mostrar mensaje de redirección
+                mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
+
+                // Esperar un momento para que se vea la alerta
+                setTimeout(() => {
+                    // Redirigir a la vista del vicerrector
+                    window.location.href = urlCompleta;
+                }, 1000);
+            }
+        } catch (error) {
+            console.error("Error al enviar firma:", error);
+            mostrarAlerta('Error al enviar la firma. Intente de nuevo.', 'danger');
+        }
+    } else {
+        console.log("Operación cancelada por el usuario");
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the confirm button in the modal
+    const btnConfirmarPDF = document.getElementById('btn-confirmar-pdf');
+    if (btnConfirmarPDF) {
+        // Remove the inline onclick attribute if it exists
+        btnConfirmarPDF.removeAttribute('onclick');
+
+        // Add event listener that passes the firma data
+        btnConfirmarPDF.addEventListener('click', function() {
+            // Make sure we have firma data available
+            if (window.firmaCoordinadorData) {
+                confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
+            } else {
+                mostrarAlerta('No se encontró la firma del coordinador', 'danger');
+            }
+        });
+
+        console.log("Modal confirm button handler configured correctly");
+    } else {
+        console.log("Modal confirm button not found");
+    }
+});
+
+// Función para cargar firma del vicerrector desde localStorage
+function cargarFirmaVicerrector() {
+    try {
+        console.log("Intentando cargar firma del vicerrector desde localStorage");
+        const firmaGuardada = localStorage.getItem('firmaVicerrectorData');
+        if (firmaGuardada) {
+            console.log("Firma del vicerrector encontrada en localStorage");
+            window.firmaVicerrectorData = firmaGuardada;
+
+            // Actualizar vista previa si estamos en la vista del vicerrector
+            const firmaPreview = document.getElementById('firma-vicerrector-preview');
             if (firmaPreview) {
                 firmaPreview.innerHTML = '';
 
@@ -1161,33 +2268,121 @@ function cargarFirmaCoordinador() {
                 firmaPreview.appendChild(img);
             }
 
-            // Mostrar firma coordinador en vista vicerrector
-            const firmaCoordinadorPreviewVice = document.getElementById('firma-coordinador-preview-vice');
-            if (firmaCoordinadorPreviewVice) {
-                firmaCoordinadorPreviewVice.innerHTML = '';
+            // También actualizar la imagen si existe
+            const imgFirmaVicerrector = document.getElementById('img-firma-vicerrector');
+            if (imgFirmaVicerrector) {
+                imgFirmaVicerrector.src = firmaGuardada;
+                imgFirmaVicerrector.style.display = 'block';
 
-                const img = document.createElement('img');
-                img.src = firmaGuardada;
-                img.style.maxWidth = '100%';
-                img.style.maxHeight = '140px';
-                firmaCoordinadorPreviewVice.appendChild(img);
+                // Ocultar placeholder si existe
+                const placeholder = document.getElementById('firma-vicerrector-placeholder');
+                if (placeholder) placeholder.style.display = 'none';
+            }
 
-                // Habilitar la sección del vicerrector si estamos en su vista
-                habilitarSeccionVicerrector();
+            // Actualizar campo oculto si existe
+            const campoOculto = document.getElementById('firma_vicerrector_data');
+            if (campoOculto) campoOculto.value = firmaGuardada;
+
+            // Habilitar botón de generar PDF si también existe firma del coordinador
+            if (window.firmaCoordinadorData) {
+                habilitarBotonGenerarPDF();
             }
 
             return true;
+        } else {
+            console.log("No se encontró firma del vicerrector en localStorage");
         }
     } catch (error) {
-        console.error('Error al cargar firma del coordinador:', error);
+        console.error('Error al cargar firma del vicerrector:', error);
     }
     return false;
 }
 
-// Función para manejar la subida de la firma del coordinador
-function handleFirmaCoordinadorUpload(event) {
+// Función para optimizar imagen y reducir tamaño
+function optimizarImagen(dataUrl, maxWidth = 400, maxHeight = 200, calidad = 0.7) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = function() {
+            // Calcular nuevas dimensiones manteniendo relación de aspecto
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+                height = Math.round(height * (maxWidth / width));
+                width = maxWidth;
+            }
+
+            if (height > maxHeight) {
+                width = Math.round(width * (maxHeight / height));
+                height = maxHeight;
+            }
+
+            // Crear canvas para redimensionar la imagen
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+
+            // Dibujar imagen redimensionada
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Convertir a base64 con calidad reducida
+            const optimizedDataUrl = canvas.toDataURL('image/jpeg', calidad);
+
+            console.log(`Imagen optimizada: Original: ${Math.round(dataUrl.length/1024)}KB, Nueva: ${Math.round(optimizedDataUrl.length/1024)}KB`);
+
+            resolve(optimizedDataUrl);
+        };
+
+        img.onerror = function() {
+            reject(new Error('Error al cargar la imagen para optimizar'));
+        };
+
+        img.src = dataUrl;
+    });
+}
+
+// Función para actualizar el estado de la firma del coordinador
+function actualizarEstadoFirmaCoordinador(existe) {
+    const statusCoordinador = document.getElementById('firma-coordinador-status');
+    const mensajeCoordinador = document.getElementById('firma-coordinador-mensaje');
+
+    if (!statusCoordinador || !mensajeCoordinador) {
+        console.log("No se encontraron elementos para actualizar estado de firma coordinador");
+        return;
+    }
+
+    if (existe) {
+        statusCoordinador.className = 'alert alert-success';
+        mensajeCoordinador.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Firma del coordinador verificada correctamente.';
+
+        // Habilitar sección de firma de vicerrector
+        const seccionViceContent = document.getElementById('seccion-firma-vicerrector-contenido');
+        if (seccionViceContent) {
+            seccionViceContent.style.display = 'block';
+        }
+    } else {
+        statusCoordinador.className = 'alert alert-danger';
+        mensajeCoordinador.innerHTML = '<i class="fas fa-times-circle mr-1"></i> No se ha encontrado la firma del coordinador. No se puede continuar.';
+
+        // Deshabilitar sección de firma de vicerrector
+        const seccionViceContent = document.getElementById('seccion-firma-vicerrector-contenido');
+        if (seccionViceContent) {
+            seccionViceContent.style.display = 'none';
+        }
+    }
+}
+
+// Mejoramos la función handleFirmaCoordinadorUpload para manejar correctamente la carga de firmas
+async function handleFirmaCoordinadorUpload(event) {
+    console.log("Función handleFirmaCoordinadorUpload iniciada");
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        console.log("No se seleccionó ningún archivo");
+        return;
+    }
+
+    console.log("Archivo seleccionado:", file.name, file.type);
 
     // Verificar que sea una imagen
     if (!file.type.match('image.*')) {
@@ -1200,47 +2395,95 @@ function handleFirmaCoordinadorUpload(event) {
     const label = document.querySelector('label[for="firma"]');
     if (label) {
         label.textContent = fileName;
+        console.log("Etiqueta actualizada con:", fileName);
     }
 
     // Leer y mostrar la vista previa
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
+        console.log("Archivo leído correctamente");
+
+        // Optimizar imagen para reducir tamaño
+        let firmaData = e.target.result;
+        try {
+            firmaData = await optimizarImagen(firmaData);
+        } catch (error) {
+            console.warn("No se pudo optimizar la imagen:", error);
+        }
+
+        // Mostrar en vista previa
         const firmaPreview = document.getElementById('firma-preview');
         if (firmaPreview) {
             firmaPreview.innerHTML = '';
 
             const img = document.createElement('img');
-            img.src = e.target.result;
+            img.src = firmaData;
             img.style.maxWidth = '100%';
             img.style.maxHeight = '140px';
             firmaPreview.appendChild(img);
+
+            // Ocultar placeholder si existe
+            const placeholder = document.getElementById('firma-coordinador-placeholder');
+            if (placeholder) placeholder.style.display = 'none';
         }
 
         // Almacenar los datos de la imagen para usar en el PDF
-        window.firmaCoordinadorData = e.target.result;
+        window.firmaCoordinadorData = firmaData;
+        console.log("Datos de firma almacenados en variable global");
 
-        // Guardar en localStorage para compartir con la vista del vicerrector
+        // Actualizar campo oculto si existe
+        const campoOculto = document.getElementById('firma_coordinador_data');
+        if (campoOculto) {
+            campoOculto.value = firmaData;
+            console.log("Campo oculto actualizado");
+        } else {
+            console.log("Campo oculto no encontrado");
+        }
+
+        // Guardar en localStorage como respaldo
         try {
-            localStorage.setItem('firmaCoordinadorData', e.target.result);
+            localStorage.setItem('firmaCoordinadorData', firmaData);
+            console.log("Firma guardada en localStorage como respaldo");
         } catch (error) {
-            console.error('Error al guardar firma en localStorage (puede ser demasiado grande):', error);
-            mostrarAlerta('Advertencia: No se pudo guardar la firma para compartir (imagen demasiado grande)', 'warning');
+            console.warn('Error al guardar firma en localStorage (puede ser demasiado grande):', error);
         }
 
-        // Habilitar botón de generar PDF en vista coordinador
-        const btnGenerarPDFCoord = document.getElementById('btn-generar-pdf-coordinador');
-        if (btnGenerarPDFCoord) {
-            btnGenerarPDFCoord.disabled = false;
+        // Habilitar botón de generar PDF
+        const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+        if (btnGenerarPDF) {
+            btnGenerarPDF.disabled = false;
+            console.log("Botón de generar PDF habilitado");
+
+            // Añadir efecto visual para indicar que está activo
+            btnGenerarPDF.classList.add('btn-pulse');
+            setTimeout(() => {
+                btnGenerarPDF.classList.remove('btn-pulse');
+            }, 1000);
         }
+
+        // Mostrar alerta de éxito
+        mostrarAlerta('Firma cargada correctamente', 'success');
+    };
+
+    reader.onerror = function(error) {
+        console.error("Error al leer el archivo:", error);
+        mostrarAlerta('Error al procesar la imagen', 'danger');
     };
 
     reader.readAsDataURL(file);
 }
 
+
 // Función para manejar la subida de la firma del vicerrector
-function handleFirmaVicerrectorUpload(event) {
+async function handleFirmaVicerrectorUpload(event) {
+    console.log("Función handleFirmaVicerrectorUpload iniciada");
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+        console.log("No se seleccionó ningún archivo");
+        return;
+    }
+
+    console.log("Archivo seleccionado:", file.name, file.type);
 
     // Verificar que sea una imagen
     if (!file.type.match('image.*')) {
@@ -1253,303 +2496,548 @@ function handleFirmaVicerrectorUpload(event) {
     const label = document.querySelector('label[for="firma-vicerrector"]');
     if (label) {
         label.textContent = fileName;
+        console.log("Etiqueta actualizada con:", fileName);
     }
 
     // Leer y mostrar la vista previa
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
+        console.log("Archivo leído correctamente");
+
+        // Optimizar imagen para reducir tamaño
+        let firmaData = e.target.result;
+        try {
+            firmaData = await optimizarImagen(firmaData);
+        } catch (error) {
+            console.warn("No se pudo optimizar la imagen:", error);
+        }
+
         const firmaPreview = document.getElementById('firma-vicerrector-preview');
         if (firmaPreview) {
             firmaPreview.innerHTML = '';
 
             const img = document.createElement('img');
-            img.src = e.target.result;
+            img.src = firmaData;
             img.style.maxWidth = '100%';
             img.style.maxHeight = '140px';
             firmaPreview.appendChild(img);
         }
 
+        // Actualizar la imagen designada si existe
+        const imgFirmaVicerrector = document.getElementById('img-firma-vicerrector');
+        if (imgFirmaVicerrector) {
+            imgFirmaVicerrector.src = firmaData;
+            imgFirmaVicerrector.style.display = 'block';
+
+            // Ocultar placeholder si existe
+            const placeholder = document.getElementById('firma-vicerrector-placeholder');
+            if (placeholder) placeholder.style.display = 'none';
+        }
+
         // Almacenar los datos de la imagen para usar en el PDF
-        window.firmaVicerrectorData = e.target.result;
+        window.firmaVicerrectorData = firmaData;
+        console.log("Datos de firma vicerrector almacenados en variable global");
+
+        // Actualizar campo oculto si existe
+        const campoOculto = document.getElementById('firma_vicerrector_data');
+        if (campoOculto) {
+            campoOculto.value = firmaData;
+            console.log("Campo oculto de vicerrector actualizado");
+        }
+
+        // Guardar en localStorage para futuras referencias
+        try {
+            localStorage.setItem('firmaVicerrectorData', firmaData);
+            console.log("Firma de vicerrector guardada en localStorage");
+        } catch (error) {
+            console.error('Error al guardar firma del vicerrector en localStorage:', error);
+        }
 
         // Habilitar botón de generar PDF final si tenemos ambas firmas
         if (window.firmaCoordinadorData) {
-            const btnGenerarPDFFinal = document.getElementById('btn-generar-pdf-final');
-            if (btnGenerarPDFFinal) {
-                btnGenerarPDFFinal.disabled = false;
-            }
+            habilitarBotonGenerarPDF();
         }
+
+        // Mostrar alerta de éxito
+        mostrarAlerta('Firma del vicerrector cargada correctamente', 'success');
     };
 
     reader.readAsDataURL(file);
 }
 
-// Función para inicializar los event listeners
-function initSignatureHandlers() {
-    // Cargar firma del coordinador si está disponible
-    const firmaExiste = cargarFirmaCoordinador();
-
-    // Event listener para la firma del coordinador (solo en vista coordinador)
-    const firmaCoordinadorInput = document.getElementById('firma');
-    if (firmaCoordinadorInput) {
-        firmaCoordinadorInput.addEventListener('change', handleFirmaCoordinadorUpload);
-
-        // Habilitar botón si ya hay firma guardada
-        if (firmaExiste) {
-            const btnGenerarPDFCoord = document.getElementById('btn-generar-pdf-coordinador');
-            if (btnGenerarPDFCoord) {
-                btnGenerarPDFCoord.disabled = false;
-            }
-        }
-    }
-
-    // Event listener para la firma del vicerrector (solo en vista vicerrector)
-    const firmaVicerrectorInput = document.getElementById('firma-vicerrector');
-    if (firmaVicerrectorInput) {
-        firmaVicerrectorInput.addEventListener('change', handleFirmaVicerrectorUpload);
-    }
-
-    // Configurar botones específicos de cada vista
-    configurarBotones();
-}
-
-
-// Detectar en qué vista estamos
+// Función para determinar en qué vista estamos
 function esVistaCoordinador() {
-    // Verificar si estamos en la vista del coordinador
-    return window.location.href.includes('procesohomologacion') &&
-        !window.location.href.includes('procesohomologacionvice');
+    const resultado = document.getElementById('firma') !== null &&
+           document.getElementById('firma-vicerrector') === null;
+    console.log("¿Es vista coordinador?", resultado);
+    return resultado;
 }
 
 function esVistaVicerrector() {
-    // Verificar si estamos en la vista del vicerrector
-    return window.location.href.includes('procesohomologacionvice');
+    const resultado = document.getElementById('firma-vicerrector') !== null;
+    console.log("¿Es vista vicerrector?", resultado);
+    return resultado;
 }
 
-// Crear sección de visualización de firma coordinador en vista vicerrector
-function crearSeccionVisualizacionFirmaCoordinador() {
-    if (!esVistaVicerrector()) return; // Solo crear en vista vicerrector
+// Función para mostrar alertas
+function mostrarAlerta(mensaje, tipo) {
+    const contenedorAlertas = document.getElementById('alertas') || document.createElement('div');
+    if (!document.getElementById('alertas')) {
+        contenedorAlertas.id = 'alertas';
+        contenedorAlertas.className = 'alertas-container';
+        document.body.appendChild(contenedorAlertas);
+    }
 
-    const seccionCoordinador = document.createElement('div');
-    seccionCoordinador.className = 'card mb-4 border-left-info';
-    seccionCoordinador.style.borderLeftColor = '#0277bd';
-
-    seccionCoordinador.innerHTML = `
-        <div class="card-header py-3 text-white" style="background-color: #0277bd;">
-            <h4 class="m-0 font-weight-bold">
-                <i class="fas fa-signature mr-2"></i>Firma del Coordinador
-            </h4>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="firma-coordinador-status" class="alert alert-info" role="alert">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        <span id="firma-coordinador-mensaje">Verificando si existe firma del coordinador...</span>
-                    </div>
-                    <div id="firma-coordinador-preview-vice"
-                        class="border rounded p-3 text-center d-flex align-items-center justify-content-center"
-                        style="height: 150px; background-color: #e1f5fe; border-color: #6c8ebf;">
-                        <p style="color: #19407b;" class="mb-0">Firma del coordinador</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    const alerta = document.createElement('div');
+    alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alerta.innerHTML = `
+        ${mensaje}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     `;
 
-    // Insertar al principio del contenedor
-    const container = document.querySelector('.container-fluid');
-    if (container.firstChild) {
-        container.insertBefore(seccionCoordinador, container.firstChild);
-    } else {
-        container.appendChild(seccionCoordinador);
-    }
+    contenedorAlertas.appendChild(alerta);
+
+    // Auto-cerrar después de 5 segundos
+    setTimeout(() => {
+        alerta.classList.remove('show');
+        setTimeout(() => {
+            alerta.remove();
+        }, 500);
+    }, 5000);
 }
 
-// Crear sección de firma vicerrector
-function crearSeccionFirmaVicerrector() {
-    if (!esVistaVicerrector()) return; // Solo crear en vista vicerrector
 
-    const vicerrectorSection = document.createElement('div');
-    vicerrectorSection.id = 'seccion-firma-vicerrector';
-    vicerrectorSection.className = 'card mb-4 border-left-warning';
-    vicerrectorSection.style.borderLeftColor = '#00695c';
+// Primero, vamos a mejorar la función initSignatureHandlers para garantizar que se configura correctamente el botón
+function initSignatureHandlers() {
+    console.log("Inicializando manejadores de firma...");
 
-    vicerrectorSection.innerHTML = `
-        <div class="card-header py-3 text-white" style="background-color: #00695c;">
-            <h4 class="m-0 font-weight-bold">
-                <i class="fas fa-signature mr-2"></i>Firma del Vicerrector
-            </h4>
-        </div>
-        <div class="card-body">
-            <div id="seccion-firma-vicerrector-contenido">
-                <div class="alert alert-warning" role="alert">
-                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                    Se requiere la firma del coordinador antes de poder continuar.
-                </div>
-            </div>
-        </div>
-    `;
+    // Determinar en qué vista estamos
+    const esVistaCoord = esVistaCoordinador();
+    const esVistaVice = esVistaVicerrector();
 
-    // Buscar dónde insertar la sección
-    const contenedor = document.querySelector('.container-fluid');
-    contenedor.appendChild(vicerrectorSection);
-}
+    console.log("Vista detectada - Coordinador:", esVistaCoord, "Vicerrector:", esVistaVice);
 
-// Habilitar sección del vicerrector cuando existe firma del coordinador
-function habilitarSeccionVicerrector() {
-    if (!esVistaVicerrector()) return;
+    // Configurar manejadores para la vista del coordinador
+    if (esVistaCoord) {
+        // Configurar el botón de continuar para la vista del coordinador
+        const btnContinuar = document.getElementById('btn-continuar');
+        if (btnContinuar) {
+            btnContinuar.disabled = true; // Deshabilitar hasta que se cargue una firma
 
-    const seccionVicerrector = document.getElementById('seccion-firma-vicerrector');
-    if (!seccionVicerrector) return;
+            // Eliminar event listeners previos para evitar duplicados
+            const nuevoBoton = btnContinuar.cloneNode(true);
+            btnContinuar.parentNode.replaceChild(nuevoBoton, btnContinuar);
 
-    const contenidoSeccion = document.getElementById('seccion-firma-vicerrector-contenido');
-    const statusCoordinador = document.getElementById('firma-coordinador-status');
-    const mensajeCoordinador = document.getElementById('firma-coordinador-mensaje');
-
-    if (window.firmaCoordinadorData) {
-        // Actualizar estado de firma coordinador
-        if (statusCoordinador) {
-            statusCoordinador.className = 'alert alert-success';
-            mensajeCoordinador.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Firma del coordinador verificada correctamente.';
-        }
-
-        // Habilitar sección vicerrector
-        contenidoSeccion.innerHTML = `
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="firma-vicerrector" class="font-weight-bold" style="color: #19407b;">
-                    <i class="fas fa-file-upload mr-1"></i> Subir Firma:
-                </label>
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" id="firma-vicerrector" accept="image/*">
-                    <label class="custom-file-label" for="firma-vicerrector" style="color: #19407b;">
-                        Seleccionar archivo...
-                    </label>
-                </div>
-                <small class="form-text" style="color: #4b6584;">
-                    Formatos aceptados: JPG, PNG, GIF
-                </small>
-            </div>
-        </div/>
-        <div class="col-md-6">
-            <div id="firma-vicerrector-preview"
-                class="border rounded p-3 text-center d-flex align-items-center justify-content-center"
-                style="height: 150px; background-color: #e3f2fd; border-color: #1976d2;">
-                <p style="color: #1565c0;" class="mb-0">Vista previa de la firma</p>
-            </div>
-        </div>
-    </div>
-    <div class="row mt-3">
-        <div class="col-12 text-center">
-            <button id="btn-generar-pdf-final" class="btn btn-primary" style="background-color: #1565c0; border-color: #1565c0;" disabled>
-                <i class="fas fa-file-pdf mr-1"></i> Generar PDF Final
-            </button>
-        </div>
-    </div>
-`;
-
-        // Inicializar event listeners
-        const firmaVicerrectorInput = document.getElementById('firma-vicerrector');
-        if (firmaVicerrectorInput) {
-            firmaVicerrectorInput.addEventListener('change', handleFirmaVicerrectorUpload);
-        }
-
-        const btnGenerarPDFFinal = document.getElementById('btn-generar-pdf-final');
-        if (btnGenerarPDFFinal) {
-            btnGenerarPDFFinal.addEventListener('click', function () {
-                generarPDF(true); // true = versión vicerrector (con ambas firmas)
-            });
-        }
-    } else {
-        // Actualizar estado de firma coordinador
-        if (statusCoordinador) {
-            statusCoordinador.className = 'alert alert-danger';
-            mensajeCoordinador.innerHTML = '<i class="fas fa-times-circle mr-1"></i> No se ha encontrado la firma del coordinador. No se puede continuar.';
-        }
-
-        // Mensaje de error en sección vicerrector
-        contenidoSeccion.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle mr-1"></i>
-                No se puede generar el PDF final sin la firma del coordinador.
-                Por favor, asegúrese de que el coordinador haya completado su parte del proceso.
-            </div>
-        `;
-    }
-}
-
-// Configurar los botones específicos de cada vista
-function configurarBotones() {
-    if (esVistaCoordinador()) {
-        // En vista coordinador, crear botón de generar PDF
-        const contenedor = document.querySelector('.card-body');
-        if (contenedor) {
-            const btnRow = document.createElement('div');
-            btnRow.className = 'row mt-3';
-            btnRow.innerHTML = `
-                <div class="col-12 text-center">
-                    <button id="btn-generar-pdf-coordinador" class="btn btn-primary" disabled>
-                        <i class="fas fa-file-pdf mr-1"></i> Previsualizar PDF y Enviar a Vicerrector
-                    </button>
-                </div>
-            `;
-            contenedor.appendChild(btnRow);
-
-            // Añadir event listener
-            const btnGenerarPDFCoord = document.getElementById('btn-generar-pdf-coordinador');
-            if (btnGenerarPDFCoord) {
-                btnGenerarPDFCoord.addEventListener('click', function () {
-                    generarPDF(false); // false = versión coordinador (solo su firma)
-                });
-
-                // Habilitar si ya existe firma
+            // Establecer el nuevo event listener
+            nuevoBoton.addEventListener('click', function() {
+                console.log("Botón continuar presionado");
+                // Verificar si tenemos la firma antes de continuar
                 if (window.firmaCoordinadorData) {
-                    btnGenerarPDFCoord.disabled = false;
+                    confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
+                } else {
+                    mostrarAlerta('Debe cargar una firma antes de continuar', 'warning');
                 }
-            }
+            });
+
+            console.log("Botón continuar configurado correctamente");
         }
-    } else if (esVistaVicerrector()) {
-        // Crear secciones específicas de vicerrector
-        crearSeccionVisualizacionFirmaCoordinador();
-        crearSeccionFirmaVicerrector();
-        habilitarSeccionVicerrector(); // Verificar estado inicial
+
+        const firmaCoordinadorInput = document.getElementById('firma');
+        if (firmaCoordinadorInput) {
+            console.log("Configurando input de firma del coordinador");
+            // Eliminar event listeners previos para evitar duplicados
+            firmaCoordinadorInput.removeEventListener('change', handleFirmaCoordinadorUpload);
+            // Añadir nuevo event listener
+            firmaCoordinadorInput.addEventListener('change', function(event) {
+                console.log("Evento change activado en firma coordinador");
+                handleFirmaCoordinadorUpload(event);
+            });
+
+            // Cargar firma del coordinador si ya existe
+            const firmaExiste = cargarFirmaCoordinador();
+
+            // Habilitar el botón de continuar si ya existe una firma
+            if (firmaExiste && btnContinuar) {
+                btnContinuar.disabled = false;
+            }
+        } else {
+            console.log("ALERTA: No se encontró el elemento 'firma'");
+        }
+    }
+
+    // El resto de la función se mantiene igual...
+}
+
+
+// Función para habilitar el botón de generar PDF
+function habilitarBotonGenerarPDF() {
+    const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+    if (btnGenerarPDF) {
+        btnGenerarPDF.disabled = false;
+        console.log("Botón de generar PDF habilitado");
+
+        // Añadir efecto visual para indicar que está activo
+        btnGenerarPDF.classList.add('btn-pulse');
+        setTimeout(() => {
+            btnGenerarPDF.classList.remove('btn-pulse');
+        }, 1000);
+    } else {
+        console.log("Botón de generar PDF no encontrado");
     }
 }
 
 // Inicializar cuando el DOM esté listo
+// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function () {
-    initSignatureHandlers();
+    console.log("DOM cargado completamente");
+
+    // Verificar elementos clave
+    console.log("Elemento 'firma' existe:", document.getElementById('firma') !== null);
+    console.log("Elemento 'firma-preview' existe:", document.getElementById('firma-preview') !== null);
+    console.log("Elemento 'firma_coordinador_data' existe:", document.getElementById('firma_coordinador_data') !== null);
+    console.log("Elemento 'btn-generar-pdf' existe:", document.getElementById('btn-generar-pdf') !== null);
+
+    // Configurar el botón de generar PDF para abrir el modal
+    const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+    if (btnGenerarPDF) {
+        btnGenerarPDF.addEventListener('click', function() {
+            // Mostrar el modal
+            $('#pdf-preview-modal').modal('show');
+            console.log("Modal de vista previa del PDF abierto");
+        });
+    }
+
+    // Configurar el input de firma del coordinador
+    const firmaCoordinadorInput = document.getElementById('firma');
+    if (firmaCoordinadorInput) {
+        console.log("Configurando input de firma del coordinador");
+        // Asegurarse de que el evento change esté configurado correctamente
+        firmaCoordinadorInput.removeEventListener('change', handleFirmaCoordinadorUpload);
+        firmaCoordinadorInput.addEventListener('change', function(event) {
+            console.log("Evento change activado en firma coordinador");
+            handleFirmaCoordinadorUpload(event);
+        });
+    }
+
+    // Configurar el botón de confirmar y enviar a vicerrector en el modal
+    const btnConfirmarPDF = document.getElementById('btn-confirmar-pdf');
+    if (btnConfirmarPDF) {
+        btnConfirmarPDF.removeAttribute('onclick'); // Eliminar cualquier onclick inline
+
+        btnConfirmarPDF.addEventListener('click', function() {
+            console.log("Botón confirmar PDF presionado");
+            // Verificar si tenemos la firma antes de continuar
+            if (window.firmaCoordinadorData) {
+                // Cerrar el modal antes de continuar
+                $('#pdf-preview-modal').modal('hide');
+                setTimeout(() => {
+                    confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
+                }, 500);
+            } else {
+                mostrarAlerta('No se encontró la firma del coordinador', 'danger');
+            }
+        });
+
+        console.log("Botón confirmar PDF configurado correctamente");
+    }
+
+    // Cargar firma del coordinador si ya existe
+    const firmaExiste = cargarFirmaCoordinador();
+    if (firmaExiste && btnGenerarPDF) {
+        btnGenerarPDF.disabled = false;
+        console.log("Botón generar PDF habilitado porque ya existe una firma");
+    }
+
+    // Añadir estilos CSS para efectos
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .btn-pulse {
+            animation: pulse 1s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .alertas-container {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 9999;
+            max-width: 400px;
+        }
+    `;
+    document.head.appendChild(style);
 });
-function generarPDF(esVersionFinal = false) {
+
+
+
+// Función de ayuda para obtener datos informativos sin usar :contains (que no es estándar)
+function obtenerDatoInformativo(etiqueta) {
+    // Buscar entre todos los elementos info-item
+    const infoItems = document.querySelectorAll('.info-item');
+    for (let i = 0; i < infoItems.length; i++) {
+        // Buscar si el texto del primer hijo contiene la etiqueta
+        const labelElem = infoItems[i].querySelector('strong, label, h4, h5, h6, span');
+        if (labelElem && labelElem.textContent.includes(etiqueta)) {
+            // Si encontramos la etiqueta, devolver el contenido del párrafo
+            const valueElem = infoItems[i].querySelector('p');
+            if (valueElem) {
+                return valueElem.textContent.trim();
+            }
+        }
+    }
+    // Alternativa: buscar directamente en un elemento con ID específico
+    const elemConId = document.getElementById('dato-' + etiqueta.toLowerCase().replace(/\s+/g, '-'));
+    if (elemConId) {
+        return elemConId.textContent.trim();
+    }
+
+    return null;
+}
+
+// Función corregida para mostrar alertas (previene recursión infinita)
+function mostrarAlerta(mensaje, tipo) {
+    console.log(`Alerta: ${mensaje} (${tipo})`);
+
+    // Verificar si ya existe un contenedor de alertas
+    let alertContainer = document.getElementById('alert-container');
+
+    // Si no existe, crear uno
+    if (!alertContainer) {
+        alertContainer = document.createElement('div');
+        alertContainer.id = 'alert-container';
+        alertContainer.style.position = 'fixed';
+        alertContainer.style.top = '20px';
+        alertContainer.style.right = '20px';
+        alertContainer.style.zIndex = '9999';
+        alertContainer.style.maxWidth = '350px';
+        document.body.appendChild(alertContainer);
+    }
+
+    // Crear la alerta
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+
+    // Configurar el HTML de manera segura para evitar llamados recursivos
+    alertDiv.textContent = mensaje;
+
+    // Añadir botón de cierre
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'close';
+    closeButton.setAttribute('data-dismiss', 'alert');
+    closeButton.setAttribute('aria-label', 'Close');
+
+    const closeSpan = document.createElement('span');
+    closeSpan.setAttribute('aria-hidden', 'true');
+    closeSpan.innerHTML = '&times;';
+
+    closeButton.appendChild(closeSpan);
+    alertDiv.appendChild(closeButton);
+
+    // Agregar la alerta al contenedor
+    alertContainer.appendChild(alertDiv);
+
+    // Configurar auto-eliminación después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.classList.remove('show');
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 300);
+        }
+    }, 5000);
+}
+
+// Función para confirmar y enviar la firma al vicerrector
+function confirmarYEnviarAVicerrector(firmaData) {
+    // Ya no necesitamos confirmar aquí porque ya estamos en el modal de confirmación
+    console.log("Enviando firma a vista de vicerrector...");
+
     try {
-        const { jsPDF } = window.jspdf;
+        // Codificar la firma optimizada para URL
+        const firmaEncoded = encodeURIComponent(firmaData);
+
+        // Verificar si la URL no es demasiado larga
+        if (firmaEncoded.length > 1500) {
+            console.warn("La firma es muy grande para URL, intentando comprimir más");
+
+            // Si es demasiado grande, volvemos a optimizar con mayor compresión
+            optimizarImagen(firmaData, 300, 150, 0.5).then(firmaComprimida => {
+                // Usar URL relativa predeterminada si no hay un botón continuar con data-url
+                const urlBase = 'vista-vicerrector.html';
+                const urlCompleta = `${urlBase}?firma=${encodeURIComponent(firmaComprimida)}`;
+
+                // Guardar también en localStorage como respaldo
+                try {
+                    localStorage.setItem('firmaCoordinadorData', firmaComprimida);
+                    console.log("Firma comprimida guardada en localStorage");
+                } catch (error) {
+                    console.warn("No se pudo guardar en localStorage, continuando de todos modos");
+                }
+
+                // Mostrar mensaje de redirección
+                mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
+
+                // Esperar un momento para que se vea la alerta
+                setTimeout(() => {
+                    // Redirigir a la vista del vicerrector
+                    window.location.href = urlCompleta;
+                }, 1000);
+            }).catch(error => {
+                console.error("Error al comprimir imagen:", error);
+                mostrarAlerta('Error al comprimir la imagen. Intente con una firma más pequeña.', 'danger');
+            });
+        } else {
+            // La URL no es demasiado larga, podemos usarla directamente
+            const urlBase = 'vista-vicerrector.html';
+            const urlCompleta = `${urlBase}?firma=${firmaEncoded}`;
+
+            // Mostrar mensaje de redirección
+            mostrarAlerta('Redirigiendo a la vista de vicerrector...', 'info');
+
+            // Esperar un momento para que se vea la alerta
+            setTimeout(() => {
+                // Redirigir a la vista del vicerrector
+                window.location.href = urlCompleta;
+            }, 1000);
+        }
+    } catch (error) {
+        console.error("Error al enviar firma:", error);
+        mostrarAlerta('Error al enviar la firma. Intente de nuevo.', 'danger');
+    }
+}
+// Función corregida para generar PDF
+function generarPDF(esVistaVicerrector) {
+    console.log("Función generarPDF llamada, es vista vicerrector:", esVistaVicerrector);
+
+    try {
+        // Verificar si jsPDF está disponible
+        if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+            console.error('jsPDF no está disponible');
+            mostrarAlerta('Error: Librería jsPDF no disponible. Verifique que todas las librerías necesarias están cargadas.', 'danger');
+            return;
+        }
+
+        // Verificar las firmas necesarias para cada vista
+        if (!window.firmaCoordinadorData) {
+            // Intentar cargar de localStorage una última vez
+            const firmaCoordGuardada = localStorage.getItem('firmaCoordinadorData');
+            if (firmaCoordGuardada) {
+                window.firmaCoordinadorData = firmaCoordGuardada;
+                console.log("Firma del coordinador cargada desde localStorage justo antes de generar PDF");
+            } else {
+                mostrarAlerta('Error: No se ha cargado la firma del coordinador. Por favor, cargue la firma antes de continuar.', 'danger');
+                return;
+            }
+        }
+
+        if (esVistaVicerrector && !window.firmaVicerrectorData) {
+            mostrarAlerta('Error: No se ha cargado la firma del vicerrector. Por favor, cargue la firma antes de continuar.', 'danger');
+            return;
+        }
+
+        // Mostrar indicador de carga
+        const btnGenerar = document.getElementById('btn-generar-pdf');
+        if (btnGenerar) {
+            const textoOriginal = btnGenerar.innerHTML;
+            btnGenerar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            btnGenerar.disabled = true;
+
+            // Restaurar botón si hay error después de 10 segundos
+            setTimeout(() => {
+                if (btnGenerar.innerHTML.includes('fa-spinner')) {
+                    btnGenerar.innerHTML = textoOriginal;
+                    btnGenerar.disabled = false;
+                }
+            }, 10000);
+        }
+
+        // Obtener datos del DOM para el PDF - CORREGIDO para no usar :contains que no es estándar
+        const estudiante = obtenerDatoInformativo('Nombre') || 'Estudiante';
+        const identificacion = obtenerDatoInformativo('Identificación') || 'No disponible';
+        const universidad = obtenerDatoInformativo('Universidad de Origen') || 'Universidad Externa';
+        const programa = obtenerDatoInformativo('Programa') || 'Programa Actual';
+
+        // Obtener homologaciones de la tabla
+        const homologaciones = [];
+        document.querySelectorAll('#tabla-homologaciones tbody tr:not(#no-homologaciones)').forEach(row => {
+            const celdas = row.querySelectorAll('td');
+            if (celdas.length >= 5) {
+                homologaciones.push({
+                    asignatura_origen_nombre: celdas[0].textContent.trim(),
+                    asignatura_destino_nombre: celdas[1].textContent.trim(),
+                    nota_origen: celdas[2].textContent.trim(),
+                    nota_destino: celdas[3].textContent.trim(),
+                    creditos: celdas[4].textContent.trim()
+                });
+            }
+        });
+
+        // Crear objeto con los datos recopilados
+        const datosEstudiante = {
+            nombre: estudiante,
+            identificacion: identificacion
+        };
+
+        const datosSolicitud = {
+            universidad_origen: universidad,
+            programa_destino: programa
+        };
+
+        const datosHomologacion = {
+            homologaciones: homologaciones
+        };
+
+        // Crear el PDF con los datos recopilados
+        generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, esVistaVicerrector);
+
+    } catch (error) {
+        console.error('Error general al iniciar generación de PDF:', error);
+        mostrarAlerta(`Error al generar PDF: ${error.message}`, 'danger');
+
+        // Restaurar botón
+        const btnGenerar = document.getElementById('btn-generar-pdf');
+        if (btnGenerar) {
+            btnGenerar.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> Generar Resolución PDF';
+            btnGenerar.disabled = false;
+        }
+    }
+}
+// Función corregida para generar el PDF con los datos
+function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, esVistaVicerrector) {
+    try {
+        // Crear instancia de jsPDF
+        const { jsPDF } = jspdf;
         const doc = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: 'letter',
-            compress: true // Mejora la calidad
+            compress: true
         });
 
-        // Obtener datos del estudiante
-        let estudiante, identificacion, universidad, programa;
-
-        try {
-            const datosEstudiante = document.querySelector('.col-md-6');
-            if (datosEstudiante) {
-                estudiante = datosEstudiante.querySelector('p:nth-child(1)')?.textContent.replace('Nombre:', '').trim() || 'N/A';
-                identificacion = datosEstudiante.querySelector('p:nth-child(2)')?.textContent.replace('Identificación:', '').trim() || 'N/A';
-                universidad = datosEstudiante.querySelector('p:nth-child(3)')?.textContent.replace('Universidad de Origen:', '').trim() || 'N/A';
-                programa = datosEstudiante.querySelector('p:nth-child(4)')?.textContent.replace('Programa de interes:', '').trim() || 'N/A';
-            }
-        } catch (e) {
-            console.error('Error al obtener datos del estudiante:', e);
-            estudiante = 'N/A';
-            identificacion = 'N/A';
-            universidad = 'N/A';
-            programa = 'N/A';
+        // Verificar que tenemos las firmas necesarias antes de continuar
+        if (!window.firmaCoordinadorData) {
+            mostrarAlerta('Error: No se ha cargado la firma del coordinador', 'danger');
+            return;
         }
+
+        if (esVistaVicerrector && !window.firmaVicerrectorData) {
+            mostrarAlerta('Error: No se ha cargado la firma del vicerrector', 'danger');
+            return;
+        }
+
+        // Obtener datos del estudiante
+        let estudiante = datosEstudiante.nombre || 'N/A';
+        let identificacion = datosEstudiante.identificacion || 'N/A';
+        let universidad = datosSolicitud.universidad_origen || 'N/A';
+        let programa = datosSolicitud.programa_destino || 'N/A';
 
         // Obtener la fecha actual
         const fechaActual = new Date();
@@ -1567,60 +3055,48 @@ function generarPDF(esVersionFinal = false) {
 
         // Configurar colores institucionales
         const colorAzulInstitucional = [0, 51, 153]; // RGB para azul institucional
+        const colorAzulClaro = [230, 236, 250]; // Azul muy claro para fondos
         const colorGris = [100, 100, 100]; // RGB para texto gris
 
-        // Primera página
-        // --------------
-        doc.setFillColor(255, 255, 255);
+        // Primera página con marco decorativo
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2); // Marco exterior con bordes redondeados
 
-        // Agregar logo de la institución
-        try {
-            // Verificar si hay un logo disponible
-            if (window.logoUploadData) {
-                doc.addImage(window.logoUploadData, 'PNG', 85, 15, 40, 20, undefined, 'FAST');
-            } else {
-                // Si no hay logo cargado, usar un texto como logo provisional
-                doc.setFontSize(12);
-                doc.setFont('helvetica', 'bold');
-                doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-                doc.text('CORPORACIÓN UNIVERSITARIA AUTÓNOMA DEL CAUCA', 105, 15, { align: 'center' });
-                doc.text('Líderes, visionarios y emprendedores', 105, 22, { align: 'center' });
-
-                // Dibuja una línea decorativa bajo el nombre
-                doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-                doc.setLineWidth(0.5);
-                doc.line(20, 25, 190, 25);
-            }
-        } catch (error) {
-            console.error('Error al agregar logo:', error);
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-            doc.text('CORPORACIÓN UNIVERSITARIA AUTÓNOMA DEL CAUCA', 105, 15, { align: 'center' });
-            doc.text('Líderes, visionarios y emprendedores', 105, 22, { align: 'center' });
-
-            // Dibuja una línea decorativa bajo el nombre
-            doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-            doc.setLineWidth(0.5);
-            doc.line(20, 25, 190, 25);
-        }
-
-        // Número de resolución en la parte superior
-        let yPos = 40;
-        doc.setFontSize(11);
+        // Título y logo institucional
+        doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.text('CORPORACIÓN UNIVERSITARIA AUTÓNOMA DEL CAUCA', 105, 25, { align: 'center' });
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Líderes, visionarios y emprendedores', 105, 35, { align: 'center' });
+
+        // Línea decorativa
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.7);
+        doc.line(30, 40, 180, 40);
+
+        // Número de resolución
+        let yPos = 55;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+
+        // Fondo para el título de resolución
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(50, yPos - 6, 110, 10, 1, 1, 'F');
+
         doc.text(`RESOLUCIÓN No. ${numeroResolucion}`, 105, yPos, { align: 'center' });
 
-        yPos += 10;
-
-        // Texto de la fecha
+        yPos += 15;
         doc.text('Del', 105, yPos, { align: 'center' });
 
-        yPos += 7;
+        yPos += 10;
         doc.text(`(${dia} ${mes.toUpperCase().substring(0, 3)}. ${año})`, 105, yPos, { align: 'center' });
 
-        yPos += 15;
+        yPos += 25;
 
         // Título principal del documento
         doc.setFont('helvetica', 'normal');
@@ -1630,7 +3106,7 @@ function generarPDF(esVersionFinal = false) {
         const lineasTituloPrincipal = doc.splitTextToSize(tituloPrincipal, 170);
         doc.text(lineasTituloPrincipal, 20, yPos);
 
-        yPos += lineasTituloPrincipal.length * 6 + 10;
+        yPos += lineasTituloPrincipal.length * 7 + 15;
 
         // Texto de vicerrectoría
         doc.setFont('helvetica', 'bold');
@@ -1639,18 +3115,22 @@ function generarPDF(esVersionFinal = false) {
         const lineasVicerrectoria = doc.splitTextToSize(textoVicerrectoria, 170);
         doc.text(lineasVicerrectoria, 20, yPos);
 
-        yPos += lineasVicerrectoria.length * 5 + 10;
+        yPos += lineasVicerrectoria.length * 7 + 15;
 
         // Considerando
         doc.setFont('helvetica', 'bold');
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(65, yPos - 6, 80, 10, 2, 2, 'F');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
         doc.text('CONSIDERANDO', 105, yPos, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
 
-        yPos += 10;
+        yPos += 15;
 
-        // Texto formal considerando
+        // Texto considerando
         doc.setFont('helvetica', 'normal');
         let considerandos = [
-            `Que el Decano de la Facultad de ${programa}, realizó el estudio de homologación de los cursos aprobados en el Programa de ${programa.toUpperCase()}, de ${universidad.toUpperCase()}, solicitado por ${estudiante.toUpperCase()} identificado con ${identificacion}.`,
+            `Que el Decano de la Facssssssssssssssssssssssssssssssssssssssssssssssssultad de ${programa}, realizó el estudio de homologación de los cursos aprobados en el Programa de ${programa.toUpperCase()}, de ${universidad.toUpperCase()}, solicitado por ${estudiante.toUpperCase()} identificado con ${identificacion}.`,
 
             `Que la Vicerrectora Académica revisó los procedimientos aplicados y los anexos allegados por ${estudiante.toUpperCase()} para el estudio y análisis de la homologación realizada por el Decano de la Facultad correspondiente, con el correspondiente pensum vigente del Programa de ${programa} y por lo anterior.`,
 
@@ -1661,411 +3141,1437 @@ function generarPDF(esVersionFinal = false) {
             `Que en sesión del ${dia} de ${mes} de ${año}, el Comité de Homologaciones recomendó la aprobación de las asignaturas que se detallan en la presente resolución.`
         ];
 
-        // Agregar considerandos
+        // Agregar considerandos con viñetas
         considerandos.forEach((texto, index) => {
-            // Asegurar que hay espacio para el considerando
-            if (yPos > 240) {
+            // Nueva página si es necesario
+            if (yPos > 220) {
                 doc.addPage();
-                yPos = 20;
+                yPos = 30;
 
-                // Opcional: agregar encabezado en la nueva página
-                doc.setFontSize(8);
+                // Marco decorativo
+                doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(10, 10, 195, 260, 2, 2);
+
+                // Encabezado en la nueva página
+                doc.setFontSize(9);
                 doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
-                doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 10, { align: 'center' });
+                doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
                 doc.setTextColor(0, 0, 0);
                 doc.setFontSize(10);
             }
 
             const lineas = doc.splitTextToSize(texto, 165);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`${index + 1}.`, 20, yPos);
+
+            // Viñeta
+            doc.setFillColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+            doc.circle(23, yPos, 1.2, 'F');
+
             doc.setFont('helvetica', 'normal');
             doc.text(lineas, 30, yPos);
-            yPos += lineas.length * 5 + 3;
+            yPos += lineas.length * 6 + 8; // Espacio entre párrafos
         });
-
-        yPos += 5;
-
-        // Resuelve
-        doc.setFont('helvetica', 'bold');
-        doc.text('RESUELVE:', 105, yPos, { align: 'center' });
 
         yPos += 10;
 
-        // Artículo Primero - Título e introducción
+        // Resuelve
+        doc.setFont('helvetica', 'bold');
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(70, yPos - 6, 70, 10, 2, 2, 'F');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.text('RESUELVE:', 105, yPos, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+
+        yPos += 15;
+
+        // Artículo Primero
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
         doc.setFont('helvetica', 'bold');
         doc.text('ARTÍCULO 1°.', 20, yPos);
         doc.setFont('helvetica', 'normal');
 
-        yPos += 6;
+        yPos += 10;
 
         // Texto del artículo primero
         const textoArticuloPrimero = `Aprobar el estudio de homologación de ${estudiante.toUpperCase()} identificado con ${identificacion}, de la siguiente manera:`;
         const lineasArticulo1 = doc.splitTextToSize(textoArticuloPrimero, 175);
         doc.text(lineasArticulo1, 20, yPos);
 
-        yPos += lineasArticulo1.length * 5 + 5;
+        yPos += lineasArticulo1.length * 6 + 12;
 
-        // Establecer posición inicial para la tabla
-        const inicioTabla = yPos;
+        // Siempre crear una nueva página para la tabla para tener espacio suficiente
+        doc.addPage();
+        yPos = 30;
 
-        // Asegurar que hay espacio para la tabla (o añadir nueva página)
-        if (yPos > 180) {
-            doc.addPage();
-            yPos = 20;
+        // Marco decorativo para la nueva página
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2);
 
-            // Agregar encabezado en la nueva página
-            doc.setFontSize(8);
-            doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
-            doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 10, { align: 'center' });
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(10);
-        }
+        // Encabezado en la nueva página
+        doc.setFontSize(9);
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
 
         // Título de la tabla
-        doc.setFontSize(10);
+        doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+
+        // Fondo para el título de la tabla
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(45, yPos - 6, 120, 10, 2, 2, 'F');
+
         doc.text('CURSOS ACADÉMICOS HOMOLOGADOS', 105, yPos, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
 
-        yPos += 8;
+        yPos += 15;
 
-        // Crear la tabla de cursos homologados
+        // Preparar datos para la tabla
+        let asignaturasFiltradas = [];
+
+        // Procesar datos de homologación
+        if (datosHomologacion.homologaciones && datosHomologacion.homologaciones.length > 0) {
+            asignaturasFiltradas = datosHomologacion.homologaciones.map(h => ({
+                asignatura_origen_nombre: h.asignatura_origen_nombre || 'N/A',
+                codigo_destino: h.codigo_destino || 'N/A',
+                asignatura_destino_nombre: h.asignatura_destino_nombre || 'N/A',
+                semestre: h.semestre || 'N/A',
+                creditos: h.creditos || 'N/A',
+                nota_destino: h.nota_destino || h.nota_homologada || 'N/A'
+            }));
+        }
+
+        // Si no hay datos
+        if (asignaturasFiltradas.length === 0) {
+            asignaturasFiltradas.push({
+                asignatura_origen_nombre: "No se encontraron asignaturas para homologar",
+                codigo_destino: "-",
+                asignatura_destino_nombre: "-",
+                semestre: "-",
+                creditos: "-",
+                nota_destino: "-"
+            });
+        }
+
+        // Crear tabla
         const headers = ['CURSO INSTITUCIÓN DE ORIGEN', 'CÓDIGO', 'CURSO ACADÉMICO AUTÓNOMA', 'SEM', 'CRED', 'CALIF'];
-        const data = homologaciones.map(h => [
+        const data = asignaturasFiltradas.map(h => [
             h.asignatura_origen_nombre,
-            h.codigo_destino || '',
+            h.codigo_destino,
             h.asignatura_destino_nombre,
-            h.semestre || '',
+            h.semestre,
             h.creditos,
             h.nota_destino
         ]);
 
-        // Configuración de la tabla
-        doc.autoTable({
-            startY: yPos,
-            head: [headers],
-            body: data,
-            margin: { left: 15, right: 15 },
-            styles: {
-                fontSize: 8,
-                font: 'helvetica',
-                cellPadding: 2,
-                lineWidth: 0.1,
-                lineColor: [80, 80, 80],
-                textColor: [0, 0, 0],
-                halign: 'left'
-            },
-            headStyles: {
-                fillColor: colorAzulInstitucional,
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                halign: 'center',
-                valign: 'middle',
-                fontSize: 8
-            },
-            columnStyles: {
-                0: { cellWidth: 42, overflow: 'linebreak' },
-                1: { cellWidth: 15, halign: 'center' },
-                2: { cellWidth: 42, overflow: 'linebreak' },
-                3: { cellWidth: 12, halign: 'center' },
-                4: { cellWidth: 12, halign: 'center' },
-                5: { cellWidth: 12, halign: 'center' }
-            },
-            alternateRowStyles: {
-                fillColor: [240, 240, 255],
-            },
-            tableLineColor: [0, 51, 153],
-            tableLineWidth: 0.2,
-            theme: 'grid',
-            didDrawCell: function (data) {
-                // Mejora visual de la tabla
-                if (data.row.index === 0 && data.column.index === 0) {
-                    doc.setLineWidth(0.3);
-                    doc.setDrawColor(0, 51, 153);
+        // Usar autoTable si está disponible
+        if (typeof doc.autoTable === 'function') {
+            doc.autoTable({
+                startY: yPos,
+                head: [headers],
+                body: data,
+                margin: { left: 15, right: 15 },
+                styles: {
+                    fontSize: 9,  // Aumentado de 8 a 9
+                    cellPadding: 6,  // Aumentado de 5 a 6
+                    lineWidth: 0.1,
+                    valign: 'middle',
+                    overflow: 'linebreak',
+                    lineColor: [200, 200, 200]
+                },
+                headStyles: {
+                    fillColor: colorAzulInstitucional,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 9  // Asegurar que el encabezado sea legible
+                },
+                columnStyles: {
+                    0: { cellWidth: 50 },  // Aumentado espacio para curso de origen
+                    1: { cellWidth: 18, halign: 'center' },
+                    2: { cellWidth: 50 },  // Aumentado espacio para curso destino
+                    3: { cellWidth: 15, halign: 'center' },
+                    4: { cellWidth: 15, halign: 'center' },
+                    5: { cellWidth: 15, halign: 'center' }
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                didDrawCell: function(data) {
+                    // Agregar bordes más visibles a las celdas
+                    if (data.section === 'body' || data.section === 'head') {
+                        doc.setDrawColor(150, 150, 150);
+                        doc.setLineWidth(0.1);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                    }
                 }
-            }
-        });
+            });
 
-        // Actualizar posición después de la tabla
-        yPos = doc.lastAutoTable.finalY + 10;
+            // Actualizar posición después de la tabla
+            yPos = doc.lastAutoTable.finalY + 18;
+        } else {
+            // Implementación alternativa simple si autoTable no está disponible
+            console.warn('autoTable no está disponible, usando implementación básica');
+
+            // Esta parte es para situaciones donde autoTable no esté disponible
+            // pero sería mejor asegurarse de que autoTable siempre esté incluido
+            yPos = 150;  // Simplemente avanzamos a una posición posterior en la página
+        }
+
+        // Calcular total de créditos
+        const totalCreditos = asignaturasFiltradas.reduce((sum, item) => {
+            return sum + (parseFloat(item.creditos) || 0);
+        }, 0);
+
+        // Resumen de totales
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(95, yPos - 5, 90, 25, 2, 2, 'F');  // Aumentado altura del recuadro
 
         // Total de cursos y créditos
-        doc.setFontSize(9);
+        doc.setFontSize(10);  // Aumentado tamaño de fuente
         doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL CURSOS HOMOLOGADOS:', 110, yPos);
-        doc.text(homologaciones.length.toString(), 170, yPos);
+        doc.text('TOTAL CURSOS HOMOLOGADOS:', 110, yPos + 5);
+        doc.text(asignaturasFiltradas.length.toString(), 175, yPos + 5);
 
-        yPos += 6;
+        yPos += 12;  // Aumentado espacio entre líneas
 
-        doc.text('TOTAL CRÉDITOS HOMOLOGADOS:', 110, yPos);
-        doc.text(document.getElementById('total-creditos').textContent, 170, yPos);
+        doc.text('TOTAL CRÉDITOS HOMOLOGADOS:', 110, yPos + 5);
+        doc.text(totalCreditos.toString(), 175, yPos + 5);
 
-        yPos += 15;
+        // Nueva página para firmas
+        doc.addPage();
+        yPos = 50;
+
+        // Marco decorativo para la página de firmas
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2);
+
+        // Encabezado en la página de firmas
+        doc.setFontSize(9);
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
 
         // Artículo Segundo
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
         doc.setFont('helvetica', 'bold');
         doc.text('ARTÍCULO 2°.', 20, yPos);
         doc.setFont('helvetica', 'normal');
 
-        yPos += 6;
+        yPos += 10;
 
-        const textoArticuloSegundo = "Definir los cursos pendientes por cursar y aprobar en la Corporación Universitaria Autónoma del Cauca.";
+        // Texto del artículo segundo
+        const textoArticuloSegundo = `Ordenar al Departamento de Admisiones, Registro y Control Académico, registrar en el sistema la homologación de los cursos académicos relacionados.`;
         const lineasArticulo2 = doc.splitTextToSize(textoArticuloSegundo, 175);
         doc.text(lineasArticulo2, 20, yPos);
 
-        yPos += lineasArticulo2.length * 5 + 10;
-
-        // Si los párrafos no caben, añadir nueva página
-        if (yPos > 220) {
-            doc.addPage();
-            yPos = 20;
-        }
+        yPos += lineasArticulo2.length * 6 + 10;
 
         // Artículo Tercero
-        doc.setFontSize(11);
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
         doc.setFont('helvetica', 'bold');
         doc.text('ARTÍCULO 3°.', 20, yPos);
         doc.setFont('helvetica', 'normal');
 
-        yPos += 6;
+        yPos += 10;
 
-        const textoArticuloTercero = `Autorizar matrícula para el segundo periodo académico de ${año}.`;
-        const lineasArticulo3 = doc.splitTextToSize(textoArticuloTercero, 175);
-        doc.text(lineasArticulo3, 20, yPos);
+        // Texto del artículo tercero
+        const textoArticuloTercero = `La presente Resolución rige a partir de la fecha de su expedición.`;
+        doc.text(textoArticuloTercero, 20, yPos);
 
-        yPos += lineasArticulo3.length * 5 + 15;
-
-        // Párrafo legal 1
-        doc.setFont('helvetica', 'bold');
-        doc.text('Parágrafo 1.', 20, yPos);
-        doc.setFont('helvetica', 'normal');
-
-        const textoParrafo1 = `Para legalizar el proceso de matrícula tanto académica como financiera, deberá cancelar los derechos pecuniarios correspondientes antes del 28 de ${mes} de ${año}.`;
-        const lineasParrafo1 = doc.splitTextToSize(textoParrafo1, 160);
-        doc.text(lineasParrafo1, 45, yPos);
-
-        yPos += lineasParrafo1.length * 5 + 5;
-
-        // Párrafo legal 2
-        doc.setFont('helvetica', 'bold');
-        doc.text('Parágrafo 2.', 20, yPos);
-        doc.setFont('helvetica', 'normal');
-
-        const textoParrafo2 = `El aspirante/estudiante tendrá derecho a solicitar la revisión del estudio, para lo cual tendrá un plazo máximo de ocho días siguientes a su notificación, siempre y cuando esta revisión se refiera a la documentación entregada inicialmente. Cuando el aspirante/estudiante desee incorporar nuevos contenidos, se debe proceder a solicitar y realizar un nuevo estudio de homologación.`;
-        const lineasParrafo2 = doc.splitTextToSize(textoParrafo2, 160);
-        doc.text(lineasParrafo2, 45, yPos);
-
-        yPos += lineasParrafo2.length * 5 + 10;
-
-        // Artículo Cuarto
-        doc.setFont('helvetica', 'bold');
-        doc.text('ARTÍCULO 4°.', 20, yPos);
-        doc.setFont('helvetica', 'normal');
-
-        const textoArticuloCuarto = "La presente resolución rige a partir de la fecha de su expedición.";
-        doc.text(textoArticuloCuarto, 45, yPos);
-
-        yPos += 15;
-
-        // Si las firmas no caben, añadir nueva página
-        if (yPos > 220) {
-            doc.addPage();
-            yPos = 20;
-        }
+        yPos += 20;
 
         // Comuníquese y cúmplase
         doc.setFont('helvetica', 'bold');
-        doc.text('NOTIFÍQUESE Y CÚMPLASE', 105, yPos, { align: 'center' });
+        doc.text('COMUNÍQUESE Y CÚMPLASE', 105, yPos, { align: 'center' });
 
         yPos += 10;
 
+        // Fecha de expedición
         doc.setFont('helvetica', 'normal');
-        doc.text(`Popayán, ${dia} ${mes.toUpperCase().substring(0, 3)}. ${año}`, 105, yPos, { align: 'center' });
+        doc.text(`Dada en Popayán, a los ${dia} días del mes de ${mes} de ${año}.`, 105, yPos, { align: 'center' });
 
-        yPos += 25;
+        yPos += 30;
 
-        // Sección de firmas - posiciones fijas
-        const yPosFirmas = yPos;
-        const espacioFirma = 70; // Espacio horizontal entre firmas
+        const espacioFirma = 90;
 
-        // Asegurarse de que las firmas queden en la misma página
-        if (yPos > 220) {
-            doc.addPage();
-            yPos = 40;
-        }
+        // Rectángulos de fondo para área de firmas - mejorados
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2], 0.3);
+        doc.roundedRect(105 - espacioFirma / 2 - 40, yPos - 20, 80, 70, 3, 3, 'F');  // Aumentado altura
+        doc.roundedRect(105 + espacioFirma / 2 - 40, yPos - 20, 80, 70, 3, 3, 'F');  // Aumentado altura
 
-        // Firmas - siempre en posiciones fijas
-        if (window.firmaVicerrectorData && esVersionFinal) {
-            try {
-                doc.addImage(window.firmaVicerrectorData, 'PNG', (105 + espacioFirma / 2) - 25, yPos - 15, 50, 20);
-            } catch (error) {
-                console.log('Error al agregar firma del vicerrector al PDF:', error);
+        // Agregar firmas con mejor posicionamiento
+        try {
+            // Firma del coordinador
+            if (window.firmaCoordinadorData) {
+                doc.addImage(
+                    window.firmaCoordinadorData,
+                    'PNG',
+                    (105 - espacioFirma / 2) - 25,
+                    yPos - 10,  // Ajustado
+                    50,
+                    25  // Aumentado tamaño
+                );
             }
-        }
 
-        if (window.firmaCoordinadorData) {
-            try {
-                doc.addImage(window.firmaCoordinadorData, 'PNG', (105 - espacioFirma / 2) - 25, yPos - 15, 50, 20);
-            } catch (error) {
-                console.log('Error al agregar firma del coordinador al PDF:', error);
+            // Firma del vicerrector si estamos en esa vista
+            if (esVistaVicerrector && window.firmaVicerrectorData) {
+                doc.addImage(
+                    window.firmaVicerrectorData,
+                    'PNG',
+                    (105 + espacioFirma / 2) - 25,
+                    yPos - 10,  // Ajustado
+                    50,
+                    25  // Aumentado tamaño
+                );
             }
+        } catch (error) {
+            console.error('Error al agregar firmas:', error);
         }
 
         // Líneas para firmas
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.3);
-        doc.line(105 - espacioFirma / 2 - 35, yPos + 10, 105 - espacioFirma / 2 + 35, yPos + 10); // Línea izquierda
-        doc.line(105 + espacioFirma / 2 - 35, yPos + 10, 105 + espacioFirma / 2 + 35, yPos + 10); // Línea derecha
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.5);
+        doc.line(105 - espacioFirma / 2 - 35, yPos + 20, 105 - espacioFirma / 2 + 35, yPos + 20);  // Ajustado
+        doc.line(105 + espacioFirma / 2 - 35, yPos + 20, 105 + espacioFirma / 2 + 35, yPos + 20);  // Ajustado
 
         // Nombres y cargos
         doc.setFont('helvetica', 'bold');
-        doc.text('JUAN PABLO DIAGO RODRÍGUEZ', 105 - espacioFirma / 2, yPos + 20, { align: 'center' });
-        doc.text('ISABEL RAMIREZ MEJIA', 105 + espacioFirma / 2, yPos + 20, { align: 'center' });
+        doc.setFontSize(9);
+        doc.text('JUAN PABLO DIAGO RODRÍGUEZ', 105 - espacioFirma / 2, yPos + 30, { align: 'center' });  // Ajustado
+        doc.text('ISABEL RAMIREZ MEJIA', 105 + espacioFirma / 2, yPos + 30, { align: 'center' });  // Ajustado
 
-        yPos += 25;
-
+        yPos += 40;  // Ajustado
         doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
         doc.text(`Decano Facultad ${programa}`, 105 - espacioFirma / 2, yPos, { align: 'center' });
         doc.text('Vicerrectora Académica', 105 + espacioFirma / 2, yPos, { align: 'center' });
-
-        yPos += 15;
-
-        // Sección de notificación
-        doc.text(`Notificado (a):`, 20, yPos);
-        yPos += 7;
-
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${estudiante.toUpperCase()}`, 20, yPos);
-        yPos += 7;
-
-        doc.setFont('helvetica', 'normal');
-        doc.text(`${identificacion}`, 20, yPos);
-        yPos += 7;
-
-        doc.text(`Fecha de notificación: ${dia}-${mes.substring(0, 3)}-${año}`, 20, yPos);
-
-        // Sección de copias
-        yPos += 15;
-        doc.setFontSize(8);
-        doc.text('Copia:', 20, yPos);
-        yPos += 5;
-        doc.text('Vicerrectoría Académica', 30, yPos);
-        yPos += 5;
-        doc.text('Oficina de Admisiones', 30, yPos);
-        yPos += 5;
-        doc.text('Oficina de Control y Registro (Hoja de Vida estudiante)', 30, yPos);
-        yPos += 5;
-        doc.text('Oficina de Archivo', 30, yPos);
 
         // Pie de página para todas las páginas
         const totalPages = doc.internal.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
 
-            // Línea de separación para pie de página
-            doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
-            doc.setLineWidth(0.5);
-            doc.line(20, 260, 190, 260);
-
-            doc.setFontSize(7); // Reducir tamaño para el pie de página
+            // Pie de página
+            doc.setFontSize(7);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(50, 50, 50); // Gris más oscuro para mejor legibilidad
+            doc.setTextColor(100, 100, 100);
 
-            // Datos de contacto
-            doc.text('Lic. De Funcionamiento: 12321/79. Resolución MEN Nº. 677 de 2023. Código SNIES: 2849', 105, 265, { align: 'center' });
-            doc.text('Sede principal – Calle 5 Nº 3 – 85 Centro.', 105, 269, { align: 'center' });
-            doc.text('PBX: 602 8222295 – WhatsApp 314 639 54 95 – 320 675 04 64 A.A. 043 Popayán - Cauca - Colombia.', 105, 273, { align: 'center' });
-            doc.text('www.uniautonoma.edu.co - Email: recepcion@uniautonoma.edu.co', 105, 277, { align: 'center' });
+            const footerY = 265;
+            doc.text('Lic. De Funcionamiento: 12321/79. Resolución MEN Nº. 677 de 2023. Código SNIES: 2849', 105, footerY, { align: 'center' });
+            doc.text('Sede principal – Calle 5 Nº 3 – 85 Centro. Popayán - Cauca - Colombia.', 105, footerY + 5, { align: 'center' });
 
             // Número de página
-            doc.setFontSize(8);
+            doc.setFontSize(7);
             doc.setFont('helvetica', 'bold');
-            doc.text(`Página ${i} de ${totalPages}`, 185, 277, { align: 'right' });
-
-            // Restaurar color
-            doc.setTextColor(0, 0, 0);
+            doc.text(`Página ${i} de ${totalPages}`, 180, footerY + 10, { align: 'right' });
         }
 
-        // Mostrar preview con mejor tamaño
-        const pdfPreview = document.getElementById('pdf-preview-content');
-        const iframe = document.createElement('iframe');
-        iframe.style.width = '100%';
-        iframe.style.height = '600px'; // Mayor altura para mejor visualización
-        iframe.style.border = '1px solid #ddd';
-        iframe.style.borderRadius = '4px';
-        iframe.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-        iframe.src = doc.output('datauristring');
-        pdfPreview.innerHTML = '';
-        pdfPreview.appendChild(iframe);
+        // Mostrar PDF en el modal
+        mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector);
 
-        // Mostrar modal
-        $('#pdf-preview-modal').modal('show');
+        return true;
+
+    } catch (error) {
+        console.error('Error al generar PDF con datos:', error);
+        mostrarAlerta(`Error al generar PDF: ${error.message}`, 'danger');
+
+        // Restaurar botón
+        const btnGenerar = document.getElementById('btn-generar-pdf');
+        if (btnGenerar) {
+            btnGenerar.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> Generar Resolución PDF';
+            btnGenerar.disabled = false;
+        }
+
+        return false;
+    }
+}
+
+// Función para mostrar el PDF en el modal y guardar SOLO la versión final
+function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
+    try {
+        // Crear base64 del PDF
+        const pdfData = doc.output('datauristring');
+
+        // Mostrar preview
+        const pdfPreview = document.getElementById('pdf-preview-content');
+        if (pdfPreview) {
+            pdfPreview.innerHTML = '';
+
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '600px';
+            iframe.style.border = '1px solid #ddd';
+            iframe.src = pdfData;
+
+            pdfPreview.appendChild(iframe);
+
+            // Mostrar modal
+            $('#pdf-preview-modal').modal('show');
+        } else {
+            throw new Error('No se encontró el elemento pdf-preview-content');
+        }
+
+        // IMPORTANTE: Subir el PDF final con todas las firmas
+        // Solo si es la vista del vicerrector (donde tenemos ambas firmas)
+        if (esVistaVicerrector) {
+            // Obtener el ID de homologación
+            let id = null;
+            if (typeof homologacionId !== 'undefined' && homologacionId) {
+                id = homologacionId;
+            } else if (typeof cargarHomologacionId === 'function') {
+                id = cargarHomologacionId();
+            } else {
+                // Define la función si no existe
+                window.cargarHomologacionId = function() {
+                    return new URLSearchParams(window.location.search).get('id') ||
+                          document.querySelector('[data-homologacion-id]')?.dataset.homologacionId;
+                };
+                id = cargarHomologacionId();
+            }
+
+            if (!id) {
+                console.error('No se pudo obtener el ID de homologación para guardar el PDF');
+                mostrarAlerta('No se pudo obtener el ID de homologación para guardar el PDF', 'warning');
+            } else {
+                // Normalizar el ID si es necesario
+                let apiHomologacionId = id;
+                if (typeof normalizarHomologacionId === 'function') {
+                    apiHomologacionId = normalizarHomologacionId(id);
+                } else if (typeof window.normalizarHomologacionId === 'function') {
+                    apiHomologacionId = window.normalizarHomologacionId(id);
+                }
+
+                // Crear archivo PDF para guardar - Asegurarnos que sea el PDF completo con todas las firmas
+                const pdfBlob = doc.output('blob');
+                const fecha = new Date().toISOString().split('T')[0];
+                const nombreArchivo = `resolucion_homologacion_FINAL_${apiHomologacionId}_${fecha}.pdf`;
+                const pdfFile = new File([pdfBlob], nombreArchivo, { type: 'application/pdf' });
+
+                // Verificar que la función para subir existe
+                if (typeof subirSoloPDFResolucion !== 'function') {
+                    console.error('La función subirSoloPDFResolucion no está disponible');
+                    mostrarAlerta('No se pudo guardar el PDF final. La función de subida no está disponible.', 'danger');
+                } else {
+                    // Subir el PDF FINAL con TODAS LAS FIRMAS al servidor
+                    subirSoloPDFResolucion(apiHomologacionId, pdfFile)
+                        .then(data => {
+                            console.log('PDF FINAL con TODAS LAS FIRMAS subido exitosamente:', data);
+                            if (typeof actualizarInterfazConPDF === 'function') {
+                                actualizarInterfazConPDF(data);
+                            }
+                            mostrarAlerta('PDF con TODAS las firmas guardado correctamente en el sistema', 'success');
+                        })
+                        .catch(error => {
+                            console.error('Error al subir PDF FINAL:', error);
+                            mostrarAlerta(`Error al guardar el PDF en el sistema: ${error.message}`, 'danger');
+                        });
+                }
+            }
+        } else {
+            console.log('Vista de coordinador: PDF mostrado pero NO guardado en el backend (se guardará en la fase final con vicerrector)');
+        }
 
         // Configurar botón de confirmar
-        document.getElementById('btn-confirmar-pdf').onclick = function () {
-            // Nombre de archivo con identificador de version final o coordinador
-            const prefijo = esVersionFinal ? 'Homologacion_Final' : 'Homologacion_Coordinador';
-            const nombreArchivo = `${prefijo}_${estudiante.replace(/\s+/g, '_')}_${identificacion}.pdf`;
-            doc.save(nombreArchivo);
-            $('#pdf-preview-modal').modal('hide');
+        const btnConfirmar = document.getElementById('btn-confirmar-pdf');
+        if (btnConfirmar) {
+            // Definir la acción según la vista
+            if (esVistaVicerrector) {
+                btnConfirmar.onclick = function() {
+                    // Cerrar el modal
+                    $('#pdf-preview-modal').modal('hide');
 
-            // Si es la versión del coordinador, mostrar mensaje de éxito
-            if (!esVersionFinal) {
-                mostrarAlerta('Documento generado y listo para revisión del Vicerrector', 'success');
+                    // Descargar PDF final para el usuario
+                    const nombreArchivo = `Homologacion_Final_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+                    doc.save(nombreArchivo);
+
+                    // Mostrar mensaje de éxito
+                    mostrarAlerta('Resolución de homologación finalizada y guardada correctamente', 'success');
+                };
             } else {
-                mostrarAlerta('Documento final generado correctamente', 'success');
+                btnConfirmar.onclick = function() {
+                    // Cerrar el modal
+                    $('#pdf-preview-modal').modal('hide');
+
+                    // Enviar a vicerrector si estamos en la vista de coordinador
+                    if (typeof confirmarYEnviarAVicerrector === 'function') {
+                        // Si la firma del coordinador existe, pasarla a la función
+                        if (window.firmaCoordinadorData) {
+                            confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
+                        } else {
+                            // Intentar generar una firma por defecto
+                            const firmaDefault = typeof generarFirmaDefault === 'function' ? generarFirmaDefault('coordinador') : null;
+                            confirmarYEnviarAVicerrector(firmaDefault);
+                        }
+                    } else {
+                        console.error('La función confirmarYEnviarAVicerrector no está disponible');
+                        mostrarAlerta('No se pudo enviar al vicerrector. La función no está disponible.', 'danger');
+                    }
+
+                    // Descargar PDF para el usuario
+                    const nombreArchivo = `Homologacion_Coordinador_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+                    doc.save(nombreArchivo);
+                };
             }
-        };
+        }
+
+        // Botón para solo descargar sin confirmar
+        const btnDescargar = document.getElementById('btn-descargar-solo-pdf');
+        if (btnDescargar) {
+            btnDescargar.onclick = function() {
+                const prefijo = esVistaVicerrector ? 'Homologacion_Final' : 'Homologacion_Coordinador';
+                const nombreArchivo = `${prefijo}_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+                doc.save(nombreArchivo);
+                mostrarAlerta('PDF descargado correctamente', 'success');
+            };
+        }
+
+        // Restaurar botón de generar PDF
+        const btnGenerar = document.getElementById('btn-generar-pdf');
+        if (btnGenerar) {
+            btnGenerar.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> Generar Resolución PDF';
+            btnGenerar.disabled = false;
+        }
+
+        return true;
     } catch (error) {
-        console.error('Error al generar PDF:', error);
-        mostrarAlerta('Error al generar PDF: ' + error.message, 'danger');
+        console.error('Error al mostrar el PDF en el modal:', error);
+        mostrarAlerta(`Error al mostrar el PDF: ${error.message}`, 'danger');
+
+        // Si hay error, intentar descargar directamente
+        try {
+            const prefijo = esVistaVicerrector ? 'Homologacion_Final' : 'Homologacion_Coordinador';
+            const nombreArchivo = `${prefijo}_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+            doc.save(nombreArchivo);
+            mostrarAlerta('PDF generado y descargado directamente', 'warning');
+            return true;
+        } catch (e) {
+            console.error('Error al descargar PDF directamente:', e);
+            mostrarAlerta('No se pudo generar el PDF', 'danger');
+            return false;
+        }
     }
 }
-// Función auxiliar para mostrar alertas
+
+/**
+ * Configura el botón de descargar PDF para guardar la ruta en la API
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
+    if (btnDescargarPDF) {
+        btnDescargarPDF.addEventListener('click', descargarPDF);
+        console.log('Botón de descargar PDF configurado correctamente');
+    } else {
+        console.log('Botón de descargar PDF no encontrado en esta página');
+    }
+});
+
+
+
+
+/**
+ * Sube solo el PDF de resolución al endpoint específico
+ * @param {string} homologacionId - ID de la homologación
+ * @param {File} pdfFile - El archivo PDF
+ * @returns {Promise} - Promesa con el resultado de la operación
+ */
+function subirSoloPDFResolucion(homologacionId, pdfFile) {
+    console.log('Iniciando subida de PDF de resolución...');
+
+    // Verificar que tengamos un ID válido
+    if (!homologacionId) {
+        // Define la función si no existe
+        if (typeof cargarHomologacionId !== 'function') {
+            window.cargarHomologacionId = function() {
+                return new URLSearchParams(window.location.search).get('id') ||
+                      document.querySelector('[data-homologacion-id]')?.dataset.homologacionId;
+            };
+        }
+        homologacionId = cargarHomologacionId();
+        console.log('ID cargado con cargarHomologacionId:', homologacionId);
+    }
+
+    if (!homologacionId) {
+        return Promise.reject(new Error('ID de homologación no válido. Debe guardar la homologación antes de generar el PDF.'));
+    }
+
+    // Define API_BASE_URL si no existe
+    if (typeof API_BASE_URL === 'undefined') {
+        window.API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
+        console.log('API_BASE_URL definido:', API_BASE_URL);
+    }
+
+    // Normalizar el ID para la API (si es necesario)
+    if (typeof normalizarHomologacionId !== 'function') {
+        window.normalizarHomologacionId = id => id;
+    }
+    const apiHomologacionId = normalizarHomologacionId(homologacionId);
+    console.log('ID normalizado para API:', apiHomologacionId);
+
+    // Verificar que tengamos un archivo válido
+    if (!pdfFile || !(pdfFile instanceof File)) {
+        return Promise.reject(new Error('Archivo PDF no válido'));
+    }
+
+    console.log('Subiendo PDF al servidor:', {
+        endpoint: `${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`,
+        fileName: pdfFile.name,
+        fileSize: pdfFile.size
+    });
+
+    // Crear FormData para el archivo
+    const formData = new FormData();
+    formData.append('ruta_pdf_resolucion', pdfFile);
+
+    // Obtener el token CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!csrfToken) {
+        console.warn('No se encontró token CSRF en el documento');
+    }
+
+    // Verificar conectividad con el servidor antes de la subida
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al verificar conectividad: ${response.status}`);
+        }
+        console.log('Conectividad con el servidor verificada, procediendo con la subida');
+
+        // Ahora intentar con el endpoint específico para PDF
+        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken || ''
+            },
+            body: formData
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Respuesta del servidor:', text);
+                throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta exitosa:', data);
+        actualizarInterfazConPDF(data);
+        return data;
+    })
+    .catch(error => {
+        console.error('Error en la operación de subida:', error);
+        // Si el error es por conectividad, intentar el método completo
+        if (error.message.includes('conectividad') || error.message.includes('Failed to fetch')) {
+            console.log('Intentando método alternativo debido a problemas de conexión...');
+            return intentarMetodoCompleto(apiHomologacionId, pdfFile);
+        }
+        throw error;
+    });
+}
+/**
+ * Método que implementa la misma lógica de guardarHomologaciones para subir el PDF
+ * @param {string} homologacionId - ID de homologación
+ * @param {File} pdfFile - Archivo PDF
+ * @returns {Promise} - Promesa con el resultado
+ */
+function intentarMetodoCompleto(homologacionId, pdfFile) {
+    console.log('Utilizando método completo para subir PDF...');
+
+    // Obtener datos actuales de homologaciones
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data || !data.datos) {
+            throw new Error('No se pudieron obtener los datos de la homologación');
+        }
+
+        console.log('Datos obtenidos del servidor:', data.datos);
+
+        // Preparar un array válido de homologaciones basado en los datos existentes
+        let homologacionesArray = [];
+
+        if (data.datos.homologaciones && Array.isArray(data.datos.homologaciones)) {
+            homologacionesArray = data.datos.homologaciones.map(h => ({
+                asignatura_origen_id: h.asignatura_origen_id,
+                asignatura_destino_id: h.asignatura_destino_id || 1, // Asegurar que sea entero
+                nota_destino: h.nota_destino || "0",
+                comentarios: h.comentarios || ''
+            }));
+        } else if (data.datos.asignaturas_origen && data.datos.asignaturas_destino) {
+            homologacionesArray = data.datos.asignaturas_origen.map((asignatura, index) => {
+                const destino = data.datos.asignaturas_destino[index] || {};
+                return {
+                    asignatura_origen_id: asignatura.id,
+                    asignatura_destino_id: destino.id || 1, // Asegurar que sea entero
+                    nota_destino: destino.nota_destino || "0",
+                    comentarios: destino.comentarios || ''
+                };
+            });
+        }
+
+        // Si aún no tenemos homologaciones, crear una entrada mínima válida
+        if (homologacionesArray.length === 0) {
+            homologacionesArray = [{
+                asignatura_origen_id: 1,
+                asignatura_destino_id: 1, // Entero válido
+                nota_destino: "0",
+                comentarios: ''
+            }];
+        }
+
+        console.log('Homologaciones preparadas para enviar:', homologacionesArray);
+
+        // Crear FormData con los datos necesarios
+        const formData = new FormData();
+        formData.append('_method', 'PUT'); // Simular PUT para envío de archivos
+        formData.append('ruta_pdf_resolucion', pdfFile);
+
+        // Asegurar que homologaciones se envía correctamente como array
+        homologacionesArray.forEach((item, index) => {
+            Object.keys(item).forEach(key => {
+                formData.append(`homologaciones[${index}][${key}]`, item[key]);
+            });
+        });
+
+        // Verificar los datos del FormData (solo para debug)
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        // Enviar la solicitud con el archivo PDF y los datos existentes
+        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
+            method: 'POST', // Usando POST con _method=PUT
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: formData
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al subir PDF: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Crear un objeto de respuesta estandarizado
+        return {
+            mensaje: data.mensaje || 'PDF actualizado correctamente',
+            ruta_pdf_resolucion: data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion) || '',
+            url_pdf_resolucion: data.url_pdf_resolucion || (data.ruta_pdf_resolucion ? `/storage/${data.ruta_pdf_resolucion}` : '')
+        };
+    });
+}
+
+function descargarPDF() {
+    console.log('Iniciando generación de PDF de resolución...');
+
+    // Asegurarnos de tener el ID necesario
+    let id = null;
+
+    // Intentar obtener el ID de diferentes fuentes
+    if (typeof homologacionId !== 'undefined' && homologacionId) {
+        id = homologacionId;
+        console.log('Usando homologacionId global:', id);
+    } else {
+        id = cargarHomologacionId();
+        console.log('ID cargado con cargarHomologacionId:', id);
+    }
+
+    if (!id) {
+        console.error('No se pudo obtener el ID de homologación.');
+        alert('Error: Debe guardar la homologación antes de generar el PDF');
+        return;
+    }
+
+    // Normalizar el ID para la API (si es necesario)
+    const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(id) : id;
+    console.log('ID normalizado para API:', apiHomologacionId);
+
+    // Mostrar indicador de carga
+    const btnDescargar = document.getElementById('btn-descargar-pdf');
+    if (!btnDescargar) {
+        console.error('No se encontró el botón de descargar PDF');
+        return;
+    }
+
+    const textoOriginal = btnDescargar.innerHTML;
+    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+    btnDescargar.disabled = true;
+
+    try {
+        // Obtener datos de homologación para generar el PDF
+        fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos para generación de PDF obtenidos:', data);
+
+            if (!data || !data.datos) {
+                throw new Error('No se pudieron obtener los datos de la homologación');
+            }
+
+            const homologacionData = data.datos;
+
+            // Preparar datos para la generación del PDF
+            const datosEstudiante = {
+                nombre: homologacionData.estudiante || 'Estudiante',
+                identificacion: homologacionData.numero_identificacion || 'No disponible'
+            };
+
+            const datosSolicitud = {
+                universidad_origen: homologacionData.universidad_origen || 'Universidad Externa',
+                programa_destino: homologacionData.programa_destino || 'Programa Actual'
+            };
+
+            // Preparar datos de homologación
+            const homologaciones = [];
+            if (homologacionData.asignaturas_origen && homologacionData.asignaturas_destino) {
+                homologacionData.asignaturas_origen.forEach((asignatura, index) => {
+                    const destino = homologacionData.asignaturas_destino[index] || {};
+
+                    homologaciones.push({
+                        asignatura_origen_nombre: asignatura.nombre || 'No disponible',
+                        codigo_destino: destino.codigo || 'N/A',
+                        asignatura_destino_nombre: destino.nombre || 'No disponible',
+                        semestre: destino.semestre || 'N/A',
+                        creditos: asignatura.creditos || destino.creditos || 'N/A',
+                        nota_destino: destino.nota_destino || 'N/A'
+                    });
+                });
+            }
+
+            const datosHomologacion = {
+                homologaciones: homologaciones
+            };
+
+            // Crear las firmas si no existen
+            if (!window.firmaCoordinadorData) {
+                window.firmaCoordinadorData = generarFirmaDefault('coordinador');
+                console.log('Se generó una firma por defecto para el coordinador');
+            }
+
+            // Verificar si generarPDFConDatos está disponible
+            if (typeof generarPDFConDatos === 'function') {
+                // Generar el PDF con los datos - NO se sobrescribe mostrarPDFEnModal aquí
+                console.log('Llamando a generarPDFConDatos...');
+                const resultadoGeneracion = generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, false);
+
+                if (!resultadoGeneracion) {
+                    throw new Error('No se pudo generar el PDF con datos');
+                }
+            } else {
+                throw new Error('Función generarPDFConDatos no disponible');
+            }
+        })
+        .catch(error => {
+            console.error('Error al generar o procesar el PDF:', error);
+            alert(`Error: ${error.message}`);
+
+            // Restaurar botón
+            if (btnDescargar) {
+                btnDescargar.innerHTML = textoOriginal;
+                btnDescargar.disabled = false;
+            }
+        });
+    } catch (error) {
+        console.error('Error en la función descargarPDF:', error);
+        alert(`Error al generar el PDF: ${error.message}`);
+
+        // Restaurar botón
+        if (btnDescargar) {
+            btnDescargar.innerHTML = textoOriginal;
+            btnDescargar.disabled = false;
+        }
+    }
+}
+
+/**
+ * Actualiza la interfaz de usuario con la información del PDF
+ * @param {Object} data - Datos de respuesta del servidor
+ */
+function actualizarInterfazConPDF(data) {
+    try {
+        console.log('Actualizando interfaz con datos del PDF:', data);
+
+        // Actualizar link del PDF si existe en la interfaz
+        const pdfLink = document.getElementById('link-pdf-resolucion');
+        if (pdfLink) {
+            let rutaPDF = '';
+
+            if (data.url_pdf_resolucion) {
+                rutaPDF = data.url_pdf_resolucion;
+            } else if (data.ruta_pdf_resolucion) {
+                rutaPDF = `/storage/${data.ruta_pdf_resolucion}`;
+            } else if (data.datos && data.datos.ruta_pdf_resolucion) {
+                rutaPDF = `/storage/${data.datos.ruta_pdf_resolucion}`;
+            } else if (data.datos && data.datos.url_pdf_resolucion) {
+                rutaPDF = data.datos.url_pdf_resolucion;
+            }
+
+            if (rutaPDF) {
+                pdfLink.href = rutaPDF;
+                pdfLink.style.display = 'inline';
+
+                // Actualizar texto del enlace si tiene un span
+                const pdfLinkText = pdfLink.querySelector('span');
+                if (pdfLinkText) {
+                    pdfLinkText.textContent = 'Ver PDF de resolución';
+                }
+            }
+        }
+
+        // Actualizar campo oculto si existe
+        const pdfPathField = document.getElementById('ruta_pdf_resolucion');
+        const rutaPDF = data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion);
+        if (pdfPathField && rutaPDF) {
+            pdfPathField.value = rutaPDF;
+        }
+
+        // Actualizar cualquier elemento que muestre el nombre del archivo
+        const pdfFileName = document.getElementById('pdf-file-name');
+        if (pdfFileName && rutaPDF) {
+            const nombreArchivo = rutaPDF.split('/').pop();
+            pdfFileName.textContent = nombreArchivo;
+        }
+
+        // Actualizar estado visual en la interfaz
+        const estadoPDF = document.getElementById('estado-pdf');
+        if (estadoPDF) {
+            estadoPDF.innerHTML = '<span class="badge badge-success">PDF Cargado</span>';
+        }
+
+        // Mostrar contenedor de PDF si existe
+        const pdfContainer = document.getElementById('pdf-container');
+        if (pdfContainer) {
+            pdfContainer.style.display = 'block';
+        }
+    } catch (e) {
+        console.error('Error al actualizar interfaz con datos del PDF:', e);
+    }
+}
+
+/**
+ * Función para definir alertaEnProceso si no existe
+ */
+if (typeof alertaEnProceso !== 'function') {
+    function alertaEnProceso(mensaje) {
+        console.log('Alerta en proceso:', mensaje);
+        alert(mensaje);
+    }
+}
+
+/**
+ * Configura el botón de descargar PDF para guardar la ruta en la API
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
+    if (btnDescargarPDF) {
+        btnDescargarPDF.addEventListener('click', descargarPDF);
+        console.log('Botón de descargar PDF configurado correctamente');
+    } else {
+        console.log('Botón de descargar PDF no encontrado en esta página');
+    }
+});
+
+
+
+
+/**
+ * Sube solo el PDF de resolución al endpoint específico
+ * @param {string} homologacionId - ID de la homologación
+ * @param {File} pdfFile - El archivo PDF
+ * @returns {Promise} - Promesa con el resultado de la operación
+ */
+function subirSoloPDFResolucion(homologacionId, pdfFile) {
+    console.log('Iniciando subida de PDF de resolución...');
+
+    // Verificar que tengamos un ID válido
+    if (!homologacionId) {
+        homologacionId = cargarHomologacionId();
+        console.log('ID cargado con cargarHomologacionId:', homologacionId);
+    }
+
+    if (!homologacionId) {
+        return Promise.reject(new Error('ID de homologación no válido. Debe guardar la homologación antes de generar el PDF.'));
+    }
+
+    // Normalizar el ID para la API (si es necesario)
+    const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(homologacionId) : homologacionId;
+    console.log('ID normalizado para API:', apiHomologacionId);
+
+    // Verificar que tengamos un archivo válido
+    if (!pdfFile || !(pdfFile instanceof File)) {
+        return Promise.reject(new Error('Archivo PDF no válido'));
+    }
+
+    console.log('Subiendo PDF al servidor:', {
+        endpoint: `${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`,
+        fileName: pdfFile.name,
+        fileSize: pdfFile.size
+    });
+
+    // Crear FormData para el archivo
+    const formData = new FormData();
+    formData.append('ruta_pdf_resolucion', pdfFile);
+
+    // Obtener el token CSRF
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    // Intentar con el endpoint específico para PDF primero
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}/pdf`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.warn(`Endpoint específico falló: ${response.status}. Intentando método alternativo...`);
+            return response.text().then(text => {
+                console.error('Respuesta del servidor:', text);
+                // Intentar método alternativo
+                return intentarMetodoCompleto(apiHomologacionId, pdfFile);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta exitosa:', data);
+        return data;
+    });
+}
+
+/**
+ * Método que implementa la misma lógica de guardarHomologaciones para subir el PDF
+ * @param {string} homologacionId - ID de homologación
+ * @param {File} pdfFile - Archivo PDF
+ * @returns {Promise} - Promesa con el resultado
+ */
+function intentarMetodoCompleto(homologacionId, pdfFile) {
+    console.log('Utilizando método completo para subir PDF...');
+
+    // Obtener datos actuales de homologaciones
+    return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data || !data.datos) {
+            throw new Error('No se pudieron obtener los datos de la homologación');
+        }
+
+        console.log('Datos obtenidos del servidor:', data.datos);
+
+        // Preparar un array válido de homologaciones basado en los datos existentes
+        let homologacionesArray = [];
+
+        if (data.datos.homologaciones && Array.isArray(data.datos.homologaciones)) {
+            homologacionesArray = data.datos.homologaciones.map(h => ({
+                asignatura_origen_id: h.asignatura_origen_id,
+                asignatura_destino_id: h.asignatura_destino_id || 1, // Asegurar que sea entero
+                nota_destino: h.nota_destino || "0",
+                comentarios: h.comentarios || ''
+            }));
+        } else if (data.datos.asignaturas_origen && data.datos.asignaturas_destino) {
+            homologacionesArray = data.datos.asignaturas_origen.map((asignatura, index) => {
+                const destino = data.datos.asignaturas_destino[index] || {};
+                return {
+                    asignatura_origen_id: asignatura.id,
+                    asignatura_destino_id: destino.id || 1, // Asegurar que sea entero
+                    nota_destino: destino.nota_destino || "0",
+                    comentarios: destino.comentarios || ''
+                };
+            });
+        }
+
+        // Si aún no tenemos homologaciones, crear una entrada mínima válida
+        if (homologacionesArray.length === 0) {
+            homologacionesArray = [{
+                asignatura_origen_id: 1,
+                asignatura_destino_id: 1, // Entero válido
+                nota_destino: "0",
+                comentarios: ''
+            }];
+        }
+
+        console.log('Homologaciones preparadas para enviar:', homologacionesArray);
+
+        // Crear FormData con los datos necesarios
+        const formData = new FormData();
+        formData.append('_method', 'PUT'); // Simular PUT para envío de archivos
+        formData.append('ruta_pdf_resolucion', pdfFile);
+
+        // Asegurar que homologaciones se envía correctamente como array
+        homologacionesArray.forEach((item, index) => {
+            Object.keys(item).forEach(key => {
+                formData.append(`homologaciones[${index}][${key}]`, item[key]);
+            });
+        });
+
+        // Verificar los datos del FormData (solo para debug)
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        // Enviar la solicitud con el archivo PDF y los datos existentes
+        return fetch(`${API_BASE_URL}/homologacion-asignaturas/${homologacionId}`, {
+            method: 'POST', // Usando POST con _method=PUT
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: formData
+        });
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Error al subir PDF: ${response.status} - ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Crear un objeto de respuesta estandarizado
+        return {
+            mensaje: data.mensaje || 'PDF actualizado correctamente',
+            ruta_pdf_resolucion: data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion) || '',
+            url_pdf_resolucion: data.url_pdf_resolucion || (data.ruta_pdf_resolucion ? `/storage/${data.ruta_pdf_resolucion}` : '')
+        };
+    });
+}
+
+function descargarPDF() {
+    console.log('Iniciando generación de PDF de resolución...');
+
+    // Asegurarnos de tener el ID necesario
+    let id = null;
+
+    // Intentar obtener el ID de diferentes fuentes
+    if (typeof homologacionId !== 'undefined' && homologacionId) {
+        id = homologacionId;
+        console.log('Usando homologacionId global:', id);
+    } else {
+        id = cargarHomologacionId();
+        console.log('ID cargado con cargarHomologacionId:', id);
+    }
+
+    if (!id) {
+        console.error('No se pudo obtener el ID de homologación.');
+        alert('Error: Debe guardar la homologación antes de generar el PDF');
+        return;
+    }
+
+    // Normalizar el ID para la API (si es necesario)
+    const apiHomologacionId = normalizarHomologacionId ? normalizarHomologacionId(id) : id;
+    console.log('ID normalizado para API:', apiHomologacionId);
+
+    // Mostrar indicador de carga
+    const btnDescargar = document.getElementById('btn-descargar-pdf');
+    if (!btnDescargar) {
+        console.error('No se encontró el botón de descargar PDF');
+        return;
+    }
+
+    const textoOriginal = btnDescargar.innerHTML;
+    btnDescargar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando PDF...';
+    btnDescargar.disabled = true;
+
+    try {
+        // Obtener datos de homologación para generar el PDF
+        fetch(`${API_BASE_URL}/homologacion-asignaturas/${apiHomologacionId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Error al obtener datos: ${response.status} - ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Datos para generación de PDF obtenidos:', data);
+
+            if (!data || !data.datos) {
+                throw new Error('No se pudieron obtener los datos de la homologación');
+            }
+
+            const homologacionData = data.datos;
+
+            // Preparar datos para la generación del PDF
+            const datosEstudiante = {
+                nombre: homologacionData.estudiante || 'Estudiante',
+                identificacion: homologacionData.numero_identificacion || 'No disponible'
+            };
+
+            const datosSolicitud = {
+                universidad_origen: homologacionData.universidad_origen || 'Universidad Externa',
+                programa_destino: homologacionData.programa_destino || 'Programa Actual'
+            };
+
+            // Preparar datos de homologación
+            const homologaciones = [];
+            if (homologacionData.asignaturas_origen && homologacionData.asignaturas_destino) {
+                homologacionData.asignaturas_origen.forEach((asignatura, index) => {
+                    const destino = homologacionData.asignaturas_destino[index] || {};
+
+                    homologaciones.push({
+                        asignatura_origen_nombre: asignatura.nombre || 'No disponible',
+                        codigo_destino: destino.codigo || 'N/A',
+                        asignatura_destino_nombre: destino.nombre || 'No disponible',
+                        semestre: destino.semestre || 'N/A',
+                        creditos: asignatura.creditos || destino.creditos || 'N/A',
+                        nota_destino: destino.nota_destino || 'N/A'
+                    });
+                });
+            }
+
+            const datosHomologacion = {
+                homologaciones: homologaciones
+            };
+
+            // Crear las firmas si no existen
+            if (!window.firmaCoordinadorData) {
+                window.firmaCoordinadorData = generarFirmaDefault('coordinador');
+                console.log('Se generó una firma por defecto para el coordinador');
+            }
+
+            // Verificar si generarPDFConDatos está disponible
+            if (typeof generarPDFConDatos === 'function') {
+                // Generar el PDF con los datos - NO se sobrescribe mostrarPDFEnModal aquí
+                console.log('Llamando a generarPDFConDatos...');
+                const resultadoGeneracion = generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, false);
+
+                if (!resultadoGeneracion) {
+                    throw new Error('No se pudo generar el PDF con datos');
+                }
+            } else {
+                throw new Error('Función generarPDFConDatos no disponible');
+            }
+        })
+        .catch(error => {
+            console.error('Error al generar o procesar el PDF:', error);
+            alert(`Error: ${error.message}`);
+
+            // Restaurar botón
+            if (btnDescargar) {
+                btnDescargar.innerHTML = textoOriginal;
+                btnDescargar.disabled = false;
+            }
+        });
+    } catch (error) {
+        console.error('Error en la función descargarPDF:', error);
+        alert(`Error al generar el PDF: ${error.message}`);
+
+        // Restaurar botón
+        if (btnDescargar) {
+            btnDescargar.innerHTML = textoOriginal;
+            btnDescargar.disabled = false;
+        }
+    }
+}
+
+/**
+ * Actualiza la interfaz de usuario con la información del PDF
+ * @param {Object} data - Datos de respuesta del servidor
+ */
+function actualizarInterfazConPDF(data) {
+    try {
+        console.log('Actualizando interfaz con datos del PDF:', data);
+
+        // Actualizar link del PDF si existe en la interfaz
+        const pdfLink = document.getElementById('link-pdf-resolucion');
+        if (pdfLink) {
+            let rutaPDF = '';
+
+            if (data.url_pdf_resolucion) {
+                rutaPDF = data.url_pdf_resolucion;
+            } else if (data.ruta_pdf_resolucion) {
+                rutaPDF = `/storage/${data.ruta_pdf_resolucion}`;
+            } else if (data.datos && data.datos.ruta_pdf_resolucion) {
+                rutaPDF = `/storage/${data.datos.ruta_pdf_resolucion}`;
+            } else if (data.datos && data.datos.url_pdf_resolucion) {
+                rutaPDF = data.datos.url_pdf_resolucion;
+            }
+
+            if (rutaPDF) {
+                pdfLink.href = rutaPDF;
+                pdfLink.style.display = 'inline';
+
+                // Actualizar texto del enlace si tiene un span
+                const pdfLinkText = pdfLink.querySelector('span');
+                if (pdfLinkText) {
+                    pdfLinkText.textContent = 'Ver PDF de resolución';
+                }
+            }
+        }
+
+        // Actualizar campo oculto si existe
+        const pdfPathField = document.getElementById('ruta_pdf_resolucion');
+        const rutaPDF = data.ruta_pdf_resolucion || (data.datos && data.datos.ruta_pdf_resolucion);
+        if (pdfPathField && rutaPDF) {
+            pdfPathField.value = rutaPDF;
+        }
+
+        // Actualizar cualquier elemento que muestre el nombre del archivo
+        const pdfFileName = document.getElementById('pdf-file-name');
+        if (pdfFileName && rutaPDF) {
+            const nombreArchivo = rutaPDF.split('/').pop();
+            pdfFileName.textContent = nombreArchivo;
+        }
+
+        // Actualizar estado visual en la interfaz
+        const estadoPDF = document.getElementById('estado-pdf');
+        if (estadoPDF) {
+            estadoPDF.innerHTML = '<span class="badge badge-success">PDF Cargado</span>';
+        }
+
+        // Mostrar contenedor de PDF si existe
+        const pdfContainer = document.getElementById('pdf-container');
+        if (pdfContainer) {
+            pdfContainer.style.display = 'block';
+        }
+    } catch (e) {
+        console.error('Error al actualizar interfaz con datos del PDF:', e);
+    }
+}
+
+/**
+ * Función para definir alertaEnProceso si no existe
+ */
+if (typeof alertaEnProceso !== 'function') {
+    function alertaEnProceso(mensaje) {
+        console.log('Alerta en proceso:', mensaje);
+        alert(mensaje);
+    }
+}
+
+/**
+ * Función auxiliar para mostrar alertas
+ */
 function mostrarAlerta(mensaje, tipo) {
+    console.log(`Alerta [${tipo}]: ${mensaje}`);
+
+    // Usar alertaEnProceso si está disponible
+    if (typeof alertaEnProceso === 'function') {
+        alertaEnProceso(mensaje);
+    } else {
+        alert(mensaje);
+    }
+
+    // Si existe un contenedor de alertas en el DOM, usarlo también
     const alertContainer = document.getElementById('alert-container');
-    if (!alertContainer) return;
+    if (alertContainer) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${mensaje}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        `;
+        alertContainer.appendChild(alertDiv);
 
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
-    alertDiv.role = 'alert';
-    alertDiv.innerHTML = `
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-
-    alertContainer.innerHTML = '';
-    alertContainer.appendChild(alertDiv);
-
-    // Auto cerrar después de 5 segundos
-    setTimeout(() => {
-        alertDiv.classList.remove('show');
-        setTimeout(() => alertContainer.innerHTML = '', 150);
-    }, 5000);
-}
-
-function abrirModalEditarHomologacion(index) {
-    const homologacion = homologaciones[index];
-    abrirModalAgregarHomologacion();
-    document.querySelector('#modal-titulo').textContent = 'Editar Homologación';
-    document.querySelector('#homologacion-index').value = index;
-
-    // Llenar campos con datos de la homologación
-    document.getElementById('asignatura-origen').value = homologacion.asignatura_origen_id;
-    document.getElementById('asignatura-destino').value = homologacion.asignatura_destino_id;
-    document.getElementById('nota-origen').value = homologacion.nota_origen;
-    document.getElementById('nota-homologada').value = homologacion.nota_destino;
-    document.getElementById('creditos-homologados').value = homologacion.creditos;
-    document.getElementById('observacion').value = homologacion.comentarios || '';
-}
-
-function limpiarHomologaciones() {
-    if (confirm('¿Está seguro de limpiar todas las homologaciones?')) {
-        homologaciones = [];
-        renderizarTablaHomologaciones();
-        guardarHomologaciones();
+        // Auto-eliminar después de 5 segundos
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
+        }, 5000);
     }
 }
+
+
+
+/**
+ * Función para configurar el botón de PDF cuando el DOM está listo
+ */
+function configurarBotonPDF() {
+    const btnDescargarPDF = document.getElementById('btn-descargar-pdf');
+    if (btnDescargarPDF) {
+        btnDescargarPDF.addEventListener('click', descargarPDF);
+        console.log('Botón de descargar PDF configurado correctamente');
+    } else {
+        console.log('Botón de descargar PDF no encontrado en esta página');
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', configurarBotonPDF);
+} else {
+    configurarBotonPDF();
+}
+
+
+
+// Reemplazar el event listener existente con esta versión actualizada
+
+
+document.getElementById('btn-limpiar-homologaciones').addEventListener('click', limpiarHomologaciones);
 
 function desactivarControles() {
     document.querySelectorAll('input, button, select').forEach(element => {
@@ -2084,16 +4590,6 @@ function actualizarEstadoUI() {
     }
 }
 
-function actualizarNotasDesdeInputs() {
-    document.querySelectorAll('.nota-input').forEach(input => {
-        const id = input.dataset.index;
-        const valor = parseFloat(input.value);
-
-        if (!isNaN(valor)) {
-            homologaciones[id].nota_destino = valor.toFixed(1);
-        }
-    });
-}
 
 function obtenerInfoAsignatura(tipo, id) {
     // Buscar la asignatura en los arreglos
@@ -2374,3 +4870,120 @@ document.getElementById('btn-confirmar-pdf').addEventListener('click', function 
         btnConfirmarPDF.innerHTML = '<i class="fas fa-check mr-1"></i> Confirmar y Descargar';
     });
 });
+
+
+function mostrarAlerta(mensaje, tipo) {
+    // Prevenir recursión
+    if (alertaEnProceso) {
+        console.error("Prevención de recursión en mostrarAlerta");
+        return;
+    }
+
+    alertaEnProceso = true;
+
+    try {
+        console.log("Mostrando alerta:", mensaje, tipo);
+
+        // Método 1: Usar Bootstrap nativo si está disponible
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            // Crear un toast de Bootstrap 5
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast align-items-center text-white bg-${tipo} border-0`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.setAttribute('aria-live', 'assertive');
+            toastEl.setAttribute('aria-atomic', 'true');
+
+            toastEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${mensaje}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+
+            document.body.appendChild(toastEl);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+
+            // Eliminar después de que se oculte
+            toastEl.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toastEl);
+            });
+        }
+        // Método 2: Enfoque simple, crea un div de alerta básico
+        else {
+            // Usa un ID único para el contenedor de alertas
+            let contenedor = document.getElementById('sistema-alertas');
+            if (!contenedor) {
+                contenedor = document.createElement('div');
+                contenedor.id = 'sistema-alertas';
+                contenedor.style.position = 'fixed';
+                contenedor.style.top = '20px';
+                contenedor.style.right = '20px';
+                contenedor.style.zIndex = '9999';
+                contenedor.style.maxWidth = '300px';
+                document.body.appendChild(contenedor);
+            }
+
+            // Crear elemento de alerta con estilo inline para evitar dependencias
+            const alertaEl = document.createElement('div');
+            alertaEl.style.padding = '15px';
+            alertaEl.style.marginBottom = '10px';
+            alertaEl.style.border = '1px solid transparent';
+            alertaEl.style.borderRadius = '4px';
+            alertaEl.style.opacity = '0';
+            alertaEl.style.transition = 'opacity 0.3s ease-in-out';
+
+            // Establecer colores según el tipo
+            switch (tipo) {
+                case 'success':
+                    alertaEl.style.backgroundColor = '#d4edda';
+                    alertaEl.style.borderColor = '#c3e6cb';
+                    alertaEl.style.color = '#155724';
+                    break;
+                case 'danger':
+                    alertaEl.style.backgroundColor = '#f8d7da';
+                    alertaEl.style.borderColor = '#f5c6cb';
+                    alertaEl.style.color = '#721c24';
+                    break;
+                case 'warning':
+                    alertaEl.style.backgroundColor = '#fff3cd';
+                    alertaEl.style.borderColor = '#ffeeba';
+                    alertaEl.style.color = '#856404';
+                    break;
+                case 'info':
+                default:
+                    alertaEl.style.backgroundColor = '#d1ecf1';
+                    alertaEl.style.borderColor = '#bee5eb';
+                    alertaEl.style.color = '#0c5460';
+                    break;
+            }
+
+            alertaEl.textContent = mensaje;
+            contenedor.appendChild(alertaEl);
+
+            // Hacer visible con un pequeño retraso para que la transición funcione
+            setTimeout(() => {
+                alertaEl.style.opacity = '1';
+            }, 10);
+
+            // Auto-eliminar después de 5 segundos
+            setTimeout(() => {
+                alertaEl.style.opacity = '0';
+                setTimeout(() => {
+                    if (alertaEl.parentNode) {
+                        alertaEl.parentNode.removeChild(alertaEl);
+                    }
+                }, 300);
+            }, 5000);
+        }
+    } catch (e) {
+        // Capturar cualquier error sin llamar a mostrarAlerta para evitar recursión
+        console.error('Error en mostrarAlerta:', e);
+    } finally {
+        // Siempre restablecer la bandera
+        setTimeout(() => {
+            alertaEnProceso = false;
+        }, 100);
+    }
+}
+// DESDE AQUI INICIA

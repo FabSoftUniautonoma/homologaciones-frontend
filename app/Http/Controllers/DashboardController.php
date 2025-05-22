@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function __construct()
     {
         // Configura la URL base de la API (ajustable desde el .env)
-        $this->apiUrl = env('API_URL', 'http://localhost:8000/api');
+        $this->apiUrl = env('API_URL', 'https://homologacionesback.educarenemociones.com/api');
     }
 
     /**
@@ -233,88 +233,146 @@ class DashboardController extends Controller
     /**
      * Actualiza la información del perfil del usuario
      */
-    public function actualizarPerfilUsuario(Request $request, $id)
-    {
-        try {
-            Log::info("Actualizando perfil para usuario ID: {$id}", [
-                'datos' => $request->except(['password'])  // No logueamos contraseñas
-            ]);
+/**
+ * Actualiza la información del perfil del usuario
+ */
+/**
+ * Actualiza la información del perfil del usuario
+ */
+public function actualizarPerfilUsuario(Request $request, $id)
+{
+    try {
+        Log::info("Actualizando perfil para usuario ID: {$id}", [
+            'datos' => $request->except(['password'])  // No logueamos contraseñas
+        ]);
 
-            // Verificar que el ID sea válido
-            if (!$id || !is_numeric($id)) {
-                return response()->json([
-                    'mensaje' => 'ID de usuario inválido',
-                    'error' => 'El ID debe ser un número'
-                ], 400);
-            }
-
-            // Primero obtener datos actuales para asegurar que todos los campos requeridos estén presentes
-            $datosActuales = Http::get($this->apiUrl . '/usuarios/' . $id);
-
-            if (!$datosActuales->successful()) {
-                return response()->json([
-                    'mensaje' => 'No se pudieron obtener los datos actuales del usuario',
-                    'error' => $datosActuales->status() . ': ' . $datosActuales->body()
-                ], $datosActuales->status());
-            }
-
-            $datosUsuario = $datosActuales->json();
-
-            // Combinar datos actuales con los enviados
-            $datosCompletos = array_merge(
-                $datosUsuario['datos'] ?? [],
-                $request->all()
-            );
-
-            // Validar datos mínimos requeridos
-            $validator = Validator::make($datosCompletos, [
-                'email' => 'required|email',
-                'primer_nombre' => 'required|string',
-                'primer_apellido' => 'required|string',
-                'tipo_identificacion' => 'required|string',
-                'numero_identificacion' => 'required|string',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'mensaje' => 'Datos de usuario inválidos',
-                    'error' => $validator->errors()
-                ], 422);
-            }
-
-            $response = Http::timeout(15)
-                ->withHeaders(['Accept' => 'application/json'])
-                ->put($this->apiUrl . '/usuarios/' . $id, $datosCompletos);
-
-            if (!$response->successful()) {
-                Log::error("Error al actualizar perfil de usuario: {$response->status()}", [
-                    'id' => $id,
-                    'respuesta' => $response->body()
-                ]);
-
-                return response()->json([
-                    'mensaje' => 'No se pudo actualizar la información del usuario',
-                    'error' => $response->status() . ': ' . $response->body()
-                ], $response->status());
-            }
-
-            Log::info("Perfil de usuario actualizado exitosamente", ['id' => $id]);
-
+        // Verificar que el ID sea válido
+        if (!$id || !is_numeric($id)) {
             return response()->json([
-                'mensaje' => 'Perfil actualizado correctamente',
-                'datos' => $response->json()
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error("Excepción al actualizar perfil de usuario: {$e->getMessage()}", [
-                'id' => $id,
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return response()->json([
-                'mensaje' => 'Error al conectar con la API',
-                'error' => $e->getMessage()
-            ], 500);
+                'mensaje' => 'ID de usuario inválido',
+                'error' => 'El ID debe ser un número'
+            ], 400);
         }
+
+        // Lista blanca de campos que se pueden actualizar directamente
+        // IMPORTANTE: Solo incluir campos básicos, no campos relacionales
+        $camposPermitidos = [
+            'primer_nombre',
+            'segundo_nombre',
+            'primer_apellido',
+            'segundo_apellido',
+            'email',
+            'tipo_identificacion',
+            'numero_identificacion',
+            'telefono',
+            'direccion'
+        ];
+
+        // Filtrar datos del request para solo incluir los campos permitidos
+        $datosActualizar = [];
+        foreach ($camposPermitidos as $campo) {
+            if ($request->has($campo)) {
+                $datosActualizar[$campo] = $request->input($campo);
+            }
+        }
+
+        // Validar datos básicos
+        $validator = Validator::make($datosActualizar, [
+            'email' => 'required|email',
+            'primer_nombre' => 'required|string',
+            'primer_apellido' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'mensaje' => 'Datos de usuario inválidos',
+                'error' => $validator->errors()
+            ], 422);
+        }
+
+        // Añadimos logs detallados para ver qué estamos enviando
+        Log::info("Datos filtrados para actualizar:", $datosActualizar);
+
+        // Realizar la actualización solo con los campos básicos
+        $response = Http::timeout(15)
+            ->withHeaders(['Accept' => 'application/json'])
+            ->put($this->apiUrl . '/usuarios/' . $id, $datosActualizar);
+
+        if (!$response->successful()) {
+            Log::error("Error al actualizar perfil de usuario: {$response->status()}", [
+                'id' => $id,
+                'respuesta' => $response->body()
+            ]);
+
+            return response()->json([
+                'mensaje' => 'No se pudo actualizar la información del usuario',
+                'error' => $response->status() . ': ' . $response->body()
+            ], $response->status());
+        }
+
+        Log::info("Perfil de usuario actualizado exitosamente", ['id' => $id]);
+
+        return response()->json([
+            'mensaje' => 'Perfil actualizado correctamente',
+            'datos' => $response->json()
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error("Excepción al actualizar perfil de usuario: {$e->getMessage()}", [
+            'id' => $id,
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'mensaje' => 'Error al conectar con la API',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
+
+/**
+ * Obtiene las homologaciones de asignaturas asociadas a una solicitud
+ */
+public function obtenerHomologacionAsignaturas($id)
+{
+    try {
+        Log::info("Obteniendo homologaciones para solicitud ID: {$id}");
+
+        if (!$id || !is_numeric($id)) {
+            return response()->json([
+                'mensaje' => 'ID de solicitud inválido',
+                'error' => 'El ID debe ser un número'
+            ], 400);
+        }
+
+        $response = Http::timeout(15)->get($this->apiUrl . '/homologacion-asignaturas/' . $id);
+
+        if (!$response->successful()) {
+            Log::error("Error al obtener homologaciones de asignatura: {$response->status()}", [
+                'id' => $id,
+                'respuesta' => $response->body()
+            ]);
+
+            return response()->json([
+                'mensaje' => 'No se pudieron obtener las homologaciones de la solicitud',
+                'error' => $response->status() . ': ' . $response->body()
+            ], $response->status());
+        }
+
+        Log::info("Homologaciones de asignatura obtenidas exitosamente", ['id' => $id]);
+        return response()->json($response->json());
+
+    } catch (\Exception $e) {
+        Log::error("Excepción al obtener homologaciones de asignatura: {$e->getMessage()}", [
+            'id' => $id,
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'mensaje' => 'Error al conectar con la API',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }

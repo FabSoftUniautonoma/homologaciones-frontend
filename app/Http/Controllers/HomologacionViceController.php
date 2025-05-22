@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use DB;
@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Solicitud;
+use Exception;
 
-class homologacionviceController extends Controller
+class HomologacionViceController extends Controller
 {
     /**
      * Obtiene la URL base del backend.
@@ -18,6 +19,7 @@ class homologacionviceController extends Controller
     {
         return rtrim(env('BASE_URL_BACKEND', 'http://127.0.0.1:8000'), '/') . '/api/';
     }
+
     /**
      * Realiza una solicitud HTTP de forma segura y con reintentos
      */
@@ -65,6 +67,7 @@ class homologacionviceController extends Controller
             throw $e;
         }
     }
+
     public function actualizar(Request $request, $id)
     {
         try {
@@ -79,6 +82,7 @@ class homologacionviceController extends Controller
             return redirect()->back()->with('error', 'Error al comunicarse con el servidor: ' . $e->getMessage());
         }
     }
+
     public function buscarSolicitudPorUsuario($idUsuario)
     {
         try {
@@ -98,6 +102,7 @@ class homologacionviceController extends Controller
             return null;
         }
     }
+
     public function obtenerUsuario($idUsuario)
     {
         try {
@@ -108,6 +113,7 @@ class homologacionviceController extends Controller
             return null;
         }
     }
+
     public function verInformacion($radicado)
     {
         try {
@@ -132,7 +138,11 @@ class homologacionviceController extends Controller
             abort(500, 'Error: ' . $e->getMessage());
         }
     }
-    public function obtenerDatosBack()
+
+    /**
+     * Muestra la vista principal de vicerrectoría con las solicitudes
+     */
+    public function index()
     {
         try {
             $response = $this->safeApiCall('GET', 'solicitudes');
@@ -153,6 +163,8 @@ class homologacionviceController extends Controller
             ]);
         }
     }
+
+
     public function descargarDocumento($documento)
     {
         $ruta = storage_path("app/documentos/{$documento}");
@@ -162,69 +174,54 @@ class homologacionviceController extends Controller
 
         return response()->download($ruta);
     }
+
     public function verReportes()
     {
         return view('admin.homologacionesvice.reportes');
     }
-    public function verDocumentos($radicado)
-    {
-        try {
-            // Obtener todas las solicitudes
-            $respSolicitudes = $this->safeApiCall('GET', 'solicitudes');
-            if (!$respSolicitudes->successful())
-                abort(500, 'Error al obtener solicitudes');
 
-            // Buscar la solicitud específica por radicado
-            $solicitud = collect($respSolicitudes->json())->firstWhere('numero_radicado', $radicado);
-            if (!$solicitud)
-                abort(404, 'Solicitud no encontrada');
-
-            // Obtener el usuario asociado a la solicitud
-            $respUsuarios = $this->safeApiCall('GET', 'usuarios');
-            if (!$respUsuarios->successful())
-                abort(500, 'Error al obtener usuarios');
-
-            $usuario = collect($respUsuarios->json())->firstWhere('numero_identificacion', $solicitud['numero_identificacion']);
-            if (!$usuario)
-                abort(404, 'Usuario no encontrado');
-
-            // Ahora que tenemos el ID del usuario, obtenemos sus documentos
-            $respDocumentos = $this->safeApiCall('GET', 'documentos/usuario/' . $usuario['id']);
-            if (!$respDocumentos->successful()) {
-                return view('admin.homologacionesvice.documentos', [
-                    'radicado' => $radicado,
-                    'id' => $solicitud['id'],
-                    'nombreEstudiante' => $usuario['nombre'],
-                    'documentos' => [
-                        'mensaje' => 'Sin documentos',
-                        'datos' => []
-                    ]
-                ])->withErrors([
-                            'error' => 'No se pudieron cargar los datos de documentos. Error: ' . $respDocumentos->body()
-                        ]);
-            }
-
-            // Pasar los datos a la vista
-            return view('admin.homologacionesvice.documentos', [
-                'documentos' => $respDocumentos->json(),
-                'id' => $solicitud['id'],
-                'radicado' => $radicado,
-                'nombreEstudiante' => $usuario['nombre']
-            ]);
-        } catch (\Exception $e) {
-            return view('admin.homologacionesvice.documentos', [
-                'radicado' => $radicado,
-                'id' => 0,
-                'nombreEstudiante' => 'Estudiante',
-                'documentos' => [
-                    'mensaje' => 'Error al cargar documentos',
-                    'datos' => []
-                ]
-            ])->withErrors([
-                        'error' => 'Error al obtener datos del backend: ' . $e->getMessage()
-                    ]);
+public function verDocumentos($id) {
+    try {
+        // Obtener documentos del usuario
+        $respDocumentos = $this->safeApiCall('GET', 'documentos/usuario/' . $id);
+        if (!$respDocumentos->successful()) {
+            abort(500, 'Error al obtener documentos');
         }
+
+        $respuestaJson = $respDocumentos->json();
+        $documentos = $respuestaJson['datos'] ?? [];
+
+        if (empty($documentos)) {
+            abort(404, 'No se encontraron documentos para el usuario');
+        }
+
+        // Extraer nombre del usuario desde el primer documento
+        $primerDocumento = $documentos[0];
+        $nombreEstudiante = $primerDocumento['primer_nombre'] . ' ' . $primerDocumento['primer_apellido'];
+        $radicado = $primerDocumento['numero_radicado'] ?? '-';
+
+        // Retornar la vista
+        return view('admin.homologacionesvice.documentos', [
+            'documentos' => $documentos,
+            'id' => $id,
+            'radicado' => $radicado,
+            'nombreEstudiante' => $nombreEstudiante,
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error en verDocumentos: ' . $e->getMessage());
+        return view('admin.homologacionesvice.documentos', [
+            'documentos' => [],
+            'id' => 0,
+            'radicado' => '-',
+            'nombreEstudiante' => 'Estudiante'
+        ])->withErrors([
+            'error' => 'No se pudo cargar la información de los documentos. ' . $e->getMessage()
+        ]);
     }
+}
+
+
     public function obtenerSolicitud($solicitud_id)
     {
         try {
@@ -235,6 +232,12 @@ class homologacionviceController extends Controller
         }
     }
 
+    /**
+     * Procesa la solicitud de homologación y muestra la vista para vicerrectoría
+     *
+     * @param string|int $id ID de la homologación
+     * @return \Illuminate\View\View
+     */
     public function procesarHomologacion($id)
     {
         try {
@@ -244,72 +247,105 @@ class homologacionviceController extends Controller
                 $idNumerico = substr($id, 9); // Obtener los últimos dígitos (ej. 0001)
             }
 
-            // Inicializar variables por defecto
-            $solicitud = null;
-            $asignaturasOrigen = [];
-            $asignaturasDestino = [];
-            $homologacionesExistentes = [];
-            $solicitudId = null;  // Añadir la variable solicitudId
+            // Llamar al API de homologaciones usando el método seguro
+            $responseHomologacion = $this->safeApiCall('GET', 'homologacion-asignaturas/' . $idNumerico);
 
-            // Llamar al API de homologaciones
-            $responseHomologacion = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
-
-            // Llamar al API de pensum de Autónoma (programaId = 12)
-            $responsePensum = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/12');
-
-            // Procesar respuesta de homologación
+            // Verificar si la llamada a la API fue exitosa
             if ($responseHomologacion->successful()) {
-                // Normalizar los datos independientemente de cómo vengan estructurados
-                $homologacion = isset($responseHomologacion['datos'])
-                    ? $responseHomologacion['datos']
-                    : (isset($responseHomologacion['data'])
-                        ? $responseHomologacion['data']
-                        : []);
+                $datosAPI = $responseHomologacion->json();
 
-                // Obtener el solicitud_id
-                $solicitudId = $homologacion['solicitud_id'] ?? null; // Guardar el solicitud_id en la variable
+                // Obtener los datos dentro de la estructura recibida
+                $datos = isset($datosAPI['datos']) ? $datosAPI['datos'] :
+                        (isset($datosAPI['data']) ? $datosAPI['data'] : null);
 
-                // Rellenar los datos de solicitud
-                $solicitud = $homologacion;
+                if (!$datos) {
+                    throw new Exception('La estructura de datos recibida no es la esperada');
+                }
 
-                // Obtener asignaturas origen
-                $asignaturasOrigen = isset($homologacion['asignaturas_origen'])
-                    ? $homologacion['asignaturas_origen']
-                    : [];
+                // Filtrar las asignaturas de origen y destino válidas
+                $asignaturasOrigenFiltradas = array_filter($datos['asignaturas_origen'] ?? [], function($item) {
+                    return isset($item['id']) && !is_null($item['id']);
+                });
 
-                // Obtener homologaciones existentes para que el frontend pueda actualizar los IDs
-                $homologacionesExistentes = isset($homologacion['homologaciones'])
-                    ? $homologacion['homologaciones']
-                    : [];
+                $asignaturasDestinoFiltradas = array_filter($datos['asignaturas_destino'] ?? [], function($item) {
+                    return isset($item['id']) && !is_null($item['id']);
+                });
+
+                // Construir las correspondencias entre asignaturas (homologaciones)
+                $homologacionesExistentes = [];
+
+                // Si hay correspondencias explícitas en la API, usarlas
+                if (isset($datos['correspondencias']) && !empty($datos['correspondencias'])) {
+                    $homologacionesExistentes = $datos['correspondencias'];
+                }
+                // Si no hay correspondencias explícitas, crear basadas en los índices
+                else {
+                    foreach ($asignaturasOrigenFiltradas as $indice => $asignaturaOrigen) {
+                        // Buscar una asignatura destino para esta asignatura origen
+                        $asignaturaDestinoId = null;
+                        $notaDestino = '3.0'; // Valor por defecto
+
+                        // Si hay una asignatura destino en el mismo índice, usarla
+                        $asignaturasDestinoArray = array_values($asignaturasDestinoFiltradas);
+                        if (isset($asignaturasDestinoArray[$indice])) {
+                            $asignaturaDestinoId = $asignaturasDestinoArray[$indice]['id'];
+                            $notaDestino = $asignaturasDestinoArray[$indice]['nota_destino'] ?? '3.0';
+                        }
+
+                        if ($asignaturaDestinoId) {
+                            $homologacionesExistentes[] = [
+                                'id' => $indice + 1,
+                                'asignatura_origen_id' => $asignaturaOrigen['id'],
+                                'asignatura_destino_id' => $asignaturaDestinoId,
+                                'nota_origen' => $asignaturaOrigen['nota_origen'] ?? null,
+                                'nota_destino' => $notaDestino,
+                                'estado' => 'pendiente'
+                            ];
+                        }
+                    }
+                }
+
+                // Log para depuración
+                Log::info('Datos de homologación procesados correctamente para ID: ' . $idNumerico);
+                Log::debug('Homologaciones existentes: ' . json_encode($homologacionesExistentes));
+
+                // Devolver la vista con los datos necesarios
+                return view('admin.homologacionesvice.procesohomologacionvice', [
+                    'datos' => $datos,
+                    'homologacionesExistentes' => $homologacionesExistentes,
+                    'homologacionId' => $idNumerico
+                ]);
+            } else {
+                // Si la API retorna un error
+                $statusCode = $responseHomologacion->status();
+                $errorBody = $responseHomologacion->body();
+                throw new Exception("Error en la API (Código: {$statusCode}): {$errorBody}");
             }
 
-            // Procesar respuesta de pensum y asignarla a asignaturasDestino
-            if ($responsePensum->successful()) {
-                $asignaturasDestino = isset($responsePensum['datos'])
-                    ? $responsePensum['datos']
-                    : (isset($responsePensum['data'])
-                        ? $responsePensum['data']
-                        : []);
-            }
-            // Pasar el solicitudId a la vista
+        } catch (Exception $e) {
+            // Registrar el error
+            Log::error('Error al procesar homologación para vicerrectoría: ' . $e->getMessage());
+
+            // Devolver la vista con mensaje de error
             return view('admin.homologacionesvice.procesohomologacionvice', [
-                'solicitud' => $solicitud,
-                'asignaturasOrigen' => $asignaturasOrigen,
-                'asignaturasDestino' => $asignaturasDestino,
-                'homologacionesExistentes' => $homologacionesExistentes,
-                'solicitudId' => $solicitudId // Aquí estamos pasando el solicitudId a la vista
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error al procesar homologación: ' . $e->getMessage());
-            return view('admin.homologacionesvice.procesohomologacionvice', [
-                'solicitud' => null,
-                'asignaturasOrigen' => [],
-                'asignaturasDestino' => [],
+                'datos' => null,
                 'homologacionesExistentes' => [],
                 'errors' => ['Error al procesar homologación: ' . $e->getMessage()],
-                'solicitudId' => null // Si ocurre un error, pasamos null
+                'homologacionId' => $id
             ]);
         }
+    }
+
+    /**
+     * Procesa la solicitud de homologación para vicerrectoría (Método con nombre corregido)
+     * Este es un alias del método procesarHomologacion para coincidir con la ruta definida
+     *
+     * @param string|int $id ID de la homologación
+     * @return \Illuminate\View\View
+     */
+    public function vicerrectoria($id)
+    {
+        return $this->procesarHomologacion($id);
     }
 
     public function obtenerPensumAutonoma($programaId = 12)
@@ -346,6 +382,26 @@ class homologacionviceController extends Controller
                 'asignaturasDestino' => [],
                 'programaId' => $programaId,
                 'errors' => ['Error al obtener pensum: ' . $e->getMessage()]
+            ]);
+        }
+    }
+        public function obtenerDatosBack()
+    {
+        try {
+            $response = $this->safeApiCall('GET', 'solicitudes');
+
+            if (!$response->successful()) {
+                return view('admin.homologacionesvice.vicerrector')->withErrors([
+                    'error' => 'No se pudieron cargar los datos de solicitudes. Error: ' . $response->body()
+                ]);
+            }
+
+            return view('admin.homologacionesvice.vicerrector', [
+                'solicitudes' => $response->json(),
+            ]);
+        } catch (\Exception $e) {
+            return view('admin.homologacionesvice.vicerrector')->withErrors([
+                'error' => 'Error al obtener datos del backend: ' . $e->getMessage()
             ]);
         }
     }

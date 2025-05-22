@@ -8,7 +8,6 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-2 text-center text-md-start">
-                    <img src="/img/logo-small.png" alt="Logo" class="img-fluid" style="max-height: 60px;">
                 </div>
                 <div class="col-md-8 text-center">
                     <h1 class="display-5 fw-bold mb-0" style="color: white !important;">Crear Instituciones y Programas</h1>
@@ -24,21 +23,24 @@
                 <div class="card shadow-lg border-0 rounded-lg">
                     <div class="card-body p-4">
                         <!-- Steps mejorados -->
-                        <div class="steps-container mb-5">
-                            <div class="step-circles d-flex justify-content-center position-relative">
-                                <div class="progress-line"></div>
-                                <div class="step-circle active" data-step="1">
-                                    <div class="circle">
-                                        <i class="fas fa-university"></i>
+                        <div class="steps-container mb-4">
+                            <div class="steps-wrapper">
+                                <div class="step active" id="step-institucion-indicator">
+                                    <div class="step-circle">
+                                        <i class="step-icon fas fa-university"></i>
                                     </div>
+                                    <div class="step-line"></div>
                                     <div class="step-label">Institución</div>
                                 </div>
-                                <div class="step-circle" data-step="2">
-                                    <div class="circle">
-                                        <i class="fas fa-graduation-cap"></i>
+                                <div class="step" id="step-programa-indicator">
+                                    <div class="step-circle">
+                                        <i class="step-icon fas fa-graduation-cap"></i>
                                     </div>
                                     <div class="step-label">Programa</div>
                                 </div>
+                            </div>
+                            <div class="steps-progress">
+                                <div class="steps-progress-bar"></div>
                             </div>
                         </div>
 
@@ -261,100 +263,22 @@
             letter-spacing: 0.5px;
         }
 
-        /* Estilos mejorados para los steps circulares */
-        .steps-container {
-            margin: 2rem 0 4rem;
-        }
-
-        .step-circles {
-            width: 70%;
-            margin: 0 auto;
-        }
-
-        .progress-line {
-            position: absolute;
-            top: 25px;
-            height: 6px;
-            width: 100%;
-            background-color: #e9ecef;
-            z-index: 1;
-            border-radius: 3px;
-        }
-
-        .progress-line:before {
-            content: '';
-            position: absolute;
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-            width: 0%;
-            transition: var(--transition);
-            z-index: 2;
-            border-radius: 3px;
-        }
-
-        .progress-line.step-1-active:before {
-            width: 0%;
-        }
-
-        .progress-line.step-2-active:before {
-            width: 100%;
-        }
-
-        .step-circle {
-            z-index: 3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 150px;
-            transition: var(--transition);
-        }
-
-        .circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: #6c757d;
-            margin-bottom: 12px;
-            transition: var(--transition);
-            border: 3px solid #e9ecef;
-            box-shadow: 0 0 0 5px rgba(233, 236, 239, 0.5);
-        }
-
-        .circle i {
-            font-size: 1.4rem;
-        }
-
-        .step-label {
-            font-weight: 600;
-            color: #6c757d;
-            transition: var(--transition);
-            font-size: 1.1rem;
-            margin-top: 5px;
-        }
-
-        .step-circle.active .circle {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 5px rgba(67, 97, 238, 0.2);
-            transform: scale(1.1);
-        }
-
-        .step-circle.active .step-label {
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .step-circle.completed .circle {
-            background-color: var(--success-color);
-            color: white;
-            border-color: var(--success-color);
-        }
+        /* Steps circulares institucionales (igual a usuarios_crear) */
+        .steps-container { position: relative; padding: 0 0 25px; }
+.steps-wrapper { display: flex; justify-content: space-between; position: relative; z-index: 1; }
+.steps-progress { position: absolute; top: 40px; left: 0; right: 0; height: 3px; background-color: #e9ecef; z-index: 0; }
+.steps-progress-bar { height: 100%; background-color: #0d6efd; width: 0%; transition: width 0.3s ease; }
+.step { display: flex; flex-direction: column; align-items: center; position: relative; width: 50%; }
+.step-circle { width: 80px; height: 80px; border-radius: 50%; background-color: #f8f9fa; border: 3px solid #dee2e6; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; transition: all 0.3s ease; }
+.step.active .step-circle { border-color: #0d6efd; background-color: #e7f1ff; box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2); }
+.step.completed .step-circle { border-color: #198754; background-color: #d1e7dd; }
+.step-icon { font-size: 1.8rem; color: #6c757d; margin-top: 15px; }
+.step.active .step-icon { color: #0d6efd; }
+.step.completed .step-icon { color: #198754; }
+.step-label { font-size: 0.95rem; color: #6c757d; font-weight: 500; text-align: center; }
+.step.active .step-label { color: #0d6efd; font-weight: 600; }
+.step.completed .step-label { color: #198754; }
+@media (max-width: 768px) { .step-circle { width: 60px; height: 60px; } .step-icon { font-size: 1.3rem; margin-top: 12px; } .step-label { font-size: 0.8rem; } }
 
         /* Estilos para el contenido de los pasos */
         .step-content {
@@ -483,85 +407,82 @@
             border-top: 1px solid #eee;
         }
 
-        /* Notificaciones mejoradas */
+        /* Notificaciones institucionales mejoradas */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            min-width: 300px;
-            max-width: 500px;
-            transform: translateX(100%);
-            animation: slideIn 0.3s forwards;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 340px;
+            max-width: 90vw;
+            z-index: 9999;
+            padding: 1.5rem 2.5rem 1.5rem 1.5rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
             display: flex;
             align-items: center;
+            font-size: 1.15rem;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            animation: fadeInNotif 0.4s forwards;
         }
-
-        .notification i {
-            margin-right: 10px;
-            font-size: 1.5rem;
+        .notification.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
-
-        @keyframes slideIn {
-            to {
-                transform: translateX(0);
-            }
+        .notification .notif-icon {
+            margin-right: 1.2rem;
+            font-size: 2.1rem;
+            flex-shrink: 0;
         }
-
         .notification.success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-left: 5px solid #059669;
+            background: linear-gradient(135deg, #0e5ba7 60%, #10b981 100%);
+            color: #fff;
+            border-left: 7px solid #10b981;
         }
-
         .notification.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            border-left: 5px solid #dc2626;
+            background: linear-gradient(135deg, #b91c1c 60%, #ef4444 100%);
+            color: #fff;
+            border-left: 7px solid #ef4444;
         }
-
-        /* Estilo para los mensajes de carga */
-        .loading-spinner {
-            display: inline-block;
-            width: 1.5rem;
-            height: 1.5rem;
-            vertical-align: middle;
-            border: 3px solid rgba(0, 0, 0, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s infinite linear;
+        .notification.warning {
+            background: linear-gradient(135deg, #f59e42 60%, #fbbf24 100%);
+            color: #fff;
+            border-left: 7px solid #fbbf24;
         }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+        .notification.info {
+            background: linear-gradient(135deg, #2563eb 60%, #38bdf8 100%);
+            color: #fff;
+            border-left: 7px solid #38bdf8;
         }
-
-        .invalid-feedback {
-            display: none;
-            width: 100%;
-            margin-top: 0.25rem;
-            font-size: 0.875em;
-            color: #dc3545;
+        .notification .notif-close {
+            margin-left: 1.5rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .notification .notif-close:hover {
+            opacity: 1;
+        }
+        @keyframes fadeInNotif {
+            from { opacity: 0; transform: translate(-50%, -60%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
     </style>
 
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="notification" role="alert" aria-live="assertive" style="display:none;"></div>
 
     <script>
-// Variables para almacenar los IDs creados
+        // Variables para almacenar los IDs creados
 let institucionId = null;
 let programaId = null;
 let apiBaseUrl = 'https://homologacionesback.educarenemociones.com/api';
-let usarProxyLocal = false; // Bandera para usar un proxy local si es necesario
 
 // Lista de departamentos de Colombia
 const departamentosColombia = [
@@ -862,204 +783,99 @@ const municipiosPorDepartamento = {
     ]
 };
 
-// Datos de instituciones para trabajar en modo local si hay problemas CORS
-const institucionesDato = [
-    { id_institucion: 1, nombre: "Universidad Nacional de Colombia" },
-    { id_institucion: 2, nombre: "Universidad de Antioquia" },
-    { id_institucion: 3, nombre: "Universidad del Valle" },
-    { id_institucion: 4, nombre: "Universidad de Los Andes" },
-    { id_institucion: 5, nombre: "Pontificia Universidad Javeriana" },
-    { id_institucion: 6, nombre: "Universidad Industrial de Santander" },
-    { id_institucion: 7, nombre: "Universidad del Norte" },
-    { id_institucion: 8, nombre: "Universidad EAFIT" },
-    { id_institucion: 9, nombre: "Universidad Externado de Colombia" },
-    { id_institucion: 10, nombre: "Universidad del Rosario" }
-];
-
 // Función para obtener el token CSRF
 function getCsrfToken() {
     const token = document.querySelector('meta[name="csrf-token"]');
     return token ? token.getAttribute('content') : '';
 }
 
-// Determinar si estamos en un entorno local
-function isLocalEnvironment() {
-    return window.location.hostname === 'localhost' ||
-           window.location.hostname === '127.0.0.1';
-}
-
-// Función para realizar peticiones AJAX con manejo de errores mejorado y soporte para CORS
+// Función para realizar peticiones AJAX con manejo de errores mejorado
 async function fetchWithErrorHandling(url, options = {}) {
     try {
-        // Si estamos en modo local y la URL es para instituciones y usarProxyLocal está activado
-        if (usarProxyLocal && url.includes('/instituciones')) {
-            // Para consulta de instituciones, devolver datos locales
-            if (options.method === 'GET') {
-                console.log("Usando datos locales para instituciones (modo desarrollo)");
-                return institucionesDato;
-            }
-
-            // Para creación de institución, simular respuesta exitosa
-            if (options.method === 'POST') {
-                console.log("Simulando creación de institución (modo desarrollo)");
-                const data = JSON.parse(options.body);
-                // Generar un ID simulado único
-                const newId = Math.floor(Math.random() * 1000) + 100;
-                const response = {
-                    id_institucion: newId,
-                    nombre: data.nombre,
-                    mensaje: "Institución creada en modo de desarrollo local"
-                };
-                // Mostrar mensaje al usuario
-                mostrarNotificacion("Modo desarrollo: Institución simulada creada correctamente", "info");
-                return response;
-            }
-        }
-
-        // Opciones para solicitudes que pueden tener problemas CORS
-        if (isLocalEnvironment()) {
-            options.mode = 'cors';
-            options.credentials = 'include';
-        }
-
         const response = await fetch(url, options);
-
-        // Si la respuesta no es exitosa, intentar obtener detalles del error
         if (!response.ok) {
             let errorMessage = `Error HTTP ${response.status}`;
             try {
                 const errorData = await response.json();
-                if (errorData.message) {
-                    errorMessage = errorData.message;
-                } else if (errorData.error) {
-                    errorMessage = errorData.error;
-                }
+                if (errorData.message) errorMessage = errorData.message;
+                else if (errorData.error) errorMessage = errorData.error;
             } catch (parseError) {
-                // Si no se puede parsear la respuesta como JSON, usar el statusText
                 errorMessage = `${errorMessage}: ${response.statusText}`;
             }
             throw new Error(errorMessage);
         }
-
-        // Intentar parsear la respuesta como JSON
         try {
             return await response.json();
         } catch (jsonError) {
-            // Si no es JSON, devolver el texto de la respuesta
             return { success: true, message: await response.text() };
         }
     } catch (error) {
         console.error('Error en la petición:', error);
-
-        // Si estamos en entorno local y hay error de CORS, activar el modo de datos locales
-        if (isLocalEnvironment() &&
-            (error.message.includes('CORS') || error.message.includes('Failed to fetch'))) {
-
-            if (!usarProxyLocal) {
-                usarProxyLocal = true;
-                mostrarNotificacion(
-                    "Detectado error CORS. Cambiando a modo de desarrollo local para continuar.",
-                    "warning"
-                );
-
-                // Si la URL era para instituciones, intentar de nuevo con datos locales
-                if (url.includes('/instituciones')) {
-                    if (options.method === 'GET') {
-                        return institucionesDato;
-                    } else if (options.method === 'POST') {
-                        const data = JSON.parse(options.body);
-                        const newId = Math.floor(Math.random() * 1000) + 100;
-                        return {
-                            id_institucion: newId,
-                            nombre: data.nombre,
-                            mensaje: "Institución creada en modo de desarrollo local"
-                        };
-                    }
-                }
-            }
-        }
-
+        mostrarNotificacion('Error de conexión: ' + error.message, 'error');
         throw error;
     }
 }
 
-// Función para mostrar notificaciones mejorada
-function mostrarNotificacion(mensaje, tipo) {
-    const notificacion = document.getElementById('notification');
-
-    // Añadir ícono según tipo
-    let icono = '';
-    if (tipo === 'success') {
-        icono = '<i class="fas fa-check-circle"></i> ';
-    } else if (tipo === 'error') {
-        icono = '<i class="fas fa-exclamation-circle"></i> ';
-    } else if (tipo === 'warning') {
-        icono = '<i class="fas fa-exclamation-triangle"></i> ';
-    } else if (tipo === 'info') {
-        icono = '<i class="fas fa-info-circle"></i> ';
-    }
-
-    notificacion.innerHTML = icono + mensaje;
-    notificacion.className = 'notification ' + tipo;
-    notificacion.style.display = 'flex';
-
-    // Mostrar por 4 segundos y luego ocultar con animación
-    setTimeout(() => {
-        notificacion.style.opacity = '0';
-        setTimeout(() => {
-            notificacion.style.display = 'none';
-            notificacion.style.opacity = '1';
-        }, 300);
-    }, 4000);
+// Función para mostrar notificaciones institucionales mejoradas
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const notif = document.getElementById('notification');
+    notif.className = 'notification ' + tipo + ' visible';
+    notif.innerHTML = `<span class='notif-icon'>${tipo === 'success' ? '✔️' : tipo === 'error' ? '❌' : tipo === 'warning' ? '⚠️' : 'ℹ️'}</span><span>${mensaje}</span><button class='notif-close' onclick='this.parentNode.style.display="none"'>&times;</button>`;
+    notif.style.display = 'flex';
+    setTimeout(() => { notif.style.display = 'none'; notif.classList.remove('visible'); }, 3000);
 }
 
-// Función para cambiar de paso con mejor manejo de errores
-function changeStep(step) {
-    try {
-        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-        const stepElement = document.getElementById('step' + step);
-        if (!stepElement) {
-            throw new Error(`Step ${step} not found`);
+document.addEventListener('DOMContentLoaded', function() {
+    // Steps animados igual que usuarios_crear
+    const stepItems = {
+        institucion: document.getElementById('step-institucion-indicator'),
+        programa: document.getElementById('step-programa-indicator')
+    };
+    const stepsProgressBar = document.querySelector('.steps-progress-bar');
+    // Función para actualizar los steps visualmente
+    function actualizarSteps(stepActivo) {
+        for (const key in stepItems) {
+            stepItems[key].classList.remove('active', 'completed');
         }
-        stepElement.classList.add('active');
-
-        // Actualizar los círculos de progreso
-        document.querySelectorAll('.step-circle').forEach(circle => {
-            const circleStep = parseInt(circle.getAttribute('data-step'));
-            circle.classList.remove('active', 'completed');
-
-            if (circleStep === step) {
-                circle.classList.add('active');
-            } else if (circleStep < step) {
-                circle.classList.add('completed');
-            }
-        });
-
-        // Actualizar la línea de progreso
-        const progressLine = document.querySelector('.progress-line');
-        progressLine.className = 'progress-line';
-        progressLine.classList.add('step-' + step + '-active');
-
-        // Si avanzamos al paso 2, cargar las instituciones
-        if (step === 2) {
+        if (stepActivo === 1) {
+            stepItems.institucion.classList.add('active');
+            stepsProgressBar.style.width = '0%';
+        } else if (stepActivo === 2) {
+            stepItems.institucion.classList.add('completed');
+            stepItems.programa.classList.add('active');
+            stepsProgressBar.style.width = '100%';
+            // Cargar instituciones al pasar al step 2
             cargarInstituciones();
         }
-    } catch (error) {
-        console.error('Error al cambiar de paso:', error);
-        mostrarNotificacion('Error al cambiar de paso: ' + error.message, 'error');
     }
-}
+    // Inicializar en el primer paso
+    actualizarSteps(1);
+    // Vincular a los botones de navegación
+    window.nextStep = function() {
+        actualizarSteps(2);
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+        // Cargar instituciones si no se han cargado
+        cargarInstituciones();
+    };
+    window.previousStep = function() {
+        actualizarSteps(1);
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step1').classList.add('active');
+    };
+    // Si el step2 está visible al cargar, cargar instituciones
+    if (document.getElementById('step2').classList.contains('active')) {
+        cargarInstituciones();
+    }
+});
 
-// Función para cargar todas las instituciones desde la API con mejor manejo de errores
+// Función para cargar todas las instituciones desde la API
 async function cargarInstituciones() {
     const selectInstitucion = document.getElementById('institucion_seleccionada');
     selectInstitucion.innerHTML = '<option value="">Cargando instituciones...</option>';
-
     try {
         const instituciones = await fetchWithErrorHandling(`${apiBaseUrl}/instituciones`);
-
         selectInstitucion.innerHTML = '<option value="">Seleccione una institución</option>';
-
         if (Array.isArray(instituciones) && instituciones.length > 0) {
             instituciones.forEach(institucion => {
                 const option = document.createElement('option');
@@ -1067,39 +883,15 @@ async function cargarInstituciones() {
                 option.textContent = institucion.nombre;
                 selectInstitucion.appendChild(option);
             });
-
-            // Si ya tenemos una institucion seleccionada, seleccionarla
-            if (institucionId) {
-                selectInstitucion.value = institucionId;
-            }
+            if (institucionId) selectInstitucion.value = institucionId;
         } else {
-            // Si no hay instituciones, mostrar mensaje
             const option = document.createElement('option');
             option.value = "";
             option.textContent = "No hay instituciones disponibles";
             selectInstitucion.appendChild(option);
         }
     } catch (error) {
-        console.error('Error al cargar instituciones:', error);
-
-        // En caso de error, mostrar opciones de datos locales si estamos en modo desarrollo
-        if (isLocalEnvironment()) {
-            selectInstitucion.innerHTML = '<option value="">Seleccione una institución (modo local)</option>';
-            institucionesDato.forEach(institucion => {
-                const option = document.createElement('option');
-                option.value = institucion.id_institucion;
-                option.textContent = institucion.nombre;
-                selectInstitucion.appendChild(option);
-            });
-
-            // Si ya tenemos una institución seleccionada, seleccionarla
-            if (institucionId) {
-                selectInstitucion.value = institucionId;
-            }
-        } else {
-            selectInstitucion.innerHTML = '<option value="">Error al cargar instituciones</option>';
-        }
-
+        selectInstitucion.innerHTML = '<option value="">Error al cargar instituciones</option>';
         mostrarNotificacion('Error al cargar instituciones: ' + error.message, 'error');
     }
 }
@@ -1108,27 +900,17 @@ async function cargarInstituciones() {
 function cargarDepartamentosColombia() {
     try {
         const selectDepartamento = document.getElementById('departamento');
-
-        // Limpiar select
         selectDepartamento.innerHTML = '<option value="">Seleccione un departamento</option>';
-
-        // Verificar si tenemos datos
         if (!Array.isArray(departamentosColombia) || departamentosColombia.length === 0) {
             throw new Error('No se encontraron datos de departamentos');
         }
-
-        // Agregar departamentos al select
         departamentosColombia.forEach(depto => {
             const option = document.createElement('option');
             option.value = depto.id;
             option.textContent = depto.nombre;
             selectDepartamento.appendChild(option);
         });
-
-        // Seleccionar Cauca (id: 8) por defecto, ya que estamos en Popayán
         selectDepartamento.value = "8";
-
-        // Cargar municipios del departamento seleccionado
         cargarMunicipiosPorDepartamento(8);
     } catch (error) {
         console.error('Error al cargar departamentos:', error);
@@ -1140,35 +922,25 @@ function cargarDepartamentosColombia() {
 function cargarMunicipiosPorDepartamento(departamentoId) {
     try {
         const selectMunicipio = document.getElementById('municipio');
-
-        // Limpiar select
         selectMunicipio.innerHTML = '<option value="">Seleccione un municipio</option>';
-
-        // Verificar si existen municipios para este departamento
         if (!municipiosPorDepartamento[departamentoId] ||
             !Array.isArray(municipiosPorDepartamento[departamentoId]) ||
             municipiosPorDepartamento[departamentoId].length === 0) {
             console.warn(`No se encontraron municipios para el departamento ID: ${departamentoId}`);
             return;
         }
-
-        // Agregar municipios al select
         municipiosPorDepartamento[departamentoId].forEach(municipio => {
             const option = document.createElement('option');
             option.value = municipio.id;
             option.textContent = municipio.nombre;
             selectMunicipio.appendChild(option);
         });
-
-        // Si es Cauca (id: 8), seleccionar Popayán por defecto
         if (parseInt(departamentoId) === 8) {
-            // Buscar el ID de Popayán en el array de municipios de Cauca
             const popayan = municipiosPorDepartamento[8].find(m => m.nombre === "Popayán");
             if (popayan) {
                 selectMunicipio.value = popayan.id;
             }
         } else if (municipiosPorDepartamento[departamentoId].length > 0) {
-            // Si no es Cauca, seleccionar el primer municipio por defecto
             selectMunicipio.value = municipiosPorDepartamento[departamentoId][0].id;
         }
     } catch (error) {
@@ -1180,27 +952,21 @@ function cargarMunicipiosPorDepartamento(departamentoId) {
 // Función para validar formulario mejorada
 function validateForm(form) {
     let valid = true;
-
-    // Resetear todos los campos
     form.querySelectorAll('.form-control, .form-select').forEach(field => {
         field.classList.remove('is-invalid', 'is-valid');
         const feedbackElement = field.nextElementSibling?.classList.contains('invalid-feedback')
             ? field.nextElementSibling
             : field.parentElement.querySelector('.invalid-feedback');
-
         if (feedbackElement) {
             feedbackElement.style.display = 'none';
         }
     });
-
-    // Validar campos requeridos
     form.querySelectorAll('[required]').forEach(field => {
         if (!field.value.trim()) {
             field.classList.add('is-invalid');
             const feedbackElement = field.nextElementSibling?.classList.contains('invalid-feedback')
                 ? field.nextElementSibling
                 : field.parentElement.querySelector('.invalid-feedback');
-
             if (feedbackElement) {
                 feedbackElement.textContent = 'Este campo es obligatorio';
                 feedbackElement.style.display = 'block';
@@ -1210,18 +976,14 @@ function validateForm(form) {
             field.classList.add('is-valid');
         }
     });
-
-    // Validación específica para código IES si tiene valor
     const codigoIES = form.querySelector('#codigo_ies');
     if (codigoIES && codigoIES.value.trim()) {
-        // Solo números y letras, sin espacios
         const regex = /^[a-zA-Z0-9]+$/;
         if (!regex.test(codigoIES.value.trim())) {
             codigoIES.classList.add('is-invalid');
             const feedbackElement = codigoIES.nextElementSibling?.classList.contains('invalid-feedback')
                 ? codigoIES.nextElementSibling
                 : codigoIES.parentElement.querySelector('.invalid-feedback');
-
             if (feedbackElement) {
                 feedbackElement.textContent = 'El código IES solo debe contener letras y números, sin espacios';
                 feedbackElement.style.display = 'block';
@@ -1229,18 +991,14 @@ function validateForm(form) {
             valid = false;
         }
     }
-
-    // Validación específica para código SNIES si tiene valor
     const codigoSNIES = form.querySelector('#codigo_snies');
     if (codigoSNIES && codigoSNIES.value.trim()) {
-        // Solo números, sin espacios
         const regex = /^[0-9]+$/;
         if (!regex.test(codigoSNIES.value.trim())) {
             codigoSNIES.classList.add('is-invalid');
             const feedbackElement = codigoSNIES.nextElementSibling?.classList.contains('invalid-feedback')
                 ? codigoSNIES.nextElementSibling
                 : codigoSNIES.parentElement.querySelector('.invalid-feedback');
-
             if (feedbackElement) {
                 feedbackElement.textContent = 'El código SNIES solo debe contener números';
                 feedbackElement.style.display = 'block';
@@ -1248,18 +1006,14 @@ function validateForm(form) {
             valid = false;
         }
     }
-
     return valid;
 }
 
-// Función para siguiente paso con mejor manejo de errores
+// Función para siguiente paso with mejor manejo de errores
 function nextStep(currentStep) {
     try {
         if (currentStep === 1) {
-            // Intentar guardar la institución (parcialmente, sin validación completa)
             guardarInstitucion(false);
-
-            // Avanzar al siguiente paso
             changeStep(2);
         }
     } catch (error) {
@@ -1278,10 +1032,9 @@ function previousStep(currentStep) {
     }
 }
 
-// Función para guardar institución (completa o parcial) con mejor manejo de errores y soporte para modo local
+// Función para guardar institución (solo API)
 async function guardarInstitucion(validarCompleto = false) {
     try {
-        // Si se pide validación completa, validar los campos
         if (validarCompleto) {
             const formInstitucion = document.getElementById('formInstitucion');
             if (!validateForm(formInstitucion)) {
@@ -1289,50 +1042,36 @@ async function guardarInstitucion(validarCompleto = false) {
                 return false;
             }
         } else {
-            // En modo parcial, al menos verificar que exista el nombre
             const nombre = document.getElementById('nombre_institucion').value.trim();
             if (!nombre) {
                 mostrarNotificacion('Debe ingresar al menos el nombre de la institución', 'error');
                 return false;
             }
         }
-
-        // Obtener datos del formulario
         const nombre = document.getElementById('nombre_institucion').value.trim();
         const paisId = document.getElementById('pais').value;
         let departamentoId = null;
         let municipioId = null;
         let departamentoNombre = null;
         let municipioNombre = null;
-
-        if (paisId == '1') { // Colombia
+        if (paisId == '1') {
             const selectDepartamento = document.getElementById('departamento');
             const selectMunicipio = document.getElementById('municipio');
-
             departamentoId = selectDepartamento.value;
             municipioId = selectMunicipio.value;
-
-            // Solo incluir nombres si los select tienen una opción seleccionada
             if (selectDepartamento.selectedIndex > 0) {
                 departamentoNombre = selectDepartamento.options[selectDepartamento.selectedIndex].text;
             }
-
             if (selectMunicipio.selectedIndex > 0) {
                 municipioNombre = selectMunicipio.options[selectMunicipio.selectedIndex].text;
             }
-        } else { // Otro país
+        } else {
             departamentoNombre = document.getElementById('otro_departamento').value.trim();
             municipioNombre = document.getElementById('otro_municipio').value.trim();
         }
-
         const tipoInstitucion = document.getElementById('tipo_institucion').value;
         const codigoIes = document.getElementById('codigo_ies').value.trim();
-
-        // Construir objeto de datos solo con valores que existen
-        const data = {
-            nombre: nombre
-        };
-
+        const data = { nombre: nombre };
         if (codigoIes) data.codigo_ies = codigoIes;
         if (paisId) data.pais_id = parseInt(paisId);
         if (departamentoId) data.departamento_id = parseInt(departamentoId);
@@ -1340,53 +1079,34 @@ async function guardarInstitucion(validarCompleto = false) {
         if (municipioId) data.municipio_id = parseInt(municipioId);
         if (municipioNombre) data.municipio_nombre = municipioNombre;
         if (tipoInstitucion) data.tipo = tipoInstitucion;
-
-        console.log('Enviando datos institución:', data);
-
-        // Deshabilitar botón durante la petición
         const saveButton = document.getElementById('btnGuardarInstitucion') || document.querySelector('#step1 .btn-primary');
         const originalText = saveButton.innerHTML;
         saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         saveButton.disabled = true;
-
-        // Cabeceras para la petición
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         };
-
-        // Añadir CSRF si está disponible
         const token = document.querySelector('meta[name="csrf-token"]');
         if (token) {
             headers['X-CSRF-TOKEN'] = token.getAttribute('content');
         }
-
         try {
-            // Intentar enviar datos a la API
             const result = await fetchWithErrorHandling(`${apiBaseUrl}/instituciones`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(data)
             });
-
-            console.log('Respuesta API institución:', result);
-
-            // Procesar resultado
             if (result && result.id_institucion) {
                 institucionId = result.id_institucion;
                 mostrarNotificacion('¡Institución guardada correctamente!', 'success');
-
-                // Si es guardado completo, avanzar al siguiente paso
                 if (validarCompleto) {
                     setTimeout(() => {
                         changeStep(2);
                     }, 1000);
                 }
-
-                // Restaurar botón
                 saveButton.innerHTML = originalText;
                 saveButton.disabled = false;
-
                 return true;
             } else if (result && result.error) {
                 if (result.error.includes('already been taken')) {
@@ -1402,76 +1122,42 @@ async function guardarInstitucion(validarCompleto = false) {
             }
         } catch (fetchError) {
             console.error('Error al guardar en API:', fetchError);
-
-            // Si estamos en ambiente local, generar un ID simulado y continuar
-            if (isLocalEnvironment()) {
-                const localId = Math.floor(Math.random() * 1000) + 100;
-                institucionId = localId;
-                mostrarNotificacion('Modo desarrollo: Institución simulada creada con ID: ' + localId, 'warning');
-
-                // Si es guardado completo, avanzar al siguiente paso
-                if (validarCompleto) {
-                    setTimeout(() => {
-                        changeStep(2);
-                    }, 1000);
-                }
-
-                // Restaurar botón
-                saveButton.innerHTML = originalText;
-                saveButton.disabled = false;
-
-                return true;
-            } else {
-                throw fetchError; // Re-lanzar el error si no estamos en entorno local
-            }
+            mostrarNotificacion('Error de conexión: ' + fetchError.message, 'error');
         }
-
-        // Restaurar botón
         saveButton.innerHTML = originalText;
         saveButton.disabled = false;
-
         return false;
     } catch (error) {
         console.error('Error al guardar institución:', error);
-
-        // Restaurar botón
         const saveButton = document.getElementById('btnGuardarInstitucion') || document.querySelector('#step1 .btn-primary');
         if (saveButton) {
             saveButton.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Institución';
             saveButton.disabled = false;
         }
-
         mostrarNotificacion('Error de conexión: ' + error.message, 'error');
         return false;
     }
 }
 
-// Función para guardar programa completo con mejor manejo de errores y soporte para modo local
+// Función para guardar programa (solo API)
 async function guardarPrograma() {
     try {
-        // Validar el formulario de programa
         const formPrograma = document.getElementById('formPrograma');
         if (!validateForm(formPrograma)) {
             mostrarNotificacion('Por favor complete todos los campos requeridos correctamente', 'error');
             return;
         }
-
         const nombrePrograma = document.getElementById('nombre_programa').value.trim();
         if (!nombrePrograma) {
             mostrarNotificacion('Por favor ingrese el nombre del programa', 'error');
             return;
         }
-
-        // Obtener institución seleccionada
         const institucionSeleccionada = document.getElementById('institucion_seleccionada').value;
-        // Si no hay institución seleccionada, usar la creada anteriormente o mostrar error
         const instId = institucionSeleccionada || institucionId;
-
         if (!instId) {
             mostrarNotificacion('No hay institución seleccionada para el programa', 'error');
             return;
         }
-
         const data = {
             institucion_id: parseInt(instId),
             facultad_id: null,
@@ -1480,39 +1166,29 @@ async function guardarPrograma() {
             tipo_formacion: document.getElementById('tipo_formacion').value || 'Profesional',
             metodologia: document.getElementById('metodologia').value || 'Presencial'
         };
-
-        // Deshabilitar botón durante la petición
         const saveButton = document.querySelector('#step2 .btn-success');
         const originalText = saveButton.innerHTML;
         saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
         saveButton.disabled = true;
-
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         };
-
-        // Añadir CSRF si está disponible
         const token = document.querySelector('meta[name="csrf-token"]');
         if (token) {
             headers['X-CSRF-TOKEN'] = token.getAttribute('content');
         }
-
         try {
             const result = await fetchWithErrorHandling(`${apiBaseUrl}/programas`, {
                 method: 'POST',
                 headers: headers,
                 body: JSON.stringify(data)
             });
-
             saveButton.innerHTML = '<i class="fas fa-check"></i> ¡Guardado!';
-
             if (result.mensaje === 'Programa insertado correctamente' || result.id_programa) {
                 programaId = result.id_programa;
-                institucionId = instId; // Actualizar institucionId con la seleccionada
+                institucionId = instId;
                 mostrarNotificacion('¡Programa guardado correctamente!', 'success');
-
-                // Redirigir después de un breve retraso
                 setTimeout(() => {
                     window.location.href = '/admin/programas';
                 }, 2000);
@@ -1524,34 +1200,17 @@ async function guardarPrograma() {
             }
         } catch (fetchError) {
             console.error('Error al guardar programa en API:', fetchError);
-
-            // Si estamos en ambiente local, simular una respuesta exitosa
-            if (isLocalEnvironment()) {
-                saveButton.innerHTML = '<i class="fas fa-check"></i> ¡Guardado en modo local!';
-                mostrarNotificacion('Modo desarrollo: Programa simulado guardado correctamente', 'warning');
-
-                // Simular redirección
-                setTimeout(() => {
-                    mostrarNotificacion('Modo desarrollo: La redirección está desactivada en modo local', 'info');
-                    saveButton.innerHTML = originalText;
-                    saveButton.disabled = false;
-                }, 2000);
-
-                return true;
-            } else {
-                throw fetchError; // Re-lanzar el error si no estamos en entorno local
-            }
+            mostrarNotificacion('Error al guardar programa: ' + fetchError.message, 'error');
+            saveButton.innerHTML = originalText;
+            saveButton.disabled = false;
         }
     } catch (error) {
         console.error('Error al guardar programa:', error);
-
-        // Restaurar botón
         const saveButton = document.querySelector('#step2 .btn-success');
         if (saveButton) {
             saveButton.innerHTML = '<i class="fas fa-save me-2"></i> Guardar Programa';
             saveButton.disabled = false;
         }
-
         mostrarNotificacion('Error al guardar programa: ' + error.message, 'error');
     }
 }
@@ -1559,143 +1218,90 @@ async function guardarPrograma() {
 // Inicializar el formulario cuando se cargue el documento
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Inicializando formulario...');
-
-    // Verificar si estamos en entorno local
-    if (isLocalEnvironment()) {
-        console.log("Detectado entorno local. Activando modos compatibles.");
-        mostrarNotificacion("Entorno local detectado. Si hay problemas de CORS, se activará el modo de desarrollo local.", "info");
-    }
-
-    // Cargar departamentos de Colombia por defecto
     cargarDepartamentosColombia();
-
-    // Event listeners para cambios en país
     document.getElementById('pais').addEventListener('change', function() {
         const paisId = this.value;
         const deptoContainer = document.getElementById('departamento-container');
         const muniContainer = document.getElementById('municipio-container');
         const otroDeptoContainer = document.getElementById('otro-departamento-container');
         const otroMuniContainer = document.getElementById('otro-municipio-container');
-
-        if (paisId == '1') { // Colombia
-            // Mostrar select de departamentos y municipios de Colombia
+        if (paisId == '1') {
             document.getElementById('departamento').required = true;
             document.getElementById('municipio').required = true;
             document.getElementById('otro_departamento').required = false;
             document.getElementById('otro_municipio').required = false;
-
             deptoContainer.querySelector('.form-floating').style.display = 'block';
             muniContainer.querySelector('.form-floating').style.display = 'block';
             otroDeptoContainer.style.display = 'none';
             otroMuniContainer.style.display = 'none';
-
             cargarDepartamentosColombia();
-        } else if (paisId == '2') { // Otro país
-            // Mostrar campos de texto para departamento y municipio
+        } else if (paisId == '2') {
             document.getElementById('departamento').required = false;
             document.getElementById('municipio').required = false;
             document.getElementById('otro_departamento').required = true;
             document.getElementById('otro_municipio').required = true;
-
             deptoContainer.querySelector('.form-floating').style.display = 'none';
             muniContainer.querySelector('.form-floating').style.display = 'none';
             otroDeptoContainer.style.display = 'block';
             otroMuniContainer.style.display = 'block';
         } else {
-            // Si no se selecciona país, ocultar todo
             document.getElementById('departamento').required = false;
             document.getElementById('municipio').required = false;
             document.getElementById('otro_departamento').required = false;
             document.getElementById('otro_municipio').required = false;
-
             deptoContainer.querySelector('.form-floating').style.display = 'none';
             muniContainer.querySelector('.form-floating').style.display = 'none';
             otroDeptoContainer.style.display = 'none';
             otroMuniContainer.style.display = 'none';
         }
     });
-
-    // Event listener para cambio de departamento
     document.getElementById('departamento').addEventListener('change', function() {
         const departamentoId = this.value;
         if (departamentoId) {
             cargarMunicipiosPorDepartamento(departamentoId);
         } else {
-            // Si no hay departamento seleccionado, limpiar municipios
             const selectMunicipio = document.getElementById('municipio');
             selectMunicipio.innerHTML = '<option value="">Seleccione primero un departamento</option>';
         }
     });
-
-    // Botón para guardar institución explícitamente
     const btnGuardarInstitucion = document.getElementById('btnGuardarInstitucion');
     if (btnGuardarInstitucion) {
         btnGuardarInstitucion.addEventListener('click', function(e) {
             e.preventDefault();
-            guardarInstitucion(true); // Guardar con validación completa
+            guardarInstitucion(true);
         });
     }
-
-    // Manejar eventos de formulario para prevenir envío por defecto
     document.getElementById('formInstitucion').addEventListener('submit', function(e) {
         e.preventDefault();
         guardarInstitucion(true);
     });
-
     document.getElementById('formPrograma').addEventListener('submit', function(e) {
         e.preventDefault();
         guardarPrograma();
     });
-
-    // Verificar si hay errores de conexión con la API y mostrar notificación
-    testApiConnection();
-
-    // Inicializar validaciones de campos
-    setupFieldValidations();
 });
 
 // Función para probar la conexión con la API
 async function testApiConnection() {
     try {
-        // Intentar hacer una petición simple para verificar la conexión
-        await fetch(`${apiBaseUrl}/test-connection`, {
-            method: 'GET',
-            mode: 'cors',
-            credentials: 'include'
-        });
-
+        await fetch(`${apiBaseUrl}/test-connection`, { method: 'GET' });
         console.log("Conexión a la API exitosa");
     } catch (error) {
-        // Si hay un error de red, mostrar notificación
-        console.warn('Advertencia: No se puede conectar con la API. Algunas funciones pueden no estar disponibles.', error);
-
-        if (isLocalEnvironment() && (error.message.includes('CORS') || error.message.includes('Failed to fetch'))) {
-            usarProxyLocal = true;
-            mostrarNotificacion(
-                "Error CORS detectado. Se ha activado el modo de desarrollo local para continuar.",
-                "warning"
-            );
-        } else {
-            mostrarNotificacion(
-                "Advertencia: Problemas de conexión con el servidor. Algunas funciones pueden no estar disponibles.",
-                "warning"
-            );
-        }
+        mostrarNotificacion(
+            "Advertencia: Problemas de conexión con el servidor. Algunas funciones pueden no estar disponibles.",
+            "warning"
+        );
     }
 }
 
 // Función auxiliar para agregar estilos dinámicamente si falta algún recurso
 function addMissingStyles() {
-    // Verificar si Font Awesome está cargado
     if (!document.querySelector('link[href*="font-awesome"]') &&
         !document.querySelector('link[href*="fontawesome"]')) {
-
-        // Agregar Font Awesome dinámicamente
         const fontAwesomeLink = document.createElement('link');
         fontAwesomeLink.rel = 'stylesheet';
         fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css';
         document.head.appendChild(fontAwesomeLink);
-
         console.log('Font Awesome agregado dinámicamente');
     }
 }
@@ -1734,11 +1340,7 @@ function toggleElement(element, show) {
 // Función para sanitizar entradas de usuario (evitar XSS)
 function sanitizeInput(input) {
     if (!input) return '';
-
-    // Convertir a string si no lo es
     input = String(input);
-
-    // Reemplazar caracteres especiales
     return input
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
@@ -1749,38 +1351,27 @@ function sanitizeInput(input) {
 
 // Validaciones adicionales para los campos de texto
 function setupFieldValidations() {
-    // Validar nombre de institución (solo permitir caracteres válidos)
     const nombreInstitucion = document.getElementById('nombre_institucion');
     if (nombreInstitucion) {
         nombreInstitucion.addEventListener('input', function() {
-            // Eliminar caracteres especiales excepto letras, números, espacios y algunos símbolos comunes
             this.value = this.value.replace(/[^\w\s.,&()-]/gi, '');
         });
     }
-
-    // Validar código IES (solo alfanumérico sin espacios)
     const codigoIes = document.getElementById('codigo_ies');
     if (codigoIes) {
         codigoIes.addEventListener('input', function() {
-            // Solo permitir letras y números
             this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
         });
     }
-
-    // Validar código SNIES (solo números)
     const codigoSnies = document.getElementById('codigo_snies');
     if (codigoSnies) {
         codigoSnies.addEventListener('input', function() {
-            // Solo permitir números
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
-
-    // Validar nombre de programa (solo permitir caracteres válidos)
     const nombrePrograma = document.getElementById('nombre_programa');
     if (nombrePrograma) {
         nombrePrograma.addEventListener('input', function() {
-            // Eliminar caracteres especiales excepto letras, números, espacios y algunos símbolos comunes
             this.value = this.value.replace(/[^\w\s.,&()-]/gi, '');
         });
     }

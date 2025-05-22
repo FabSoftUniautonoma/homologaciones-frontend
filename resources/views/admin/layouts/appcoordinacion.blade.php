@@ -1908,23 +1908,23 @@
         </div>
     </div>
 
-    <div class="main-panel">
-        <div class="content">
-            {{-- @include('sweetalert::alert') --}}
-            @yield('content')
-        </div>
-        <footer class="footer">
-            <div class="container-fluid">
-                <nav class="pull-left">
-                </nav>
-                <div class="copyright ml-auto">
-                    {{ now()->year }} © Homologaciones uniautonoma <a href="https://www.uniautonoma.edu.co"
-                        target="_blank" style="color: #007bff; text-decoration: none;">Uniautónoma</a> v{{ ENV('APP_VERSION') }}
-                </div>
+        <div class="main-panel">
+            <div class="content">
+                {{-- @include('sweetalert::alert') --}}
+                @yield('content')
             </div>
-        </footer>
+            <footer class="footer">
+                <div class="container-fluid">
+                    <nav class="pull-left">
+                    </nav>
+                    <div class="copyright ml-auto">
+                        {{ now()->year }} © con❤️<a href="https://www.uniautonoma.edu.co"
+                            target="_blank">Uniautónoma</a> v{{ ENV('APP_VERSION') }}
+                    </div>
+                </div>
+            </footer>
+        </div>
     </div>
-</div>
 
 <script>
     // Improved loading overlay functionality
@@ -2034,39 +2034,6 @@ $(document).ready(function() {
 });
 </script>
 @yield('scripts')
-
-</body>
-
-</html>
-        <div class="main-panel">
-            <div class="content">
-                {{-- @include('sweetalert::alert') --}}
-                @yield('content')
-            </div>
-            <footer class="footer">
-                <div class="container-fluid">
-                    <nav class="pull-left">
-                    </nav>
-                    <div class="copyright ml-auto">
-                        {{ now()->year }} © con❤️<a href="https://www.uniautonoma.edu.co"
-                            target="_blank">Uniautónoma</a> v{{ ENV('APP_VERSION') }}
-                    </div>
-                </div>
-            </footer>
-        </div>
-    </div>
-
-    <script>
-        // Eliminar el overlay de carga después de que la página esté completamente cargada
-        $(window).on('load', function() {
-            setTimeout(function() {
-                $('.loading-overlay').fadeOut(500, function() {
-                    $(this).remove();
-                });
-            }, 300);
-        });
-    </script>
-    @yield('scripts')
 
 </body>
 
