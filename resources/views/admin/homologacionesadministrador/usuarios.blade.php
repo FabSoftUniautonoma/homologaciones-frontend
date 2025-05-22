@@ -243,7 +243,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Starting initialization...");
-    const API_URL = 'https://homologacionesback.educarenemociones.com/api';
+    const API_URL = 'http://127.0.0.1:8000/api';
     console.log("API URL:", API_URL);
 
     let usuariosData = [];

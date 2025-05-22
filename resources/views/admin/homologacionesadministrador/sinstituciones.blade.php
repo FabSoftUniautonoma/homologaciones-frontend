@@ -29,9 +29,10 @@
                         </h5>
                         <div>
                             <span id="contador-instituciones" class="badge counter-badge me-2">0</span>
-                            <button class="btn btn-sm btn-success" id="btn-nueva-institucion">
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
+                           <a href="{{ route('crearinsti') }}" class="btn btn-sm btn-success" id="btn-nueva-institucion">
+    <i class="fas fa-plus-circle"></i>
+</a>
+
                         </div>
                     </div>
                 </div>
@@ -73,9 +74,10 @@
                         </h5>
                         <div>
                             <span id="contador-programas" class="badge counter-badge me-2">0</span>
-                            <button class="btn btn-sm btn-success" id="btn-nuevo-programa" disabled>
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
+                           <a href="{{ route('crearinsti') }}" class="btn btn-sm btn-success" id="btn-nuevo-programa">
+                             <i class="fas fa-plus-circle"></i>
+                           </a>
+
                         </div>
                     </div>
                 </div>
@@ -120,9 +122,10 @@
                         </h5>
                         <div>
                             <span id="contador-asignaturas" class="badge counter-badge me-2">0</span>
-                            <button class="btn btn-sm btn-success" id="btn-nueva-asignatura" disabled>
-                                <i class="fas fa-plus-circle"></i>
-                            </button>
+                            <a href="{{ route('crearasignatura') }}" class="btn btn-sm btn-success" id="btn-nueva-asignatura">
+                             <i class="fas fa-plus-circle"></i>
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -1590,7 +1593,7 @@ body {
 <!-- Scripts para manejo de datos -->
 <script>
 // Variables globales
-const API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 let instituciones = [];
 let programas = [];
 let asignaturas = [];

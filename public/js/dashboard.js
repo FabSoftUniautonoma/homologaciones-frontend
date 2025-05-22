@@ -1,5 +1,5 @@
 // dashboard.js - Versión completa optimizada
-const apiBaseUrl = 'https://homologacionesback.educarenemociones.com/api'; // Usamos rutas relativas para evitar problemas con CORS
+const apiBaseUrl = 'http://127.0.0.1:8000/api'; // Usamos rutas relativas para evitar problemas con CORS
 let usuarioActual = null;
 let userPassword = ""; // Almacenará la contraseña para mostrar/ocultar
 

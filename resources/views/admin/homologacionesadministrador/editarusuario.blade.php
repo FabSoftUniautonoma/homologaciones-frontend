@@ -138,7 +138,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // URL base de la API
-    const API_URL = 'https://homologacionesback.educarenemociones.com/public/api';
+    const API_URL = 'http://127.0.0.1:8000/api';
 
     // Obtener el ID del usuario de la URL
     const urlParams = new URLSearchParams(window.location.search);

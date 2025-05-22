@@ -45,6 +45,31 @@
     <link href="{{ asset('atlantis/assets/css/atlantis.css') }}" rel="stylesheet">
     <!-- Estilos personalizados -->
     <link href="{{ asset('css/appcoordinador.css') }}" rel="stylesheet">
+
+    {{-- Autenticacion --}}
+    <script>
+        const baseRoute = '/homologaciones-frontend/public';
+        const token = localStorage.getItem('auth_token');
+        const userData = localStorage.getItem('user_data');
+
+        if (!token || !userData) {
+            window.location.href = `${baseRoute}/auth/login`;
+        } else {
+            const user = JSON.parse(userData);
+            if (user.rol_id !== 4) {
+                const redirectMap = {
+                    1: `${baseRoute}/homologaciones/aspirante`,
+                    2: `${baseRoute}/coordinador/inicio`,
+                    3: `${baseRoute}/coordinador/inicio`,
+                    5: `${baseRoute}/administrador`,
+                    default: `${baseRoute}/auth/login`
+                };
+                window.location.href = redirectMap[user.rol_id] || redirectMap.default;
+            }
+        }
+    </script>
+
+
     <script>
         WebFont.load({
             google: {
@@ -1792,241 +1817,252 @@
 </style>
 
 <body>
-<!-- Loading Overlay -->
-<div class="loading-overlay">
-    <div class="spinner"></div>
-</div>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
 
-<div class="wrapper">
-    <div class="main-header">
-        <!-- Logo Header -->
-        <div class="logo-header" data-background-color="dark2">
-            <a href="" class="logo">
-                <div style="margin-right: 15px; display: inline-block;" data-aos="zoom-in">
-                    <img src="{{ asset('img/ChatGPT Image 20 may 2025, 01_06_09 p.m..png') }}" class="navbar-brand" height="60" style="margin-top: 5px; margin-bottom: 5px;">
-                </div>
-            </a>
-            <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse"
-                data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon">
-                    <i class="icon-menu"></i>
-                </span>
-            </button>
-            <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
-            <div class="nav-toggle">
-                <button class="btn btn-toggle toggle-sidebar">
-                    <i class="icon-menu"></i>
+    <div class="wrapper">
+        <div class="main-header">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark2">
+                <a href="" class="logo">
+                    <div style="margin-right: 15px; display: inline-block;" data-aos="zoom-in">
+                        <img src="{{ asset('img/ChatGPT Image 20 may 2025, 01_06_09 p.m..png') }}" class="navbar-brand"
+                            height="60" style="margin-top: 5px; margin-bottom: 5px;">
+                    </div>
+                </a>
+                <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse"
+                    data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon">
+                        <i class="icon-menu"></i>
+                    </span>
                 </button>
+                <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+                <div class="nav-toggle">
+                    <button class="btn btn-toggle toggle-sidebar">
+                        <i class="icon-menu"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-        <!-- End Logo Header -->
+            <!-- End Logo Header -->
 
-        <!-- Navbar Header -->
-        <nav class="navbar navbar-header navbar-expand-lg" data-background-color="dark2">
-            <div class="container-fluid">
-                <div class="collapse" id="search-nav">
-                    <div class="user-box">
-                        <div class="u-text">
-                            <h2 style="color: white; font-weight: 600; margin: 0;" data-aos="fade-right">Bienvenid@ {{-- {{ Auth::user()->nombre }} --}}</h2>
+            <!-- Navbar Header -->
+            <nav class="navbar navbar-header navbar-expand-lg" data-background-color="dark2">
+                <div class="container-fluid">
+                    <div class="collapse" id="search-nav">
+                        <div class="user-box">
+                            <div class="u-text">
+                                <h2 style="color: white; font-weight: 600; margin: 0;" data-aos="fade-right">Bienvenid@
+                                    {{-- {{ Auth::user()->nombre }} --}}</h2>
+                            </div>
                         </div>
                     </div>
+                    <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+                        <li class="nav-item dropdown hidden-caret" data-aos="fade-left">
+                            <a class="nav-link user-link" data-toggle="dropdown" href="#" aria-expanded="false">
+                                <i class="fas fa-user user-icon" style="font-size: 1.2rem;"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                <div class="dropdown-user-scroll scrollbar-outer">
+                                    <li>
+                                        <a class="dropdown-item" href="#" onclick="confirmarCerrarSesion()">
+                                            <i class="bi bi-box-arrow-right me-2"></i>
+                                            Cerrar sesión
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                            style="display: none;">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </div>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-                <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
-                    <li class="nav-item dropdown hidden-caret" data-aos="fade-left">
-                        <a class="nav-link user-link" data-toggle="dropdown" href="#" aria-expanded="false">
-                            <i class="fas fa-user user-icon" style="font-size: 1.2rem;"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-user animated fadeIn">
-                            <div class="dropdown-user-scroll scrollbar-outer">
-                                <li>
-                                    <a class="dropdown-item" href="{{-- {{ route('logout') }} --}}"
-                                        onclick="event.preventDefault();
-                                        document.getElementById('logout-form').submit();">
-                                        Cerrar sesión
-                                    </a>
-                                    <form id="logout-form" action="{{-- {{ route('logout') }} --}}" method="POST"
-                                        style="display: none;">@csrf</form>
-                                </li>
-                            </div>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-        <!-- End Navbar -->
-    </div>
-<!-- Sidebar -->
-<div class="sidebar sidebar-style-2" data-background-color="dark2">
-    <div class="sidebar-wrapper scrollbar scrollbar-inner">
-        <div class="sidebar-content">
-            <ul class="nav nav-primary">
-                <li class="nav-section" data-aos="fade-right" data-aos-delay="100">
-                    <span class="sidebar-mini-icon">
-                        <i class="fa fa-ellipsis-h"></i>
-                    </span>
-                    <h4 class="text-section" style="font-weight: 600;">Menú</h4>
-                </li>
-
-                <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
-                    <a href="{{ route('admin.homologaciones.vice.index') }}" style="padding: 12px 10px;">
-                        <i class="fas fa-tachometer-alt" style="font-size: 1.1rem;"></i>
-                        <p style="font-size: 14px; margin-left: 10px;">Inicio</p>
-                    </a>
-                </li>
-
-                <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
-                    <a href="{{ route('admin.homologaciones.vice.reportes') }}" style="padding: 12px 10px;">
-                        <i class="fas fa-file-alt" style="font-size: 1.1rem;"></i>
-                        <p style="font-size: 14px; margin-left: 10px;">Reportes</p>
-                    </a>
-                </li>
-
-
-
-
-
-                <li class="nav-item" data-aos="fade-right" data-aos-delay="600">
-                    <a href="{{ route('logout') }}" style="padding: 12px 10px;"
-                        onclick="event.preventDefault(); document.getElementById('logout-form-sidebar').submit();">
-                        <i class="fas fa-power-off" style="font-size: 1.1rem;"></i>
-                        <p style="font-size: 14px; margin-left: 10px;">Cerrar sesión</p>
-                    </a>
-                    <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST"
-                        style="display: none;">
-                        @csrf
-                    </form>
-                </li>
-            </ul>
+            </nav>
+            <!-- End Navbar -->
         </div>
-    </div>
-</div>
+        <!-- Sidebar -->
+        <div class="sidebar sidebar-style-2" data-background-color="dark2">
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <ul class="nav nav-primary">
+                        <li class="nav-section" data-aos="fade-right" data-aos-delay="100">
+                            <span class="sidebar-mini-icon">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </span>
+                            <h4 class="text-section" style="font-weight: 600;">Menú</h4>
+                        </li>
 
-    <div class="main-panel">
-        <div class="content">
-            {{-- @include('sweetalert::alert') --}}
-            @yield('content')
-        </div>
-        <footer class="footer">
-            <div class="container-fluid">
-                <nav class="pull-left">
-                </nav>
-                <div class="copyright ml-auto">
-                    {{ now()->year }} © Homologaciones uniautonoma <a href="https://www.uniautonoma.edu.co"
-                        target="_blank" style="color: #007bff; text-decoration: none;">Uniautónoma</a> v{{ ENV('APP_VERSION') }}
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="200">
+                            <a href="{{ route('admin.homologaciones.vice.index') }}" style="padding: 12px 10px;">
+                                <i class="fas fa-tachometer-alt" style="font-size: 1.1rem;"></i>
+                                <p style="font-size: 14px; margin-left: 10px;">Inicio</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="300">
+                            <a href="{{ route('admin.homologaciones.vice.reportes') }}" style="padding: 12px 10px;">
+                                <i class="fas fa-file-alt" style="font-size: 1.1rem;"></i>
+                                <p style="font-size: 14px; margin-left: 10px;">Reportes</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-aos="fade-right" data-aos-delay="600">
+                            <a href="#" style="padding: 12px 10px;" onclick="confirmarCerrarSesion()">
+                                <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
+                                <p style="font-size: 14px; margin-left: 10px;">Cerrar sesión</p>
+                            </a>
+                            <form id="logout-form-sidebar" action="{{ route('logout') }}" method="POST"
+                                style="display: none;">
+                                @csrf
+                            </form>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </footer>
+        </div>
+
+        <div class="main-panel">
+            <div class="content">
+                {{-- @include('sweetalert::alert') --}}
+                @yield('content')
+            </div>
+            <footer class="footer">
+                <div class="container-fluid">
+                    <nav class="pull-left">
+                    </nav>
+                    <div class="copyright ml-auto">
+                        {{ now()->year }} © Homologaciones uniautonoma <a href="https://www.uniautonoma.edu.co"
+                            target="_blank" style="color: #007bff; text-decoration: none;">Uniautónoma</a>
+                        v{{ ENV('APP_VERSION') }}
+                    </div>
+                </div>
+            </footer>
+        </div>
     </div>
-</div>
+    <script>
+        function confirmarCerrarSesion() {
+    // Eliminar datos de autenticación
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_data');
 
-<script>
-    // Improved loading overlay functionality
-    $(window).on('load', function() {
-        setTimeout(function() {
-            $('.loading-overlay').fadeOut(500, function() {
-                $(this).remove();
-            });
-        }, 300);
-    });
-
-    // Improve sidebar item hover effect
-    $(document).ready(function() {
-        $('.nav-item a').hover(
-            function() {
-                $(this).css({
-                    'background-color': 'rgba(255, 255, 255, 0.1)',
-                    'border-radius': '5px',
-                    'transition': 'all 0.3s ease'
+    // Agregar un pequeño retraso para permitir que se muestre la notificación
+    setTimeout(() => {
+        // Redireccionar al login con ruta absoluta
+        const baseRoute = '/homologaciones-frontend/public';
+        window.location.href = `${baseRoute}/auth/login`;
+    }, 1000);
+}
+        </script>
+    <script>
+        // Improved loading overlay functionality
+        $(window).on('load', function() {
+            setTimeout(function() {
+                $('.loading-overlay').fadeOut(500, function() {
+                    $(this).remove();
                 });
-                $(this).find('i').css('transform', 'scale(1.1)');
-            },
-            function() {
-                $(this).css({
-                    'background-color': 'transparent',
-                    'border-radius': '0'
-                });
-                $(this).find('i').css('transform', 'scale(1)');
-            }
-        );
-
-        // Highlight active menu item
-        const currentPath = window.location.pathname;
-        $('.nav-item a').each(function() {
-            const linkPath = $(this).attr('href');
-            if (linkPath && currentPath.includes(linkPath.replace(/^.*\/\/[^\/]+/, ''))) {
-                $(this).parent().addClass('active');
-                $(this).css('background-color', 'rgba(255, 255, 255, 0.1)');
-            }
+            }, 300);
         });
-    });
-</script>
-<script>
-    // First, let's add this script to improve the sidebar menu functionality
-$(document).ready(function() {
-  // Menu hover effects with smooth animations
-  $('.nav-item').hover(
-    function() {
-      $(this).addClass('menu-hover');
-      $(this).find('i').css({
-        'transform': 'translateX(5px) scale(1.2)',
-        'color': 'var(--azul-claro)',
-        'transition': 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-      });
-    },
-    function() {
-      $(this).removeClass('menu-hover');
-      $(this).find('i').css({
-        'transform': 'translateX(0) scale(1)',
-        'color': '',
-        'transition': 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-      });
-    }
-  );
 
-  // Smooth toggle for sidebar on mobile
-  $('.sidenav-toggler, .btn-toggle').click(function() {
-    $('.sidebar').toggleClass('active');
-    $('.wrapper').toggleClass('sidebar-active');
+        // Improve sidebar item hover effect
+        $(document).ready(function() {
+            $('.nav-item a').hover(
+                function() {
+                    $(this).css({
+                        'background-color': 'rgba(255, 255, 255, 0.1)',
+                        'border-radius': '5px',
+                        'transition': 'all 0.3s ease'
+                    });
+                    $(this).find('i').css('transform', 'scale(1.1)');
+                },
+                function() {
+                    $(this).css({
+                        'background-color': 'transparent',
+                        'border-radius': '0'
+                    });
+                    $(this).find('i').css('transform', 'scale(1)');
+                }
+            );
 
-    // Add ripple effect when clicking
-    let ripple = $('<span class="sidebar-ripple"></span>');
-    $(this).append(ripple);
-    setTimeout(function() {
-      ripple.remove();
-    }, 800);
-  });
+            // Highlight active menu item
+            const currentPath = window.location.pathname;
+            $('.nav-item a').each(function() {
+                const linkPath = $(this).attr('href');
+                if (linkPath && currentPath.includes(linkPath.replace(/^.*\/\/[^\/]+/, ''))) {
+                    $(this).parent().addClass('active');
+                    $(this).css('background-color', 'rgba(255, 255, 255, 0.1)');
+                }
+            });
+        });
+    </script>
+    <script>
+        // First, let's add this script to improve the sidebar menu functionality
+        $(document).ready(function() {
+            // Menu hover effects with smooth animations
+            $('.nav-item').hover(
+                function() {
+                    $(this).addClass('menu-hover');
+                    $(this).find('i').css({
+                        'transform': 'translateX(5px) scale(1.2)',
+                        'color': 'var(--azul-claro)',
+                        'transition': 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                    });
+                },
+                function() {
+                    $(this).removeClass('menu-hover');
+                    $(this).find('i').css({
+                        'transform': 'translateX(0) scale(1)',
+                        'color': '',
+                        'transition': 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                    });
+                }
+            );
 
-  // Active menu item detection
-  const currentPath = window.location.pathname;
-  $('.nav-item a').each(function() {
-    const linkPath = $(this).attr('href');
-    if (linkPath && currentPath.includes(linkPath.replace(/^.*\/\/[^\/]+/, ''))) {
-      $(this).parent().addClass('active');
-    }
-  });
+            // Smooth toggle for sidebar on mobile
+            $('.sidenav-toggler, .btn-toggle').click(function() {
+                $('.sidebar').toggleClass('active');
+                $('.wrapper').toggleClass('sidebar-active');
 
-  // Initialize custom scrollbar for sidebar
-  if ($.fn.scrollbar) {
-    $('.scrollbar').scrollbar();
-  }
+                // Add ripple effect when clicking
+                let ripple = $('<span class="sidebar-ripple"></span>');
+                $(this).append(ripple);
+                setTimeout(function() {
+                    ripple.remove();
+                }, 800);
+            });
 
-  // Handle responsiveness
-  const checkResponsive = function() {
-    if ($(window).width() < 992) {
-      $('.sidebar').addClass('sidebar-mini');
-      $('.main-panel').addClass('expanded');
-    } else {
-      $('.sidebar').removeClass('sidebar-mini');
-      $('.main-panel').removeClass('expanded');
-    }
-  };
+            // Active menu item detection
+            const currentPath = window.location.pathname;
+            $('.nav-item a').each(function() {
+                const linkPath = $(this).attr('href');
+                if (linkPath && currentPath.includes(linkPath.replace(/^.*\/\/[^\/]+/, ''))) {
+                    $(this).parent().addClass('active');
+                }
+            });
 
-  // Run on load and resize
-  checkResponsive();
-  $(window).resize(checkResponsive);
-});
-</script>
-@yield('scripts')
+            // Initialize custom scrollbar for sidebar
+            if ($.fn.scrollbar) {
+                $('.scrollbar').scrollbar();
+            }
+
+            // Handle responsiveness
+            const checkResponsive = function() {
+                if ($(window).width() < 992) {
+                    $('.sidebar').addClass('sidebar-mini');
+                    $('.main-panel').addClass('expanded');
+                } else {
+                    $('.sidebar').removeClass('sidebar-mini');
+                    $('.main-panel').removeClass('expanded');
+                }
+            };
+
+            // Run on load and resize
+            checkResponsive();
+            $(window).resize(checkResponsive);
+        });
+    </script>
+    @yield('scripts')
 
 </body>
 

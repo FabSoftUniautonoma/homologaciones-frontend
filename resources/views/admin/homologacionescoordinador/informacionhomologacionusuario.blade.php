@@ -149,7 +149,7 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('admin.homologacionescoordinador.documentos', $solicitud['id_solicitud']) }}"
+                        <a href="{{ route('admin.homologacionescoordinador.documentos', $solicitud['numero_radicado']) }}"
                             class="btn btn-primary w-100 mb-3 py-3 shadow-sm">
                             <i class="fas fa-file-pdf me-2"></i> Verificar Documentos
                         </a>
@@ -205,7 +205,7 @@
 
     // Base URL for updates - USAMOS LA MISMA RUTA QUE FUNCIONA
     const baseUrl = "{{ url('/coordinador/admin/homologacionescoordinador/actualizar-estado') }}";
-    const apiBaseUrl = "{{ config('services.api.url', 'https://homologacionesback.educarenemociones.com/api') }}";
+    const apiBaseUrl = "{{ config('services.api.url', 'http://127.0.0.1:8000/api') }}";
 
     console.log('Número de radicado:', radicado);
     console.log('ID solicitud:', solicitudId);

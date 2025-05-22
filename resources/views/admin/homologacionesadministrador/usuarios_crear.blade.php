@@ -82,45 +82,45 @@
                                 </div>
                             </div>
 
-                            <div class="row g-3">
+                            <div class="row g-4"> <!-- Cambia g-3 por g-4 para mayor separación -->
                                 <!-- Nombres -->
                                 <div class="col-md-6">
                                     <label for="primer_nombre" class="form-label">Primer Nombre <span class="text-danger">*</span></label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-user text-primary"></i></span>
-                                        <input type="text" class="form-control" id="primer_nombre" name="primer_nombre" required>
+                                        <input type="text" class="form-control" id="primer_nombre" name="primer_nombre" required style="min-height:48px;">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="segundo_nombre" class="form-label">Segundo Nombre</label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-user text-secondary"></i></span>
-                                        <input type="text" class="form-control" id="segundo_nombre" name="segundo_nombre">
+                                        <input type="text" class="form-control" id="segundo_nombre" name="segundo_nombre" style="min-height:48px;">
                                     </div>
                                 </div>
 
                                 <!-- Apellidos -->
                                 <div class="col-md-6">
                                     <label for="primer_apellido" class="form-label">Primer Apellido <span class="text-danger">*</span></label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-user text-primary"></i></span>
-                                        <input type="text" class="form-control" id="primer_apellido" name="primer_apellido" required>
+                                        <input type="text" class="form-control" id="primer_apellido" name="primer_apellido" required style="min-height:48px;">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="segundo_apellido" class="form-label">Segundo Apellido</label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-user text-secondary"></i></span>
-                                        <input type="text" class="form-control" id="segundo_apellido" name="segundo_apellido">
+                                        <input type="text" class="form-control" id="segundo_apellido" name="segundo_apellido" style="min-height:48px;">
                                     </div>
                                 </div>
 
                                 <!-- Identificación -->
                                 <div class="col-md-6">
                                     <label for="tipo_identificacion" class="form-label">Tipo de Identificación <span class="text-danger">*</span></label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-id-card text-primary"></i></span>
-                                        <select class="form-select" id="tipo_identificacion" name="tipo_identificacion" required>
+                                        <select class="form-select" id="tipo_identificacion" name="tipo_identificacion" required style="min-height:48px;">
                                             <option value="">Seleccione...</option>
                                             <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
                                             <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
@@ -130,9 +130,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="numero_identificacion" class="form-label">Número de Identificación <span class="text-danger">*</span></label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-hashtag text-primary"></i></span>
-                                        <input type="text" class="form-control" id="numero_identificacion" name="numero_identificacion" required>
+                                        <input type="number" class="form-control" id="numero_identificacion" name="numero_identificacion" required min="1" step="1" pattern="\\d*" inputmode="numeric" style="min-height:48px;">
                                     </div>
                                     <div id="identificacion-existe" class="text-danger mt-1" style="display: none;">
                                         <i class="fas fa-exclamation-circle"></i> Esta identificación ya está registrada
@@ -142,16 +142,16 @@
                                 <!-- Contacto -->
                                 <div class="col-md-6">
                                     <label for="telefono" class="form-label">Teléfono</label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-phone text-secondary"></i></span>
-                                        <input type="text" class="form-control" id="telefono" name="telefono">
+                                        <input type="number" class="form-control" id="telefono" name="telefono" min="0" step="1" inputmode="numeric" style="min-height:48px;">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="direccion" class="form-label">Dirección</label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-lg">
                                         <span class="input-group-text bg-light"><i class="fas fa-home text-secondary"></i></span>
-                                        <input type="text" class="form-control" id="direccion" name="direccion">
+                                        <input type="text" class="form-control" id="direccion" name="direccion" style="min-height:48px;">
                                     </div>
                                 </div>
                             </div>
@@ -619,13 +619,88 @@
             margin-bottom: 15px;
         }
     }
+
+    /* Estilos adicionales para el formulario */
+    .input-group.input-group-lg > .form-control,
+    .input-group.input-group-lg > .form-select {
+        min-height: 48px;
+        font-size: 1.1rem;
+    }
+    .form-section .row.g-4 > [class^='col-'],
+    .form-section .row.g-4 > [class*=' col-'] {
+        margin-bottom: 18px;
+    }
+    .form-section .input-group {
+        width: 100%;
+    }
+    .form-section .input-group .form-control,
+    .form-section .input-group .form-select {
+        width: 100%;
+    }
+    /* Segunda sección: más separación entre selects */
+    #institucional-section .input-group {
+        margin-bottom: 12px;
+    }
+    /* Step 2: campos más grandes y separados */
+    #institucional-section .row.g-3 > [class^='col-'],
+    #institucional-section .row.g-3 > [class*=' col-'] {
+        margin-bottom: 22px;
+    }
+    #institucional-section .input-group {
+        min-height: 52px;
+        font-size: 1.13rem;
+    }
+    #institucional-section .form-select,
+    #institucional-section .form-control {
+        min-height: 52px;
+        font-size: 1.13rem;
+    }
+    /* Step 3: alinear el botón ojo al lado del input */
+    .input-group .form-control[type='password'] {
+        border-right: 0;
+    }
+    .input-group .toggle-password {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+        height: 38px;
+        width: 38px;
+        min-width: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: -1px;
+    }
+    .input-group .toggle-password i {
+        font-size: 1rem;
+    }
+    /* Ajuste para que el botón no se desborde */
+    .input-group > .form-control[type='password'] {
+        border-right: 0;
+    }
+    .input-group > .toggle-password {
+        border-left: 0;
+    }
+    @media (max-width: 768px) {
+        #institucional-section .form-select,
+        #institucional-section .form-control {
+            min-height: 44px;
+            font-size: 1rem;
+        }
+        .input-group .toggle-password {
+            height: 32px;
+            width: 32px;
+            min-width: 32px;
+        }
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Constantes
-    const API_URL = 'https://homologacionesback.educarenemociones.com/api';
+    const API_URL = 'http://127.0.0.1:8000/api';
 
     // Referencias a elementos DOM
     const formNuevoUsuario = document.getElementById('formNuevoUsuario');
@@ -1631,6 +1706,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // --- CORRECCIÓN DEPARTAMENTO Y MUNICIPIO ---
+        // Guardar correctamente el valor seleccionado en el formulario
+        if (departamentoSelect) {
+            departamentoSelect.addEventListener('change', function() {
+                this.setAttribute('value', this.value);
+            });
+        }
+        if (municipioSelect) {
+            municipioSelect.addEventListener('change', function() {
+                this.setAttribute('value', this.value);
+            });
+        }
+        // Al enviar el formulario, asegurarse de que los valores seleccionados se envíen correctamente
+        if (formNuevoUsuario) {
+            formNuevoUsuario.addEventListener('submit', function(e) {
+                if (departamentoSelect) {
+                    departamentoSelect.value = departamentoSelect.options[departamentoSelect.selectedIndex].value;
+                }
+                if (municipioSelect) {
+                    municipioSelect.value = municipioSelect.options[municipioSelect.selectedIndex].value;
+                }
+            });
+        }
+
         // Envío del formulario
         formNuevoUsuario.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1744,6 +1843,7 @@ document.addEventListener('DOMContentLoaded', function() {
         stepItems[seccionActiva].classList.add('active');
 
         // Marcar los pasos completados
+
         if (seccionActiva === 'institucional' || seccionActiva === 'acceso') {
             stepItems.personal.classList.add('completed');
         }

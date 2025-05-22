@@ -234,7 +234,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // URL base de la API
-        const API_BASE_URL = 'https://homologacionesback.educarenemociones.com/api';
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
         // Configuración para fetch
         const fetchConfig = {

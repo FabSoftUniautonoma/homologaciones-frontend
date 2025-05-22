@@ -13,32 +13,22 @@
 
     <script>
         const baseRoute = '/homologaciones-frontend/public';
-
         const token = localStorage.getItem('auth_token');
         const userData = localStorage.getItem('user_data');
 
         if (!token || !userData) {
-            // Si no hay token o datos de usuario, redirige al login
             window.location.href = `${baseRoute}/auth/login`;
         } else {
             const user = JSON.parse(userData);
-
             if (user.rol_id !== 1) {
-                // Si NO es aspirante, redirige según su rol
-                let redirectUrl;
-
-                switch (user.rol_id) {
-                    case 2:
-                        redirectUrl = `${baseRoute}/coordinador/inicio`;
-                        break;
-                    case 3:
-                        redirectUrl = `${baseRoute}/administrador`;
-                        break;
-                    default:
-                        redirectUrl = `${baseRoute}/auth/login`;
-                }
-
-                window.location.href = redirectUrl;
+                const redirectMap = {
+                    2: `${baseRoute}/coordinador/inicio`,
+                    3: `${baseRoute}/coordinador/inicio`,
+                    4: `${baseRoute}/homologaciones-vicerrectoria/inicio`,
+                    5: `${baseRoute}/administrador`,
+                    default: `${baseRoute}/auth/login`
+                };
+                window.location.href = redirectMap[user.rol_id] || redirectMap.default;
             }
         }
     </script>
@@ -479,8 +469,10 @@
                             <p><strong>Programa:</strong> <span id="info-programa">Cargando...</span></p>
                             <p><strong>Estado:</strong> <span class="badge bg-secondary"
                                     id="info-estado">Cargando...</span></p>
-                            <p><strong>Institución de Origen:</strong> <span id="info-institucion">Cargando...</span></p>
-                            <p><strong>Departamento de Origen:</strong> <span id="info-departamento">Cargando...</span></p>
+                            <p><strong>Institución de Origen:</strong> <span id="info-institucion">Cargando...</span>
+                            </p>
+                            <p><strong>Departamento de Origen:</strong> <span id="info-departamento">Cargando...</span>
+                            </p>
                             <p><strong>Municipio de Origen:</strong> <span id="info-municipio">Cargando...</span></p>
                         </div>
                     </div>
@@ -547,36 +539,38 @@
     </div>
 
     <!-- Modal de Cierre de Sesión -->
-<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="logoutModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    Confirmar cierre de sesión
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <i class="bi bi-box-arrow-right text-danger" style="font-size: 3rem;"></i>
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="logoutModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Confirmar cierre de sesión
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
-                <p class="text-center fs-5">¿Está seguro que desea cerrar su sesión?</p>
-                <p class="text-center text-muted">Al confirmar, saldrá del sistema y deberá iniciar sesión nuevamente para acceder.</p>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-2"></i>
-                    Cancelar
-                </button>
-                <button type="button" class="btn btn-danger" onclick="confirmarCerrarSesion()">
-                    <i class="bi bi-box-arrow-right me-2"></i>
-                    Cerrar sesión
-                </button>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-box-arrow-right text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <p class="text-center fs-5">¿Está seguro que desea cerrar su sesión?</p>
+                    <p class="text-center text-muted">Al confirmar, saldrá del sistema y deberá iniciar sesión
+                        nuevamente para acceder.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmarCerrarSesion()">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        Cerrar sesión
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Cargar los scripts PRIMERO -->
     <script src="{{ asset('js/authService.js') }}"></script>

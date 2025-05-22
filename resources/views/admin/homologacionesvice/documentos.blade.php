@@ -3,10 +3,13 @@
 @section('content')
     <div class="container mt-5 position-relative">
         @php
+            // URL base para las rutas de la API
+            $baseUrl = 'http://127.0.0.1:8000/public/storage/';
+
             // Obtener datos del estudiante del primer documento (ya no necesitamos buscar en ['datos'])
             $estudiante = null;
-            if (count($documentos) > 0) {
-                $estudiante = $documentos[0];
+            if (count($documentos['datos']) > 0) {
+                $estudiante = $documentos['datos'][0];
             }
         @endphp
 
@@ -14,7 +17,7 @@
         @if ($estudiante)
             <div class="card mb-4 shadow-lg border-0 position-relative" style="border-radius: 15px; overflow: hidden;">
                 {{-- Botón de Cerrar (dentro del contenedor) --}}
-                <a href="{{ route('admin.homologaciones.vice.index', ['radicado' => $radicado]) }}" id="btn-cerrar"
+                <a href="{{ route('admin.homologacionescoordinador.index', ['radicado' => $radicado]) }}" id="btn-cerrar"
                     class="btn btn-danger shadow position-absolute"
                     style="top: 10px; right: 10px; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; transition: all 0.3s ease;">
                     <i class="fas fa-times"></i>
@@ -69,7 +72,7 @@
         {{-- Ya no necesitamos esta parte, simplemente usamos $documentos directamente --}}
         {{-- Navegación por pestañas --}}
         <ul class="nav nav-tabs mb-3" id="documentsTabs" role="tablist">
-            @foreach ($documentos as $index => $documento)
+            @foreach ($documentos['datos'] as $index => $documento)
                 <li class="nav-item" role="presentation">
                     <button class="nav-link {{ $index === 0 ? 'active' : '' }}" id="doc-{{ $index }}-tab"
                         data-bs-toggle="tab" data-bs-target="#doc-{{ $index }}" type="button" role="tab"
@@ -83,8 +86,13 @@
 
         {{-- Contenido de pestañas --}}
         <div class="tab-content" id="documentsTabsContent">
-            @if (count($documentos) > 0)
-                @foreach ($documentos as $index => $documento)
+            @if (count($documentos['datos']) > 0)
+                @foreach ($documentos['datos'] as $index => $documento)
+                    @php
+                        // Construir la URL completa del documento
+                        $documentUrl = $baseUrl . $documento['ruta'];
+                    @endphp
+
                     <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="doc-{{ $index }}"
                         role="tabpanel" aria-labelledby="doc-{{ $index }}-tab">
                         <div class="card shadow-sm" style="border-radius: 10px; overflow: hidden;">
@@ -102,11 +110,11 @@
 
                                 @if (isset($documento['ruta']) && $documento['ruta'])
                                     <div>
-                                        <a href="{{ asset($documento['ruta']) }}" download
+                                        <a href="{{ $documentUrl }}" download
                                             class="btn btn-sm btn-outline-primary me-2" style="transition: all 0.3s ease;">
                                             <i class="fas fa-download me-1"></i> Descargar
                                         </a>
-                                        <a href="{{ asset($documento['ruta']) }}" target="_blank" class="btn btn-sm btn-primary"
+                                        <a href="{{ $documentUrl }}" target="_blank" class="btn btn-sm btn-primary"
                                             style="transition: all 0.3s ease;">
                                             <i class="fas fa-external-link-alt me-1"></i> Abrir en nueva pestaña
                                         </a>
@@ -130,7 +138,7 @@
                                         </div>
                                         <p class="mb-0">Cargando documento...</p>
                                     </div>
-                                    <iframe src="{{ asset($documento['ruta']) }}" width="100%" height="600px"
+                                    <iframe src="{{ $documentUrl }}" width="100%" height="600px"
                                         style="border: none;"
                                         onload="document.getElementById('loading-{{ $index }}').style.display='none'">
                                     </iframe>
@@ -199,7 +207,7 @@
     <script>
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
-                window.location.href = "{{ route('admin.homologaciones.vice.index', ['radicado' => $radicado]) }}";
+                window.location.href = "{{ route('admin.homologacionescoordinador.index', ['radicado' => $radicado]) }}";
             }
         });
 

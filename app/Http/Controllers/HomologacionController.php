@@ -15,7 +15,7 @@ class HomologacionController extends Controller
      */
     private function getBaseUrl()
     {
-        return rtrim(env('BASE_URL_BACKEND', 'https://homologacionesback.educarenemociones.com'), '/') . '/api/';
+        return rtrim(env('BASE_URL_BACKEND', 'http://127.0.0.1:8000'), '/') . '/api/';
     }
     /**
      * Realiza una solicitud HTTP de forma segura y con reintentos
@@ -171,9 +171,11 @@ class HomologacionController extends Controller
         $respSolicitudes = $this->safeApiCall('GET', 'solicitudes');
         if (!$respSolicitudes->successful())
             abort(500, 'Error al obtener solicitudes');
-
         // Buscar la solicitud específica por radicado
+        //dd($radicado);
         $solicitud = collect($respSolicitudes->json())->firstWhere('numero_radicado', $radicado);
+        //dd(collect($respSolicitudes->json())->firstWhere('numero_radicado', $radicado));
+        //dd(collect($respSolicitudes->json()));
         if (!$solicitud)
             abort(404, 'Solicitud no encontrada');
 
@@ -187,12 +189,12 @@ class HomologacionController extends Controller
             abort(404, 'Usuario no encontrado');
 
         // Ahora que tenemos el ID del usuario, obtenemos sus documentos
-        $respDocumentos = $this->safeApiCall('GET', 'documentos/usuario/' . $usuario['id']);
+        $respDocumentos = $this->safeApiCall('GET', 'documentos/usuario/' . $usuario['id_usuario']);
         if (!$respDocumentos->successful()) {
             return view('admin.homologacionescoordinador.documentos', [
                 'radicado' => $radicado,
-                'id' => $solicitud['id'],
-                'nombreEstudiante' => $usuario['nombre'],
+                'id' => $solicitud['id_solicitud'],
+                'nombreEstudiante' => $usuario['primer_nombre'],
                 'documentos' => [
                     'mensaje' => 'Sin documentos',
                     'datos' => []
@@ -201,15 +203,16 @@ class HomologacionController extends Controller
                 'error' => 'No se pudieron cargar los datos de documentos. Error: ' . $respDocumentos->body()
             ]);
         }
-
+        //dd( $respDocumentos->json());
         // Pasar los datos a la vista
         return view('admin.homologacionescoordinador.documentos', [
             'documentos' => $respDocumentos->json(),
-            'id' => $solicitud['id'],
+            'id' => $solicitud['id_solicitud'],
             'radicado' => $radicado,
-            'nombreEstudiante' => $usuario['nombre']
+            'nombreEstudiante' => $usuario['primer_nombre']
         ]);
     } catch (\Exception $e) {
+        dd($e->getMessage());
         return view('admin.homologacionescoordinador.documentos', [
             'radicado' => $radicado,
             'id' => 0,
@@ -250,10 +253,10 @@ public function procesarHomologacion($id)
         $solicitudId = null;  // Inicializar la variable solicitudId
 
         // Llamar al API de homologaciones
-        $responseHomologacion = Http::get('https://homologacionesback.educarenemociones.com/api/homologacion-asignaturas/' . $idNumerico);
+        $responseHomologacion = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
 
         // Llamar al API de pensum de Autónoma (programaId = 12)
-        $responsePensum = Http::get('https://homologacionesback.educarenemociones.com/api/asignaturas/programa/12');
+        $responsePensum = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/12');
 
         // Procesar respuesta de homologación
         if ($responseHomologacion->successful()) {
@@ -330,7 +333,7 @@ public function obtenerPensumAutonoma($programaId = 12)
         $asignaturasDestino = [];
 
         // Llamar a la API para obtener las asignaturas del programa
-        $response = Http::get('https://homologacionesback.educarenemociones.com/api/asignaturas/programa/' . $programaId);
+        $response = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/' . $programaId);
 
         if ($response->successful()) {
             // Normalizar la estructura de datos
@@ -396,7 +399,7 @@ public function show($id)
         }
 
         // Llamar al API de homologaciones
-        $responseHomologacion = Http::get('https://homologacionesback.educarenemociones.com/api/homologacion-asignaturas/' . $idNumerico);
+        $responseHomologacion = Http::get('http://127.0.0.1:8000/api/homologacion-asignaturas/' . $idNumerico);
 
         if (!$responseHomologacion->successful()) {
             throw new \Exception('No se pudo obtener la homologación desde la API');
@@ -417,7 +420,7 @@ public function show($id)
         $asignaturasOrigen = $homologacion['asignaturas_origen'] ?? [];
 
         // Obtener asignaturas de destino desde pensum
-        $responsePensum = Http::get('https://homologacionesback.educarenemociones.com/api/asignaturas/programa/12');
+        $responsePensum = Http::get('http://127.0.0.1:8000/api/asignaturas/programa/12');
 
         $asignaturasDestino = $responsePensum->successful()
             ? ($responsePensum['datos'] ?? $responsePensum['data'] ?? [])

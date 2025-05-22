@@ -8,6 +8,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-2 text-center text-md-start">
+
                 </div>
                 <div class="col-md-8 text-center">
                     <h1 class="display-5 fw-bold mb-0" style="color: white !important;">Crear Instituciones y Programas</h1>
@@ -482,7 +483,7 @@
         // Variables para almacenar los IDs creados
 let institucionId = null;
 let programaId = null;
-let apiBaseUrl = 'https://homologacionesback.educarenemociones.com/api';
+let apiBaseUrl = 'http://127.0.0.1:8000/api';
 
 // Lista de departamentos de Colombia
 const departamentosColombia = [

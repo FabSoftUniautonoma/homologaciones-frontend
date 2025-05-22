@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function __construct()
     {
         // Configura la URL base de la API (ajustable desde el .env)
-        $this->apiUrl = env('API_URL', 'https://homologacionesback.educarenemociones.com/api');
+        $this->apiUrl = env('API_URL', 'http://127.0.0.1:8000/api');
     }
 
     /**

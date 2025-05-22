@@ -341,7 +341,7 @@
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                         @else
-                                            <a href="{{ route('procesohomologacion.vicerrectoria', $numero_radicado) }}"
+                                            <a href="{{ route('procesohomologacion', $numero_radicado) }}"
                                                 class="btn btn-sm btn-primary" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </a>

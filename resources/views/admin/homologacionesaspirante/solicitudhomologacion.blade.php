@@ -8,26 +8,29 @@
     <link href="{{ asset('css/estiloformularioaspirante.css') }}" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <script>
-        // Validación de acceso
-        const baseRoute = '/homologaciones-frontend/public';
-        const token = localStorage.getItem('auth_token');
-        const userData = localStorage.getItem('user_data');
 
-        if (!token || !userData) {
-            window.location.href = `${baseRoute}/auth/login`;
-        } else {
-            const user = JSON.parse(userData);
-            if (user.rol_id !== 1) {
-                const redirectMap = {
-                    2: `${baseRoute}/coordinador/inicio`,
-                    3: `${baseRoute}/administrador`,
-                    default: `${baseRoute}/auth/login`
-                };
-                window.location.href = redirectMap[user.rol_id] || redirectMap.default;
-            }
+    <script>
+    const baseRoute = '/homologaciones-frontend/public';
+    const token = localStorage.getItem('auth_token');
+    const userData = localStorage.getItem('user_data');
+
+    if (!token || !userData) {
+        window.location.href = `${baseRoute}/auth/login`;
+    } else {
+        const user = JSON.parse(userData);
+        if (user.rol_id !== 1) {
+            const redirectMap = {
+                2: `${baseRoute}/coordinador/inicio`,
+                3: `${baseRoute}/coordinador/inicio`,
+                4: `${baseRoute}/homologaciones-vicerrectoria/inicio`,
+                5: `${baseRoute}/administrador`,
+                default: `${baseRoute}/auth/login`
+            };
+            window.location.href = redirectMap[user.rol_id] || redirectMap.default;
         }
-    </script>
+    }
+</script>
+
 </head>
 
 <body>

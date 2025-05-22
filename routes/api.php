@@ -19,6 +19,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('paises', [PaisesControllerApi::class, 'getPaises'])->name('paises.get');
 
 

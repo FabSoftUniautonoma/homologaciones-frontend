@@ -91,7 +91,7 @@
 
     <script>
         // Inicializar servicio de autenticación
-        const authService = new AuthService('https://homologacionesback.educarenemociones.com/api');
+        const authService = new AuthService('http://127.0.0.1:8000/api');
 
         // Referencias a elementos del DOM
         const registerForm = document.getElementById('register-form');

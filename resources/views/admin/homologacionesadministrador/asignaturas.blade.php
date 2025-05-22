@@ -739,7 +739,7 @@
 let institucionSeleccionada = null;
 let programaSeleccionado = null;
 let currentStep = 1;
-const API_URL = 'https://homologacionesback.educarenemociones.com/api';
+const API_URL = 'http://127.0.0.1:8000/api';
 let todasLasInstituciones = [];
 let todosLosProgramas = [];
 

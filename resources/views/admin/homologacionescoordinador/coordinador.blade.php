@@ -119,7 +119,7 @@
                                             @endif
 
                                             {{-- Botón Ver Información Homologación --}}
-                                            <a href="{{ route('homologacion.Informacion', $numero_radicado) }}"
+                                            <a href="{{ route('homologacion.informacion', $numero_radicado) }}"
                                                 class="btn btn-sm btn-info" title="Ver información de homologación">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
@@ -141,7 +141,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <script src="{{ asset('js/gestionhomologacioncoordinacion.js') }}"></script>
 @endsection

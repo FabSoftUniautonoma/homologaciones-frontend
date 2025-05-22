@@ -400,10 +400,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Botón de guardar cambios -->
-                <button id="btn-guardar-homologaciones" class="btn btn-primary" onclick="guardarHomologaciones()">
-                    <i class="fas fa-save"></i> Guardar cambios
-                </button>
+
             </div>
         </div>
         {{-- Modal de Vista Previa PDF --}}
@@ -552,11 +549,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
         {{-- Modal de alertas --}}
         <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
