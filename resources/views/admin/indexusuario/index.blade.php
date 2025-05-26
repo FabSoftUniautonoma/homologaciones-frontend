@@ -296,13 +296,13 @@
                                 target="_blank">
                                 <i class="fab fa-facebook-f"></i>
                             </a>
-                            <a href="https://twitter.com/UniautonomaC" class="social-icon" target="_blank">
+                            <a href="https://x.com/uniautonomadc" class="social-icon" target="_blank">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://www.instagram.com/uniautonoma/" class="social-icon" target="_blank">
+                            <a href="https://www.instagram.com/uniautonomadelcauca/?hl=es-la" class="social-icon" target="_blank">
                                 <i class="fab fa-instagram"></i>
                             </a>
-                            <a href="https://www.youtube.com/channel/UC-0xd6W79SeyFaC9MxFQdPg" class="social-icon"
+                            <a href="https://www.youtube.com/@autonomadelcauca4125/videos" class="social-icon"
                                 target="_blank">
                                 <i class="fab fa-youtube"></i>
                             </a>

@@ -391,7 +391,7 @@
                                 <input type="hidden" id="firma_coordinador_data" name="firma_coordinador_data">
 
                                 <div class="mt-3 text-center">
-                                    <button type="button" id="btn-generar-pdf" class="btn btn-lg"
+                                    <button type="button" id="btn-generar-pdf-coordinador" class="btn btn-lg"
                                         style="background-color: #0277bd; color: white;" disabled>
                                         <i class="fas fa-file-pdf mr-2"></i> Generar PDF
                                     </button>

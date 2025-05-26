@@ -189,6 +189,7 @@ function toggleFechaFinalizacion() {
         document.getElementById("fecha_ultimo_semestre").setAttribute("required", "");
     }
 
+    // IMPORTANTE: Ejecutar validarSENA después de cambiar la fecha
     setTimeout(validarSENA, 100);
 }
 
@@ -205,7 +206,11 @@ function validarSENA() {
 
     let mensajeSENA = document.getElementById("mensajeSENA");
 
-    if (esSENA && (finalizoEstudios === "No" || finalizoEstudios === "no" || finalizoEstudios === "NO")) {
+    // Condición actualizada: bloquear SOLO si es SENA Y no finalizó estudios
+    const debeBloquear = esSENA && (finalizoEstudios === "No" || finalizoEstudios === "no" || finalizoEstudios === "NO");
+
+    if (debeBloquear) {
+        // Mostrar mensaje de error
         if (!mensajeSENA) {
             mensajeSENA = document.createElement("div");
             mensajeSENA.id = "mensajeSENA";
@@ -215,33 +220,44 @@ function validarSENA() {
             document.getElementById("finalizo_estudios").parentElement.appendChild(mensajeSENA);
         }
 
+        // Bloquear botón
         if (nextButton) {
             nextButton.disabled = true;
             nextButton.classList.add("disabled");
             nextButton.style.opacity = "0.5";
             nextButton.style.cursor = "not-allowed";
-            nextButton.setAttribute("data-original-onclick", nextButton.getAttribute("onclick"));
+
+            // Guardar el onclick original solo si no existe ya
+            if (!nextButton.getAttribute("data-original-onclick")) {
+                nextButton.setAttribute("data-original-onclick", nextButton.getAttribute("onclick") || "");
+            }
             nextButton.setAttribute("onclick", "alertaSENA(); return false;");
         }
     } else {
+        // Remover mensaje de error
         if (mensajeSENA) {
             mensajeSENA.remove();
         }
 
+        // Desbloquear botón
         if (nextButton) {
             nextButton.disabled = false;
             nextButton.classList.remove("disabled");
             nextButton.style.opacity = "";
             nextButton.style.cursor = "";
 
+            // Restaurar el onclick original
             const originalOnclick = nextButton.getAttribute("data-original-onclick");
             if (originalOnclick) {
                 nextButton.setAttribute("onclick", originalOnclick);
+            } else {
+                // Si no hay onclick original, usar la función por defecto
+                nextButton.setAttribute("onclick", "validarFormularioStep2()");
             }
         }
     }
 
-    return !(esSENA && finalizoEstudios === "No");
+    return !debeBloquear;
 }
 
 function alertaSENA() {
@@ -255,6 +271,9 @@ function updateFormacion() {
     const programaDestinoSelect = document.getElementById('programa_destino');
 
     const selectedOption = institucionSelect.options[institucionSelect.selectedIndex];
+
+    // NUEVO: Limpiar materias del SENA si se cambia de institución
+    limpiarMateriasAnterior();
 
     tipoInput.value = selectedOption?.dataset.formacion || "";
 
@@ -313,6 +332,31 @@ function updateFormacion() {
     // Cargar programas de destino
     if (programaDestinoSelect && programaDestinoSelect.options.length <= 1) {
         cargarProgramasDestino();
+    }
+}
+
+function limpiarMateriasAnterior() {
+    const materiasContainer = document.getElementById("materias-container");
+    if (!materiasContainer) return;
+
+    // Verificar si hay materias del SENA (solo lectura)
+    const materiasReadonly = materiasContainer.querySelectorAll('input[readonly]');
+
+    if (materiasReadonly.length > 0) {
+        // Limpiar completamente el contenedor
+        materiasContainer.innerHTML = "";
+
+        // Limpiar localStorage de notas
+        localStorage.removeItem("notas");
+        localStorage.removeItem("materiasGuardadas");
+
+        // Limpiar la variable global
+        window.asignaturasPorPrograma = [];
+
+        console.log("Materias del SENA limpiadas al cambiar de institución");
+
+        // Mostrar mensaje informativo
+        mostrarMensaje("Materias anteriores limpiadas. Puede seleccionar nuevas materias.", "success");
     }
 }
 
@@ -792,6 +836,20 @@ function validarFormularioStep2() {
 }
 
 function autoAsignarNotasSENA() {
+    const institucionSelect = document.getElementById("institucion");
+    const institucionValue = institucionSelect.value;
+    const institucionText = institucionSelect.options[institucionSelect.selectedIndex]?.textContent || "";
+
+    // Verificar que realmente sea SENA antes de proceder
+    const esSENA = institucionValue === "SENA" ||
+        institucionText.toUpperCase().includes("SENA") ||
+        institucionText.includes("Servicio Nacional de Aprendizaje - SENA");
+
+    if (!esSENA) {
+        console.log("No es SENA, no se autoasignan notas");
+        return;
+    }
+
     const programaId = document.getElementById("programa").value;
     const materiasContainer = document.getElementById("materias-container");
     materiasContainer.innerHTML = "";
@@ -1434,7 +1492,7 @@ function enviarFormulario() {
 
         // Procesar documentos
         const documentos = [
-          { id: "documento_id", tipo: "Documento de Identidad", dir: "doc_identidad" },
+            { id: "documento_id", tipo: "Documento de Identidad", dir: "doc_identidad" },
             { id: "certificado_notas", tipo: "Certificado de Notas", dir: "cert_notas" },
             { id: "contenido_programatico", tipo: "Contenido Programático", dir: "cont_programatico" },
             { id: "carta_homologacion", tipo: "Carta de Solicitud", dir: "cart_solicitud" },
@@ -1590,7 +1648,7 @@ function abrirModalConfirmacion(numeroRadicado) {
     console.log("Modal de confirmación añadido al DOM");
 
     // Prevenir que se cierre haciendo clic fuera
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
         if (e.target === modal) {
             e.stopPropagation();
             console.log("Intento de cierre bloqueado");
@@ -1623,6 +1681,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setTimeout(validarSENA, 500);
+
+    // Agregar event listener para cambio de institución
+    if (institucionSelect) {
+        institucionSelect.addEventListener('change', function () {
+            // Ejecutar validarSENA después de cambiar institución
+            setTimeout(validarSENA, 100);
+            // También ejecutar updateFormacion
+            updateFormacion();
+        });
+    }
 
     cargarDatosUsuario();
     handlePaisChange();

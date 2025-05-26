@@ -306,29 +306,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Función para mostrar alertas
-            function showAlert(message, type = 'info') {
-                const alertContainer = document.getElementById('system-alerts');
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-                alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            `;
-                alertContainer.appendChild(alertDiv);
-
-                // Auto-eliminar la alerta después de 5 segundos
-                setTimeout(() => {
-                    alertDiv.classList.remove('show');
-                    setTimeout(() => alertDiv.remove(), 150);
-                }, 5000);
-            }
 
             // Función para cargar datos desde la API
             async function cargarDatos() {
                 try {
-                    const response = await fetch('https://homologacionesback.educarenemociones.com/api/solicitudes');
+                    const response = await fetch('http://127.0.0.1:8000/api/solicitudes');
 
                     if (!response.ok) {
                         throw new Error('Error al cargar los datos');

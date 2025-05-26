@@ -116,10 +116,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.homologaciones.actualizar', $solicitud['id_solicitud']) }}"
-                            method="POST">
-                            @csrf
-                            @method('PUT')
+                        
 
                             <div class="form-group mb-4">
                                 <label class="text-muted small text-uppercase mb-2">Estado actual</label>

@@ -994,6 +994,9 @@ function confirmarHomologacion() {
 /**
  * Función para renderizar la tabla de homologaciones con mejor manejo de errores
  */
+/**
+ * Función para renderizar la tabla de homologaciones con mejor manejo de errores
+ */
 function renderizarTablaHomologaciones() {
     const tbody = document.getElementById('homologaciones-body');
 
@@ -1134,9 +1137,57 @@ function renderizarTablaHomologaciones() {
         });
     });
 
+    // **AGREGAR EVENT LISTENERS PARA LOS BOTONES DE EDITAR Y ELIMINAR**
+    // Event listener para botones de editar
+    document.querySelectorAll('.btn-editar-homologacion').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            if (!isNaN(index) && index >= 0 && index < homologaciones.length) {
+                editarHomologacion(index);
+            }
+        });
+    });
+
+    // Event listener para botones de eliminar
+    document.querySelectorAll('.btn-eliminar-homologacion').forEach(button => {
+        button.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            if (!isNaN(index) && index >= 0 && index < homologaciones.length) {
+                eliminarHomologacion(index);
+            }
+        });
+    });
+
     // Actualizar el estado de la UI después de renderizar
     actualizarEstadoUI();
 }
+
+// Función para eliminar una homologación individual
+function eliminarHomologacion(index) {
+    if (index < 0 || index >= homologaciones.length) {
+        console.error('Índice de homologación inválido:', index);
+        return;
+    }
+
+    const homologacion = homologaciones[index];
+    const nombreAsignatura = homologacion.asignatura_origen_nombre || 'Sin nombre';
+
+    // Mostrar confirmación
+    if (confirm(`¿Está seguro de que desea eliminar la homologación de "${nombreAsignatura}"?`)) {
+        // Eliminar la homologación del array
+        homologaciones.splice(index, 1);
+
+        // Volver a renderizar la tabla
+        renderizarTablaHomologaciones();
+
+        // Guardar cambios automáticamente
+        guardarSilencioso();
+
+        console.log('Homologación eliminada exitosamente');
+    }
+}
+
+
 // Inicializar validación para el campo nota-homologada
 function inicializarValidacionNotas() {
     // Obtener el elemento input
@@ -1193,7 +1244,6 @@ function actualizarNotasDesdeInputs() {
         homologaciones[index].nota_destino = notaFormateada;
     });
 }
-
 
 /**
  * Función para limpiar las asignaturas destino de la homologación actual
@@ -2956,6 +3006,1677 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+
+// Función para manejar la carga de firma del coordinador
+function handleFirmaCoordinadorUpload(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('firma-preview');
+    const placeholder = document.getElementById('firma-coordinador-placeholder');
+    const hiddenInput = document.getElementById('firma_coordinador_data');
+    const generateBtn = document.getElementById('btn-generar-pdf-coordinador');
+    const fileLabel = event.target.nextElementSibling;
+
+    if (file) {
+        // Validar tipo de archivo
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!validTypes.includes(file.type)) {
+            alert('Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF)');
+            event.target.value = '';
+            return;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('El archivo es demasiado grande. Máximo 5MB permitido.');
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            // Mostrar preview de la imagen
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+
+            // Guardar datos en input hidden
+            hiddenInput.value = e.target.result;
+
+            // IMPORTANTE: Guardar también en window.firmaCoordinadorData para que esté disponible globalmente
+            window.firmaCoordinadorData = e.target.result;
+
+            // Guardar en localStorage como respaldo
+            localStorage.setItem('firmaCoordinadorData', e.target.result);
+
+            // Habilitar botón de generar PDF
+            generateBtn.disabled = false;
+            generateBtn.classList.remove('btn-secondary');
+            generateBtn.style.backgroundColor = '#0277bd';
+
+            console.log('Firma del coordinador cargada y guardada correctamente');
+        };
+        reader.readAsDataURL(file);
+
+        // Actualizar label del archivo
+        fileLabel.textContent = file.name;
+    } else {
+        // Resetear si no hay archivo
+        preview.innerHTML = `<p style="color: #19407b;" class="mb-0">Vista previa de la firma</p>`;
+        hiddenInput.value = '';
+
+        // Limpiar también las variables globales
+        window.firmaCoordinadorData = null;
+        localStorage.removeItem('firmaCoordinadorData');
+
+        generateBtn.disabled = true;
+        generateBtn.style.backgroundColor = '#6c757d';
+        fileLabel.textContent = 'Seleccionar archivo...';
+    }
+}
+
+// Función para generar PDF desde el formulario del coordinador
+function generarPDFCoordinador() {
+    // Verificar que la firma esté cargada
+    const firmaData = document.getElementById('firma_coordinador_data').value;
+
+    if (!firmaData) {
+        mostrarAlerta('Por favor, carga la firma del coordinador antes de generar el PDF.', 'warning');
+        return;
+    }
+
+    // Asegurar que la firma esté disponible globalmente
+    if (!window.firmaCoordinadorData) {
+        window.firmaCoordinadorData = firmaData;
+        localStorage.setItem('firmaCoordinadorData', firmaData);
+    }
+
+    // Mostrar loading en el botón
+    const btn = document.getElementById('btn-generar-pdf-coordinador');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generando PDF...';
+    btn.disabled = true;
+
+    try {
+        // Llamar a la función principal de generación de PDF
+        // El parámetro false indica que es vista de coordinador (no vicerrector)
+        const resultado = generarPDF(false);
+
+        if (!resultado) {
+            throw new Error('Error en la generación del PDF');
+        }
+
+        console.log('PDF generado exitosamente desde formulario del coordinador');
+
+    } catch (error) {
+        console.error('Error al generar PDF desde coordinador:', error);
+        mostrarAlerta(`Error al generar PDF: ${error.message}`, 'danger');
+    } finally {
+        // Restaurar botón después de un breve delay
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 2000);
+    }
+}
+
+// Función auxiliar para obtener datos informativos del DOM
+function obtenerDatoInformativo(campo) {
+    // Buscar por texto exacto primero
+    let elemento = Array.from(document.querySelectorAll('strong, b, .font-weight-bold')).find(el =>
+        el.textContent.trim().toLowerCase().includes(campo.toLowerCase())
+    );
+
+    if (elemento) {
+        // Buscar el valor en el siguiente elemento o en el padre
+        let valor = elemento.nextElementSibling?.textContent?.trim() ||
+            elemento.parentElement?.nextElementSibling?.textContent?.trim() ||
+            elemento.parentElement?.textContent?.replace(elemento.textContent, '').trim();
+
+        if (valor && valor !== '') {
+            return valor;
+        }
+    }
+
+    // Buscar en inputs o spans con data attributes
+    elemento = document.querySelector(`[data-campo="${campo.toLowerCase()}"]`) ||
+        document.querySelector(`[data-info="${campo.toLowerCase()}"]`);
+
+    if (elemento) {
+        return elemento.textContent?.trim() || elemento.value?.trim();
+    }
+
+    return null;
+}
+
+// Función auxiliar para mostrar alertas
+function mostrarAlerta(mensaje, tipo) {
+    // Si existe una función de alertas personalizada, usarla
+    if (typeof window.mostrarAlerta === 'function' && window.mostrarAlerta !== mostrarAlerta) {
+        return window.mostrarAlerta(mensaje, tipo);
+    }
+
+    // Implementación básica con estilos Bootstrap si está disponible
+    const alertContainer = document.getElementById('alert-container') || document.body;
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.style.maxWidth = '400px';
+
+    alertDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    `;
+
+    alertContainer.appendChild(alertDiv);
+
+    // Auto-remove después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 5000);
+}
+
+// Función corregida para generar PDF
+function generarPDF(esVistaVicerrector) {
+    console.log("Función generarPDF llamada, es vista vicerrector:", esVistaVicerrector);
+
+    try {
+        // Verificar si jsPDF está disponible
+        if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
+            console.error('jsPDF no está disponible');
+            mostrarAlerta('Error: Librería jsPDF no disponible. Verifique que todas las librerías necesarias están cargadas.', 'danger');
+            return;
+        }
+
+        // Verificar las firmas necesarias para cada vista
+        if (!window.firmaCoordinadorData) {
+            // Intentar cargar de localStorage una última vez
+            const firmaCoordGuardada = localStorage.getItem('firmaCoordinadorData');
+            if (firmaCoordGuardada) {
+                window.firmaCoordinadorData = firmaCoordGuardada;
+                console.log("Firma del coordinador cargada desde localStorage justo antes de generar PDF");
+            } else {
+                mostrarAlerta('Error: No se ha cargado la firma del coordinador. Por favor, cargue la firma antes de continuar.', 'danger');
+                return;
+            }
+        }
+
+        if (esVistaVicerrector && !window.firmaVicerrectorData) {
+            mostrarAlerta('Error: No se ha cargado la firma del vicerrector. Por favor, cargue la firma antes de continuar.', 'danger');
+            return;
+        }
+
+        // Mostrar indicador de carga
+        const btnGenerar = document.getElementById('btn-generar-pdf') || document.getElementById('btn-generar-pdf-coordinador');
+        if (btnGenerar) {
+            const textoOriginal = btnGenerar.innerHTML;
+            btnGenerar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            btnGenerar.disabled = true;
+
+            // Restaurar botón si hay error después de 10 segundos
+            setTimeout(() => {
+                if (btnGenerar.innerHTML.includes('fa-spinner')) {
+                    btnGenerar.innerHTML = textoOriginal;
+                    btnGenerar.disabled = false;
+                }
+            }, 10000);
+        }
+
+        // Obtener datos del DOM para el PDF
+        const estudiante = obtenerDatoInformativo('Nombre') || 'Estudiante';
+        const identificacion = obtenerDatoInformativo('Identificación') || 'No disponible';
+        const universidad = obtenerDatoInformativo('Universidad de Origen') || 'Universidad Externa';
+        const programa = obtenerDatoInformativo('Programa') || 'Programa Actual';
+
+        // Obtener homologaciones de la tabla
+        const homologaciones = [];
+        document.querySelectorAll('#tabla-homologaciones tbody tr:not(#no-homologaciones)').forEach(row => {
+            const celdas = row.querySelectorAll('td');
+            if (celdas.length >= 5) {
+                homologaciones.push({
+                    asignatura_origen_nombre: celdas[0].textContent.trim(),
+                    asignatura_destino_nombre: celdas[1].textContent.trim(),
+                    nota_origen: celdas[2].textContent.trim(),
+                    nota_destino: celdas[3].textContent.trim(),
+                    creditos: celdas[4].textContent.trim()
+                });
+            }
+        });
+
+        // Crear objeto con los datos recopilados
+        const datosEstudiante = {
+            nombre: estudiante,
+            identificacion: identificacion
+        };
+
+        const datosSolicitud = {
+            universidad_origen: universidad,
+            programa_destino: programa
+        };
+
+        const datosHomologacion = {
+            homologaciones: homologaciones
+        };
+
+        // Crear el PDF con los datos recopilados
+        generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, esVistaVicerrector);
+
+    } catch (error) {
+        console.error('Error general al iniciar generación de PDF:', error);
+        mostrarAlerta(`Error al generar PDF: ${error.message}`, 'danger');
+
+        // Restaurar botón
+        const btnGenerar = document.getElementById('btn-generar-pdf') || document.getElementById('btn-generar-pdf-coordinador');
+        if (btnGenerar) {
+            btnGenerar.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> Generar Resolución PDF';
+            btnGenerar.disabled = false;
+        }
+    }
+}
+// Función corregida para generar el PDF con los datos
+async function generarPDFConDatos(datosHomologacion, datosEstudiante, datosSolicitud, esVistaVicerrector) {
+    try {
+        // Crear instancia de jsPDF
+        const { jsPDF } = jspdf;
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'letter',
+            compress: true
+        });
+
+        // URLs de firmas predeterminadas
+        const FIRMAS_PREDETERMINADAS = {
+            coordinador: 'https://i.postimg.cc/W4yX2QG8/firma-coordinador.png',
+            vicerrector: 'https://i.postimg.cc/h4pG2K1S/firma-vicerrector.png'
+        };
+
+        // Función mejorada para cargar imagen desde URL con fondo blanco
+        function cargarImagenDesdeURL(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = this.width;
+                        canvas.height = this.height;
+
+                        // IMPORTANTE: Llenar el canvas con fondo blanco primero
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        // Luego dibujar la imagen encima
+                        ctx.drawImage(this, 0, 0);
+
+                        resolve(canvas.toDataURL('image/png'));
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                img.onerror = function() {
+                    reject(new Error(`No se pudo cargar la imagen: ${url}`));
+                };
+                img.src = url;
+            });
+        }
+
+        // Función mejorada para crear firma de texto con fondo blanco
+        function crearFirmaTexto(nombre) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+
+            // IMPORTANTE: Fondo blanco explícito
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Configurar texto
+            ctx.font = 'italic 24px serif';
+            ctx.fillStyle = '#003399';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Dibujar el texto
+            ctx.fillText(nombre, canvas.width / 2, canvas.height / 2);
+
+            // Agregar una línea decorativa debajo
+            ctx.strokeStyle = '#003399';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, canvas.height - 20);
+            ctx.lineTo(canvas.width - 50, canvas.height - 20);
+            ctx.stroke();
+
+            return canvas.toDataURL('image/png');
+        }
+
+        // NUEVA LÓGICA: Preparar firmas automáticamente
+        async function prepararFirmas() {
+            console.log('Preparando firmas...');
+
+            try {
+                // Cargar firma del coordinador si no existe
+                if (!window.firmaCoordinadorData) {
+                    console.log('Cargando firma predeterminada del coordinador...');
+                    try {
+                        window.firmaCoordinadorData = await cargarImagenDesdeURL(FIRMAS_PREDETERMINADAS.coordinador);
+                        console.log('Firma del coordinador cargada exitosamente');
+                    } catch (error) {
+                        console.warn('Error al cargar firma del coordinador:', error);
+                        // Crear una firma de texto simple como fallback
+                        window.firmaCoordinadorData = crearFirmaTexto('Juan Pablo Diago R.');
+                    }
+                }
+
+                // Cargar firma del vicerrector si es necesaria
+                if (esVistaVicerrector && !window.firmaVicerrectorData) {
+                    console.log('Cargando firma predeterminada del vicerrector...');
+                    try {
+                        window.firmaVicerrectorData = await cargarImagenDesdeURL(FIRMAS_PREDETERMINADAS.vicerrector);
+                        console.log('Firma del vicerrector cargada exitosamente');
+                    } catch (error) {
+                        console.warn('Error al cargar firma del vicerrector:', error);
+                        // Crear una firma de texto simple como fallback
+                        window.firmaVicerrectorData = crearFirmaTexto('Sebastian Toro');
+                    }
+                }
+            } catch (error) {
+                console.error('Error general al preparar firmas:', error);
+            }
+        }
+
+        // EJECUTAR preparación de firmas ANTES de continuar
+        await prepararFirmas();
+
+        // Obtener datos del estudiante
+        let estudiante = datosEstudiante.nombre || 'N/A';
+        let identificacion = datosEstudiante.identificacion || 'N/A';
+        let universidad = datosSolicitud.universidad_origen || 'N/A';
+        let programa = datosSolicitud.programa_destino || 'N/A';
+
+        // Obtener la fecha actual
+        const fechaActual = new Date();
+        const dia = fechaActual.getDate();
+        const mes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+        const año = fechaActual.getFullYear();
+        const fechaFormateada = `Popayán, ${dia} de ${mes} de ${año}`;
+
+        // Número de resolución (generado automáticamente)
+        const numeroResolucion = `${año}-${Math.floor(Math.random() * 900) + 100}`;
+
+        // Configurar fuentes y estilos
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+
+        // Configurar colores institucionales
+        const colorAzulInstitucional = [0, 51, 153]; // RGB para azul institucional
+        const colorAzulClaro = [230, 236, 250]; // Azul muy claro para fondos
+        const colorGris = [100, 100, 100]; // RGB para texto gris
+
+        // Primera página con marco decorativo
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2); // Marco exterior con bordes redondeados
+
+        // Título y logo institucional
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.text('CORPORACIÓN UNIVERSITARIA AUTÓNOMA DEL CAUCA', 105, 25, { align: 'center' });
+
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'italic');
+        doc.text('Líderes, visionarios y emprendedores', 105, 35, { align: 'center' });
+
+        // Línea decorativa
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.7);
+        doc.line(30, 40, 180, 40);
+
+        // Número de resolución
+        let yPos = 55;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+
+        // Fondo para el título de resolución
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(50, yPos - 6, 110, 10, 1, 1, 'F');
+
+        doc.text(`RESOLUCIÓN No. ${numeroResolucion}`, 105, yPos, { align: 'center' });
+
+        yPos += 15;
+        doc.text('Del', 105, yPos, { align: 'center' });
+
+        yPos += 10;
+        doc.text(`(${dia} ${mes.toUpperCase().substring(0, 3)}. ${año})`, 105, yPos, { align: 'center' });
+
+        yPos += 25;
+
+        // Título principal del documento
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        const tituloPrincipal = `Por la cual se aprueba el estudio de homologación de los cursos aprobados en ${universidad.toUpperCase()}, Programa de ${programa.toUpperCase()}, por ${estudiante.toUpperCase()} identificado con ${identificacion}.`;
+
+        const lineasTituloPrincipal = doc.splitTextToSize(tituloPrincipal, 170);
+        doc.text(lineasTituloPrincipal, 20, yPos);
+
+        yPos += lineasTituloPrincipal.length * 7 + 15;
+
+        // Texto de vicerrectoría
+        doc.setFont('helvetica', 'bold');
+        const textoVicerrectoria = 'La suscrita Vicerrectora Académica de la CORPORACIÓN UNIVERSITARIA AUTÓNOMA DEL CAUCA, en uso de sus atribuciones reglamentarias y en especial las conferidas en el Acuerdo 010 de 2005 expedida por la ASAMBLEA DE FUNDADORES y el Reglamento Estudiantil Acuerdo 011 del 15 febrero de 2017. Artículo 32 y';
+
+        const lineasVicerrectoria = doc.splitTextToSize(textoVicerrectoria, 170);
+        doc.text(lineasVicerrectoria, 20, yPos);
+
+        yPos += lineasVicerrectoria.length * 7 + 15;
+
+        // Considerando
+        doc.setFont('helvetica', 'bold');
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(65, yPos - 6, 80, 10, 2, 2, 'F');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.text('CONSIDERANDO', 105, yPos, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+
+        yPos += 15;
+
+        // Texto considerando
+        doc.setFont('helvetica', 'normal');
+        let considerandos = [
+            `Que el Decano de la Facultad de ${programa}, realizó el estudio de homologación de los cursos aprobados en el Programa de ${programa.toUpperCase()}, de ${universidad.toUpperCase()}, solicitado por ${estudiante.toUpperCase()} identificado con ${identificacion}.`,
+
+            `Que la Vicerrectora Académica revisó los procedimientos aplicados y los anexos allegados por ${estudiante.toUpperCase()} para el estudio y análisis de la homologación realizada por el Decano de la Facultad correspondiente, con el correspondiente pensum vigente del Programa de ${programa} y por lo anterior.`,
+
+            "Que de conformidad con el Reglamento Estudiantil vigente, se establecen los procedimientos y criterios para la homologación de asignaturas.",
+
+            `Que existe correspondencia entre los contenidos programáticos, intensidad horaria, créditos académicos y nivel de competencias de las asignaturas a homologar.`,
+
+            `Que en sesión del ${dia} de ${mes} de ${año}, el Comité de Homologaciones recomendó la aprobación de las asignaturas que se detallan en la presente resolución.`
+        ];
+
+        // Agregar considerandos con viñetas
+        considerandos.forEach((texto, index) => {
+            // Nueva página si es necesario
+            if (yPos > 220) {
+                doc.addPage();
+                yPos = 30;
+
+                // Marco decorativo
+                doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+                doc.setLineWidth(0.3);
+                doc.roundedRect(10, 10, 195, 260, 2, 2);
+
+                // Encabezado en la nueva página
+                doc.setFontSize(9);
+                doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+                doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(10);
+            }
+
+            const lineas = doc.splitTextToSize(texto, 165);
+
+            // Viñeta
+            doc.setFillColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+            doc.circle(23, yPos, 1.2, 'F');
+
+            doc.setFont('helvetica', 'normal');
+            doc.text(lineas, 30, yPos);
+            yPos += lineas.length * 6 + 8; // Espacio entre párrafos
+        });
+
+        yPos += 10;
+
+        // Resuelve
+        doc.setFont('helvetica', 'bold');
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(70, yPos - 6, 70, 10, 2, 2, 'F');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.text('RESUELVE:', 105, yPos, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+
+        yPos += 15;
+
+        // Artículo Primero
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('ARTÍCULO 1°.', 20, yPos);
+        doc.setFont('helvetica', 'normal');
+
+        yPos += 10;
+
+        // Texto del artículo primero
+        const textoArticuloPrimero = `Aprobar el estudio de homologación de ${estudiante.toUpperCase()} identificado con ${identificacion}, de la siguiente manera:`;
+        const lineasArticulo1 = doc.splitTextToSize(textoArticuloPrimero, 175);
+        doc.text(lineasArticulo1, 20, yPos);
+
+        yPos += lineasArticulo1.length * 6 + 12;
+
+        // Siempre crear una nueva página para la tabla para tener espacio suficiente
+        doc.addPage();
+        yPos = 30;
+
+        // Marco decorativo para la nueva página
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2);
+
+        // Encabezado en la nueva página
+        doc.setFontSize(9);
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+
+        // Título de la tabla
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+
+        // Fondo para el título de la tabla
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(45, yPos - 6, 120, 10, 2, 2, 'F');
+
+        doc.text('CURSOS ACADÉMICOS HOMOLOGADOS', 105, yPos, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+
+        yPos += 15;
+
+        // Preparar datos para la tabla
+        let asignaturasFiltradas = [];
+
+        // Procesar datos de homologación
+        if (datosHomologacion.homologaciones && datosHomologacion.homologaciones.length > 0) {
+            asignaturasFiltradas = datosHomologacion.homologaciones.map(h => ({
+                asignatura_origen_nombre: h.asignatura_origen_nombre || 'N/A',
+                codigo_destino: h.codigo_destino || 'N/A',
+                asignatura_destino_nombre: h.asignatura_destino_nombre || 'N/A',
+                semestre: h.semestre || 'N/A',
+                creditos: h.creditos || 'N/A',
+                nota_destino: h.nota_destino || h.nota_homologada || 'N/A'
+            }));
+        }
+
+        // Si no hay datos
+        if (asignaturasFiltradas.length === 0) {
+            asignaturasFiltradas.push({
+                asignatura_origen_nombre: "No se encontraron asignaturas para homologar",
+                codigo_destino: "-",
+                asignatura_destino_nombre: "-",
+                semestre: "-",
+                creditos: "-",
+                nota_destino: "-"
+            });
+        }
+
+        // Crear tabla
+        const headers = ['CURSO INSTITUCIÓN DE ORIGEN', 'CÓDIGO', 'CURSO ACADÉMICO AUTÓNOMA', 'SEM', 'CRED', 'CALIF'];
+        const data = asignaturasFiltradas.map(h => [
+            h.asignatura_origen_nombre,
+            h.codigo_destino,
+            h.asignatura_destino_nombre,
+            h.semestre,
+            h.creditos,
+            h.nota_destino
+        ]);
+
+        // Usar autoTable si está disponible
+        if (typeof doc.autoTable === 'function') {
+            doc.autoTable({
+                startY: yPos,
+                head: [headers],
+                body: data,
+                margin: { left: 15, right: 15 },
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 6,
+                    lineWidth: 0.1,
+                    valign: 'middle',
+                    overflow: 'linebreak',
+                    lineColor: [200, 200, 200]
+                },
+                headStyles: {
+                    fillColor: colorAzulInstitucional,
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center',
+                    fontSize: 9
+                },
+                columnStyles: {
+                    0: { cellWidth: 50 },
+                    1: { cellWidth: 18, halign: 'center' },
+                    2: { cellWidth: 50 },
+                    3: { cellWidth: 15, halign: 'center' },
+                    4: { cellWidth: 15, halign: 'center' },
+                    5: { cellWidth: 15, halign: 'center' }
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                didDrawCell: function (data) {
+                    if (data.section === 'body' || data.section === 'head') {
+                        doc.setDrawColor(150, 150, 150);
+                        doc.setLineWidth(0.1);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'S');
+                    }
+                }
+            });
+
+            // Actualizar posición después de la tabla
+            yPos = doc.lastAutoTable.finalY + 18;
+        } else {
+            console.warn('autoTable no está disponible, usando implementación básica');
+            yPos = 150;
+        }
+
+        // Calcular total de créditos
+        const totalCreditos = asignaturasFiltradas.reduce((sum, item) => {
+            return sum + (parseFloat(item.creditos) || 0);
+        }, 0);
+
+        // Resumen de totales
+        doc.setFillColor(colorAzulClaro[0], colorAzulClaro[1], colorAzulClaro[2]);
+        doc.roundedRect(95, yPos - 5, 90, 25, 2, 2, 'F');
+
+        // Total de cursos y créditos
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('TOTAL CURSOS HOMOLOGADOS:', 110, yPos + 5);
+        doc.text(asignaturasFiltradas.length.toString(), 175, yPos + 5);
+
+        yPos += 12;
+
+        doc.text('TOTAL CRÉDITOS HOMOLOGADOS:', 110, yPos + 5);
+        doc.text(totalCreditos.toString(), 175, yPos + 5);
+
+        // Nueva página para firmas
+        doc.addPage();
+        yPos = 50;
+
+        // Marco decorativo para la página de firmas
+        doc.setDrawColor(colorAzulInstitucional[0], colorAzulInstitucional[1], colorAzulInstitucional[2]);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(10, 10, 195, 260, 2, 2);
+
+        // Encabezado en la página de firmas
+        doc.setFontSize(9);
+        doc.setTextColor(colorGris[0], colorGris[1], colorGris[2]);
+        doc.text('RESOLUCIÓN No. ' + numeroResolucion, 105, 20, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+
+        // Artículo Segundo
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('ARTÍCULO 2°.', 20, yPos);
+        doc.setFont('helvetica', 'normal');
+
+        yPos += 10;
+
+        // Texto del artículo segundo
+        const textoArticuloSegundo = `Ordenar al Departamento de Admisiones, Registro y Control Académico, registrar en el sistema la homologación de los cursos académicos relacionados.`;
+        const lineasArticulo2 = doc.splitTextToSize(textoArticuloSegundo, 175);
+        doc.text(lineasArticulo2, 20, yPos);
+
+        yPos += lineasArticulo2.length * 6 + 10;
+
+        // Artículo Tercero
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(20, yPos - 5, 35, 8, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('ARTÍCULO 3°.', 20, yPos);
+        doc.setFont('helvetica', 'normal');
+
+        yPos += 10;
+
+        // Texto del artículo tercero
+        const textoArticuloTercero = `La presente Resolución rige a partir de la fecha de su expedición.`;
+        doc.text(textoArticuloTercero, 20, yPos);
+
+        yPos += 20;
+
+        // Comuníquese y cúmplase
+        doc.setFont('helvetica', 'bold');
+        doc.text('COMUNÍQUESE Y CÚMPLASE', 105, yPos, { align: 'center' });
+
+        yPos += 10;
+
+        // Fecha de expedición
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Dada en Popayán, a los ${dia} días del mes de ${mes} de ${año}.`, 105, yPos, { align: 'center' });
+
+        yPos += 30;
+
+        const espacioFirma = 90;
+
+        // =================== SECCIÓN DE FIRMAS MEJORADA ===================
+
+        // Rectángulos de fondo BLANCOS para área de firmas
+        doc.setFillColor(255, 255, 255); // Blanco puro
+        doc.setDrawColor(220, 220, 220); // Borde gris muy claro
+        doc.setLineWidth(0.5);
+
+        // Área del coordinador (siempre presente)
+        doc.roundedRect(105 - espacioFirma / 2 - 40, yPos - 25, 80, 75, 3, 3, 'FD');
+
+        // Área del vicerrector (solo si es necesario)
+        if (esVistaVicerrector) {
+            doc.roundedRect(105 + espacioFirma / 2 - 40, yPos - 25, 80, 75, 3, 3, 'FD');
+        }
+
+        // AGREGAR FIRMAS con posicionamiento mejorado
+        try {
+            // Firma del coordinador (SIEMPRE presente)
+            console.log('Agregando firma del coordinador al PDF');
+            doc.addImage(
+                window.firmaCoordinadorData,
+                'PNG',
+                (105 - espacioFirma / 2) - 30, // Posición X centrada
+                yPos - 18,  // Posición Y ajustada
+                60,  // Ancho
+                35   // Alto
+            );
+
+            // Firma del vicerrector (solo si es vista vicerrector)
+            if (esVistaVicerrector) {
+                console.log('Agregando firma del vicerrector al PDF');
+                doc.addImage(
+                    window.firmaVicerrectorData,
+                    'PNG',
+                    (105 + espacioFirma / 2) - 30, // Posición X centrada
+                    yPos - 18,  // Posición Y ajustada
+                    60,  // Ancho
+                    35   // Alto
+                );
+            }
+        } catch (error) {
+            console.error('Error al agregar firmas:', error);
+            mostrarAlerta('Advertencia: Error al agregar las firmas al PDF', 'warning');
+        }
+
+        // Líneas decorativas bajo las firmas
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(0.8);
+
+        // Línea bajo firma del coordinador
+        doc.line(
+            (105 - espacioFirma / 2) - 35,
+            yPos + 25,
+            (105 - espacioFirma / 2) + 35,
+            yPos + 25
+        );
+
+        // Línea bajo firma del vicerrector (si aplica)
+        if (esVistaVicerrector) {
+            doc.line(
+                (105 + espacioFirma / 2) - 35,
+                yPos + 25,
+                (105 + espacioFirma / 2) + 35,
+                yPos + 25
+            );
+        }
+
+        // Nombres y cargos con mejor espaciado
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+
+        // Nombre del coordinador
+        doc.text('JUAN PABLO DIAGO RODRÍGUEZ', 105 - espacioFirma / 2, yPos + 35, { align: 'center' });
+
+        // Nombre del vicerrector (si aplica)
+        if (esVistaVicerrector) {
+            doc.text('SEBASTIAN TORO', 105 + espacioFirma / 2, yPos + 35, { align: 'center' });
+        }
+
+        // Cargos
+        yPos += 42;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(80, 80, 80);
+
+        // Cargo del coordinador
+        doc.text(`Decano Facultad ${programa}`, 105 - espacioFirma / 2, yPos, { align: 'center' });
+
+        // Cargo del vicerrector (si aplica)
+        if (esVistaVicerrector) {
+            doc.text('Vicerrectora Académica', 105 + espacioFirma / 2, yPos, { align: 'center' });
+        }
+
+        // =================== FIN SECCIÓN DE FIRMAS ===================
+
+        // Pie de página para todas las páginas
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+
+            // Pie de página
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 100, 100);
+
+            const footerY = 265;
+            doc.text('Lic. De Funcionamiento: 12321/79. Resolución MEN Nº. 677 de 2023. Código SNIES: 2849', 105, footerY, { align: 'center' });
+            doc.text('Sede principal – Calle 5 Nº 3 – 85 Centro. Popayán - Cauca - Colombia.', 105, footerY + 5, { align: 'center' });
+
+            // Número de página
+            doc.setFontSize(7);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Página ${i} de ${totalPages}`, 180, footerY + 10, { align: 'right' });
+        }
+
+        // Mostrar PDF en el modal
+        mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector);
+
+        return true;
+
+    } catch (error) {
+        console.error('Error al generar PDF con datos:', error);
+        mostrarAlerta(`Error al generar PDF: ${error.message}`, 'danger');
+
+        // Restaurar bot
+        // Restaurar botón
+       const btnGenerar = document.getElementById('btn-generar-pdf') || document.getElementById('btn-generar-pdf-coordinador');
+       if (btnGenerar) {
+           btnGenerar.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> Generar Resolución PDF';
+           btnGenerar.disabled = false;
+       }
+
+       return false;
+   }
+}
+
+// Función auxiliar para mostrar el PDF en modal (si no existe)
+function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
+   try {
+       // Generar el blob del PDF
+       const pdfBlob = doc.output('blob');
+       const pdfUrl = URL.createObjectURL(pdfBlob);
+
+       // Crear modal si no existe
+       let modal = document.getElementById('pdfModal');
+       if (!modal) {
+           modal = document.createElement('div');
+           modal.id = 'pdfModal';
+           modal.className = 'modal fade';
+           modal.tabIndex = -1;
+           modal.setAttribute('role', 'dialog');
+           modal.innerHTML = `
+               <div class="modal-dialog modal-xl" role="document">
+                   <div class="modal-content">
+                       <div class="modal-header bg-primary text-white">
+                           <h5 class="modal-title">
+                               <i class="fas fa-file-pdf mr-2"></i>
+                               Resolución de Homologación - ${datosEstudiante.nombre || 'Estudiante'}
+                           </h5>
+                           <button type="button" class="close text-white" data-dismiss="modal">
+                               <span>&times;</span>
+                           </button>
+                       </div>
+                       <div class="modal-body p-0">
+                           <div class="d-flex justify-content-between align-items-center p-3 bg-light">
+                               <div class="btn-group" role="group">
+                                   <button type="button" class="btn btn-success" onclick="descargarPDF()">
+                                       <i class="fas fa-download mr-2"></i>Descargar PDF
+                                   </button>
+                                   <button type="button" class="btn btn-info" onclick="imprimirPDF()">
+                                       <i class="fas fa-print mr-2"></i>Imprimir
+                                   </button>
+                               </div>
+                               <small class="text-muted">
+                                   Resolución generada el ${new Date().toLocaleDateString('es-ES')}
+                               </small>
+                           </div>
+                           <iframe id="pdfViewer"
+                                   style="width: 100%; height: 70vh; border: none;"
+                                   src="${pdfUrl}">
+                           </iframe>
+                       </div>
+                       <div class="modal-footer">
+                           <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                               <i class="fas fa-times mr-2"></i>Cerrar
+                           </button>
+                       </div>
+                   </div>
+               </div>
+           `;
+           document.body.appendChild(modal);
+       } else {
+           // Actualizar el contenido del modal existente
+           const iframe = modal.querySelector('#pdfViewer');
+           const title = modal.querySelector('.modal-title');
+           if (iframe) iframe.src = pdfUrl;
+           if (title) {
+               title.innerHTML = `
+                   <i class="fas fa-file-pdf mr-2"></i>
+                   Resolución de Homologación - ${datosEstudiante.nombre || 'Estudiante'}
+               `;
+           }
+       }
+
+       // Guardar referencia global para funciones de descarga/impresión
+       window.currentPDFDoc = doc;
+       window.currentPDFUrl = pdfUrl;
+
+       // Mostrar modal
+       $(modal).modal('show');
+
+       // Limpiar URL cuando se cierre el modal
+       $(modal).on('hidden.bs.modal', function() {
+           if (window.currentPDFUrl) {
+               URL.revokeObjectURL(window.currentPDFUrl);
+               window.currentPDFUrl = null;
+           }
+       });
+
+       console.log('PDF generado y mostrado en modal exitosamente');
+
+   } catch (error) {
+       console.error('Error al mostrar PDF en modal:', error);
+       mostrarAlerta('Error al mostrar el PDF', 'danger');
+   }
+}
+
+// Función para descargar PDF
+function descargarPDF() {
+   try {
+       if (window.currentPDFDoc) {
+           const fechaActual = new Date();
+           const timestamp = fechaActual.toISOString().slice(0, 10);
+           const nombreArchivo = `Resolucion_Homologacion_${timestamp}.pdf`;
+
+           window.currentPDFDoc.save(nombreArchivo);
+
+           mostrarAlerta('PDF descargado exitosamente', 'success');
+       } else {
+           mostrarAlerta('Error: No hay PDF disponible para descargar', 'danger');
+       }
+   } catch (error) {
+       console.error('Error al descargar PDF:', error);
+       mostrarAlerta('Error al descargar el PDF', 'danger');
+   }
+}
+
+// Función para imprimir PDF
+function imprimirPDF() {
+   try {
+       if (window.currentPDFUrl) {
+           // Abrir en nueva ventana para imprimir
+           const printWindow = window.open(window.currentPDFUrl, '_blank');
+
+           if (printWindow) {
+               printWindow.onload = function() {
+                   printWindow.print();
+               };
+           } else {
+               // Fallback si se bloquean popups
+               mostrarAlerta('Por favor, permita ventanas emergentes para imprimir', 'warning');
+           }
+       } else {
+           mostrarAlerta('Error: No hay PDF disponible para imprimir', 'danger');
+       }
+   } catch (error) {
+       console.error('Error al imprimir PDF:', error);
+       mostrarAlerta('Error al imprimir el PDF', 'danger');
+   }
+}
+
+
+
+// Función para validar que las dependencias estén cargadas
+function validarDependencias() {
+   const dependencias = {
+       'jsPDF': typeof jspdf !== 'undefined',
+       'autoTable': typeof jspdf !== 'undefined' && typeof jspdf.jsPDF.prototype.autoTable === 'function',
+       'jQuery': typeof $ !== 'undefined'
+   };
+
+   const faltantes = Object.keys(dependencias).filter(dep => !dependencias[dep]);
+
+   if (faltantes.length > 0) {
+       console.warn('Dependencias faltantes:', faltantes);
+       mostrarAlerta(`Advertencia: Faltan dependencias - ${faltantes.join(', ')}`, 'warning');
+       return false;
+   }
+
+   return true;
+}
+
+// Función de inicialización (llamar cuando se cargue la página)
+function inicializarGeneradorPDF() {
+   // Validar dependencias
+   if (!validarDependencias()) {
+       console.error('No se pueden inicializar las funciones PDF debido a dependencias faltantes');
+       return false;
+   }
+
+   // Verificar si los botones existen y agregar eventos
+   const btnGenerarCoordinador = document.getElementById('btn-generar-pdf-coordinador');
+   const btnGenerarVicerrector = document.getElementById('btn-generar-pdf');
+
+   if (btnGenerarCoordinador) {
+       btnGenerarCoordinador.addEventListener('click', function() {
+           // Aquí deberías obtener los datos reales de tu aplicación
+           const datosEjemplo = obtenerDatosParaPDF();
+           generarPDFConDatos(
+               datosEjemplo.homologaciones,
+               datosEjemplo.estudiante,
+               datosEjemplo.solicitud,
+               false // Vista coordinador
+           );
+       });
+   }
+
+   if (btnGenerarVicerrector) {
+       btnGenerarVicerrector.addEventListener('click', function() {
+           // Aquí deberías obtener los datos reales de tu aplicación
+           const datosEjemplo = obtenerDatosParaPDF();
+           generarPDFConDatos(
+               datosEjemplo.homologaciones,
+               datosEjemplo.estudiante,
+               datosEjemplo.solicitud,
+               true // Vista vicerrector
+           );
+       });
+   }
+
+   console.log('Generador PDF inicializado correctamente');
+   return true;
+}
+
+// Función para obtener datos de ejemplo (reemplazar con datos reales)
+function obtenerDatosParaPDF() {
+   // Esta función debe ser reemplazada con la lógica real de tu aplicación
+   return {
+       homologaciones: {
+           homologaciones: [
+               {
+                   asignatura_origen_nombre: "Cálculo Diferencial",
+                   codigo_destino: "MAT101",
+                   asignatura_destino_nombre: "Matemáticas I",
+                   semestre: "1",
+                   creditos: "4",
+                   nota_destino: "4.2"
+               },
+               {
+                   asignatura_origen_nombre: "Programación I",
+                   codigo_destino: "SIS201",
+                   asignatura_destino_nombre: "Fundamentos de Programación",
+                   semestre: "2",
+                   creditos: "3",
+                   nota_destino: "4.5"
+               }
+           ]
+       },
+       estudiante: {
+           nombre: "Juan Carlos Pérez García",
+           identificacion: "1234567890"
+       },
+       solicitud: {
+           universidad_origen: "Universidad Nacional de Colombia",
+           programa_destino: "Ingeniería de Sistemas"
+       }
+   };
+}
+
+// Auto-inicializar cuando se cargue el DOM
+document.addEventListener('DOMContentLoaded', function() {
+   // Esperar un poco para asegurar que todas las dependencias estén cargadas
+   setTimeout(inicializarGeneradorPDF, 500);
+});
+
+// Exponer funciones globalmente para uso externo
+window.generarPDFConDatos = generarPDFConDatos;
+window.mostrarPDFEnModal = mostrarPDFEnModal;
+window.descargarPDF = descargarPDF;
+window.imprimirPDF = imprimirPDF;
+window.inicializarGeneradorPDF = inicializarGeneradorPDF;
+// Función para mostrar el PDF en el modal y guardar SOLO la versión final
+function mostrarPDFEnModal(doc, datosEstudiante, esVistaVicerrector) {
+    try {
+        // Crear base64 del PDF
+        const pdfData = doc.output('datauristring');
+
+        // Mostrar preview
+        const pdfPreview = document.getElementById('pdf-preview-content');
+        if (pdfPreview) {
+            pdfPreview.innerHTML = '';
+
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '600px';
+            iframe.style.border = '1px solid #ddd';
+            iframe.src = pdfData;
+
+            pdfPreview.appendChild(iframe);
+
+            // Mostrar modal
+            $('#pdf-preview-modal').modal('show');
+        } else {
+            throw new Error('No se encontró el elemento pdf-preview-content');
+        }
+
+        // IMPORTANTE: Subir el PDF final con todas las firmas
+        // Solo si es la vista del vicerrector (donde tenemos ambas firmas)
+        if (esVistaVicerrector) {
+            // Obtener el ID de homologación
+            let id = null;
+            if (typeof homologacionId !== 'undefined' && homologacionId) {
+                id = homologacionId;
+            } else if (typeof cargarHomologacionId === 'function') {
+                id = cargarHomologacionId();
+            } else {
+                // Define la función si no existe
+                window.cargarHomologacionId = function () {
+                    return new URLSearchParams(window.location.search).get('id') ||
+                        document.querySelector('[data-homologacion-id]')?.dataset.homologacionId;
+                };
+                id = cargarHomologacionId();
+            }
+
+            if (!id) {
+                console.error('No se pudo obtener el ID de homologación para guardar el PDF');
+                mostrarAlerta('No se pudo obtener el ID de homologación para guardar el PDF', 'warning');
+            } else {
+                // Normalizar el ID si es necesario
+                let apiHomologacionId = id;
+                if (typeof normalizarHomologacionId === 'function') {
+                    apiHomologacionId = normalizarHomologacionId(id);
+                } else if (typeof window.normalizarHomologacionId === 'function') {
+                    apiHomologacionId = window.normalizarHomologacionId(id);
+                }
+
+                // Crear archivo PDF para guardar - Asegurarnos que sea el PDF completo con todas las firmas
+                const pdfBlob = doc.output('blob');
+                const fecha = new Date().toISOString().split('T')[0];
+                const nombreArchivo = `resolucion_homologacion_FINAL_${apiHomologacionId}_${fecha}.pdf`;
+                const pdfFile = new File([pdfBlob], nombreArchivo, { type: 'application/pdf' });
+
+                // Verificar que la función para subir existe
+                if (typeof subirSoloPDFResolucion !== 'function') {
+                    console.error('La función subirSoloPDFResolucion no está disponible');
+                    mostrarAlerta('No se pudo guardar el PDF final. La función de subida no está disponible.', 'danger');
+                } else {
+                    // Subir el PDF FINAL con TODAS LAS FIRMAS al servidor
+                    subirSoloPDFResolucion(apiHomologacionId, pdfFile)
+                        .then(data => {
+                            console.log('PDF FINAL con TODAS LAS FIRMAS subido exitosamente:', data);
+                            if (typeof actualizarInterfazConPDF === 'function') {
+                                actualizarInterfazConPDF(data);
+                            }
+                            mostrarAlerta('PDF con TODAS las firmas guardado correctamente en el sistema', 'success');
+                        })
+                        .catch(error => {
+                            console.error('Error al subir PDF FINAL:', error);
+                            mostrarAlerta(`Error al guardar el PDF en el sistema: ${error.message}`, 'danger');
+                        });
+                }
+            }
+        } else {
+            console.log('Vista de coordinador: PDF mostrado pero NO guardado en el backend (se guardará en la fase final con vicerrector)');
+        }
+
+        // Configurar botón de confirmar
+        const btnConfirmar = document.getElementById('btn-confirmar-pdf');
+        if (btnConfirmar) {
+            // Definir la acción según la vista
+            if (esVistaVicerrector) {
+                btnConfirmar.onclick = function () {
+                    // Cerrar el modal
+                    $('#pdf-preview-modal').modal('hide');
+
+                    // Descargar PDF final para el usuario
+                    const nombreArchivo = `Homologacion_Final_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+                    doc.save(nombreArchivo);
+
+                    // Mostrar mensaje de éxito
+                    mostrarAlerta('Resolución de homologación finalizada y guardada correctamente', 'success');
+                };
+            } else {
+                btnConfirmar.onclick = function () {
+                    // Cerrar el modal
+                    $('#pdf-preview-modal').modal('hide');
+
+                    // Enviar a vicerrector si estamos en la vista de coordinador
+                    if (typeof confirmarYEnviarAVicerrector === 'function') {
+                        // Si la firma del coordinador existe, pasarla a la función
+                        if (window.firmaCoordinadorData) {
+                            confirmarYEnviarAVicerrector(window.firmaCoordinadorData);
+                        } else {
+                            // Intentar generar una firma por defecto
+                            const firmaDefault = typeof generarFirmaDefault === 'function' ? generarFirmaDefault('coordinador') : null;
+                            confirmarYEnviarAVicerrector(firmaDefault);
+                        }
+                    } else {
+                        console.error('La función confirmarYEnviarAVicerrector no está disponible');
+                        mostrarAlerta('No se pudo enviar al vicerrector. La función no está disponible.', 'danger');
+                    }
+
+                    // Descargar PDF para el usuario
+                    const nombreArchivo = `Homologacion_Coordinador_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+                    doc.save(nombreArchivo);
+                };
+            }
+        }
+
+        // Botón para solo descargar sin confirmar
+        const btnDescargar = document.getElementById('btn-descargar-solo-pdf');
+        if (btnDescargar) {
+            btnDescargar.onclick = function () {
+                const prefijo = esVistaVicerrector ? 'Homologacion_Final' : 'Homologacion_Coordinador';
+                const nombreArchivo = `${prefijo}_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+                doc.save(nombreArchivo);
+                mostrarAlerta('PDF descargado correctamente', 'success');
+            };
+        }
+
+        // Restaurar botón de generar PDF
+        const btnGenerar = document.getElementById('btn-generar-pdf') || document.getElementById('btn-generar-pdf-coordinador');
+        if (btnGenerar) {
+            btnGenerar.innerHTML = '<i class="fas fa-file-pdf mr-2"></i> Generar Resolución PDF';
+            btnGenerar.disabled = false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error al mostrar el PDF en el modal:', error);
+        mostrarAlerta(`Error al mostrar el PDF: ${error.message}`, 'danger');
+
+        // Si hay error, intentar descargar directamente
+        try {
+            const prefijo = esVistaVicerrector ? 'Homologacion_Final' : 'Homologacion_Coordinador';
+            const nombreArchivo = `${prefijo}_${datosEstudiante.nombre.replace(/\s+/g, '_')}_${datosEstudiante.identificacion}.pdf`;
+            doc.save(nombreArchivo);
+            mostrarAlerta('PDF generado y descargado directamente', 'warning');
+            return true;
+        } catch (e) {
+            console.error('Error al descargar PDF directamente:', e);
+            mostrarAlerta('No se pudo generar el PDF', 'danger');
+            return false;
+        }
+    }
+}
+
+
+
+// Función auxiliar para verificar si la firma está cargada
+function verificarFirmaCoordinador() {
+    const firmaData = window.firmaCoordinadorData ||
+        document.getElementById('firma_coordinador_data')?.value ||
+        localStorage.getItem('firmaCoordinadorData');
+
+    if (!firmaData) {
+        mostrarAlerta('Por favor, carga la firma del coordinador antes de continuar.', 'warning');
+        return false;
+    }
+
+    // Asegurar que esté disponible globalmente
+    if (!window.firmaCoordinadorData) {
+        window.firmaCoordinadorData = firmaData;
+    }
+
+    return true;
+}
+
+// Función para limpiar datos de firma (útil para testing o reset)
+function limpiarFirmaCoordinador() {
+    // Limpiar todas las referencias a la firma
+    window.firmaCoordinadorData = null;
+    localStorage.removeItem('firmaCoordinadorData');
+
+    const hiddenInput = document.getElementById('firma_coordinador_data');
+    const preview = document.getElementById('firma-preview');
+    const generateBtn = document.getElementById('btn-generar-pdf-coordinador');
+    const inputFirma = document.getElementById('firma');
+    const fileLabel = document.querySelector('label[for="firma"]');
+
+    if (hiddenInput) hiddenInput.value = '';
+    if (preview) preview.innerHTML = '<p style="color: #19407b;" class="mb-0">Vista previa de la firma</p>';
+    if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.style.backgroundColor = '#6c757d';
+    }
+    if (inputFirma) inputFirma.value = '';
+    if (fileLabel) fileLabel.textContent = 'Seleccionar archivo...';
+
+    console.log('Datos de firma del coordinador limpiados');
+}
+
+// Event listeners principales
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('Inicializando sistema de firmas del coordinador...');
+
+    // Event listener para el botón de generar PDF del coordinador
+    const btnGenerar = document.getElementById('btn-generar-pdf-coordinador');
+    if (btnGenerar) {
+        btnGenerar.addEventListener('click', generarPDFCoordinador);
+        console.log('Event listener para btn-generar-pdf-coordinador configurado');
+    }
+
+    // Event listener para el input de archivo de firma
+    const inputFirma = document.getElementById('firma');
+    if (inputFirma) {
+        inputFirma.addEventListener('change', handleFirmaCoordinadorUpload);
+        console.log('Event listener para input de firma configurado');
+    }
+
+    // Verificar si hay una firma guardada al cargar la página
+    const firmaGuardada = localStorage.getItem('firmaCoordinadorData');
+    if (firmaGuardada) {
+        window.firmaCoordinadorData = firmaGuardada;
+
+        // Restaurar preview si los elementos existen
+        const preview = document.getElementById('firma-preview');
+        const generateBtn = document.getElementById('btn-generar-pdf-coordinador');
+        const hiddenInput = document.getElementById('firma_coordinador_data');
+
+        if (preview && generateBtn && hiddenInput) {
+            preview.innerHTML = `<img src="${firmaGuardada}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+            hiddenInput.value = firmaGuardada;
+            generateBtn.disabled = false;
+            generateBtn.style.backgroundColor = '#0277bd';
+
+            // Actualizar también el label del archivo
+            const fileLabel = document.querySelector('label[for="firma"]');
+            if (fileLabel) {
+                fileLabel.textContent = 'Firma cargada anteriormente';
+            }
+        }
+
+        console.log('Firma del coordinador restaurada desde localStorage');
+    }
+
+    // Event listener adicional para el botón principal de PDF (si existe)
+    const btnGenerarPrincipal = document.getElementById('btn-generar-pdf');
+    if (btnGenerarPrincipal) {
+        btnGenerarPrincipal.addEventListener('click', function () {
+            // Verificar si estamos en vista de coordinador o vicerrector
+            const esVistaVicerrector = window.location.pathname.includes('vicerrector') ||
+                document.body.classList.contains('vista-vicerrector') ||
+                document.querySelector('[data-vista="vicerrector"]') !== null;
+
+            generarPDF(esVistaVicerrector);
+        });
+        console.log('Event listener para btn-generar-pdf principal configurado');
+    }
+
+    console.log('Sistema de firmas del coordinador inicializado correctamente');
+});
+
+// Funciones auxiliares adicionales
+window.firmaCoordinadorUtils = {
+    verificar: verificarFirmaCoordinador,
+    limpiar: limpiarFirmaCoordinador,
+    obtenerFirma: function () {
+        return window.firmaCoordinadorData || localStorage.getItem('firmaCoordinadorData');
+    },
+    establecerFirma: function (firmaData) {
+        window.firmaCoordinadorData = firmaData;
+        localStorage.setItem('firmaCoordinadorData', firmaData);
+
+        // Actualizar elementos del DOM si existen
+        const hiddenInput = document.getElementById('firma_coordinador_data');
+        const preview = document.getElementById('firma-preview');
+        const generateBtn = document.getElementById('btn-generar-pdf-coordinador');
+
+        if (hiddenInput) hiddenInput.value = firmaData;
+        if (preview) preview.innerHTML = `<img src="${firmaData}" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.style.backgroundColor = '#0277bd';
+        }
+
+        console.log('Firma del coordinador establecida programáticamente');
+    }
+};
+
+// Exportar funciones principales para uso externo
+window.generarPDFCoordinador = generarPDFCoordinador;
+window.handleFirmaCoordinadorUpload = handleFirmaCoordinadorUpload;
+window.verificarFirmaCoordinador = verificarFirmaCoordinador;
+window.limpiarFirmaCoordinador = limpiarFirmaCoordinador;
+
+console.log('Script de firma del coordinador cargado completamente');
+
+
+// Manejo de la carga de firma del vicerrector
+document.getElementById('firma-vicerrector').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('firma-vicerrector-preview');
+    const placeholder = document.getElementById('firma-vicerrector-placeholder');
+    const img = document.getElementById('img-firma-vicerrector');
+    const hiddenInput = document.getElementById('firma_vicerrector_data');
+    const btnGenerar = document.getElementById('btn-generar-pdf');
+    const fileLabel = document.querySelector('label[for="firma-vicerrector"]');
+
+    if (file) {
+        // Validar tipo de archivo
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF)');
+            this.value = '';
+            return;
+        }
+
+        // Validar tamaño del archivo (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('El archivo es demasiado grande. Máximo 5MB permitido.');
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            // Mostrar vista previa
+            placeholder.style.display = 'none';
+            img.src = event.target.result;
+            img.style.display = 'block';
+
+            // Guardar datos en campo oculto
+            hiddenInput.value = event.target.result;
+
+            // Habilitar botón de generar PDF
+            btnGenerar.disabled = false;
+
+            // Actualizar etiqueta del archivo
+            fileLabel.textContent = file.name;
+            fileLabel.style.color = '#28a745';
+        };
+
+        reader.onerror = function() {
+            alert('Error al cargar el archivo. Inténtalo de nuevo.');
+        };
+
+        reader.readAsDataURL(file);
+    } else {
+        // Resetear si no hay archivo
+        placeholder.style.display = 'block';
+        img.style.display = 'none';
+        img.src = '';
+        hiddenInput.value = '';
+        btnGenerar.disabled = true;
+        fileLabel.textContent = 'Seleccionar archivo...';
+        fileLabel.style.color = '#0277bd';
+    }
+});
+
+// Función para generar PDF con las firmas
+document.getElementById('btn-generar-pdf').addEventListener('click', function() {
+    const firmaVicerrector = document.getElementById('firma_vicerrector_data').value;
+    const firmaCoordinador = document.getElementById('firma_coordinador_data').value;
+
+    if (!firmaVicerrector) {
+        alert('Por favor, sube la firma del vicerrector primero.');
+        return;
+    }
+
+    // Mostrar indicador de carga
+    const btnOriginalText = this.innerHTML;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generando PDF...';
+    this.disabled = true;
+
+    // Crear el PDF usando jsPDF
+    generarPDFConFirmas(firmaVicerrector, firmaCoordinador)
+        .then(() => {
+            // Restaurar botón
+            this.innerHTML = btnOriginalText;
+            this.disabled = false;
+        })
+        .catch((error) => {
+            console.error('Error al generar PDF:', error);
+            alert('Error al generar el PDF. Inténtalo de nuevo.');
+            this.innerHTML = btnOriginalText;
+            this.disabled = false;
+        });
+});
+
+// Función para generar el PDF con las firmas
+async function generarPDFConFirmas(firmaVicerrector, firmaCoordinador) {
+    try {
+        // Verificar que jsPDF esté cargado
+        if (typeof window.jsPDF === 'undefined') {
+            throw new Error('jsPDF no está cargado');
+        }
+
+        const { jsPDF } = window.jsPDF;
+        const doc = new jsPDF();
+
+        // Configuración del documento
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        // Título del documento
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('DOCUMENTO OFICIAL', pageWidth / 2, 30, { align: 'center' });
+
+        // Línea separadora
+        doc.setLineWidth(0.5);
+        doc.line(20, 40, pageWidth - 20, 40);
+
+        // Contenido del documento (aquí puedes agregar el contenido que necesites)
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Contenido del documento...', 20, 60);
+
+        // Sección de firmas
+        const firmaY = pageHeight - 80;
+
+        // Firma del Coordinador (si existe)
+        if (firmaCoordinador) {
+            doc.text('Coordinador:', 30, firmaY - 10);
+            await agregarFirmaAlPDF(doc, firmaCoordinador, 30, firmaY, 60, 30);
+            doc.line(20, firmaY + 35, 80, firmaY + 35);
+            doc.setFontSize(10);
+            doc.text('Firma del Coordinador', 35, firmaY + 40);
+        }
+
+        // Firma del Vicerrector
+        doc.setFontSize(12);
+        doc.text('Vicerrector:', 130, firmaY - 10);
+        await agregarFirmaAlPDF(doc, firmaVicerrector, 130, firmaY, 60, 30);
+        doc.line(120, firmaY + 35, 180, firmaY + 35);
+        doc.setFontSize(10);
+        doc.text('Firma del Vicerrector', 135, firmaY + 40);
+
+        // Fecha y hora
+        const now = new Date();
+        const fechaHora = now.toLocaleString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        doc.setFontSize(8);
+        doc.text(`Generado el: ${fechaHora}`, pageWidth - 20, pageHeight - 10, { align: 'right' });
+
+        // Descargar el PDF
+        const filename = `documento_firmado_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.pdf`;
+        doc.save(filename);
+
+        // Mostrar mensaje de éxito
+        mostrarMensajeExito('PDF generado exitosamente');
+
+    } catch (error) {
+        console.error('Error en generarPDFConFirmas:', error);
+        throw error;
+    }
+}
+
+// Función auxiliar para agregar firma al PDF
+function agregarFirmaAlPDF(doc, firmaBase64, x, y, width, height) {
+    return new Promise((resolve, reject) => {
+        try {
+            // Agregar la imagen de la firma al PDF
+            doc.addImage(firmaBase64, 'PNG', x, y, width, height);
+            resolve();
+        } catch (error) {
+            console.error('Error al agregar firma al PDF:', error);
+            reject(error);
+        }
+    });
+}
+
+// Función para mostrar mensajes de éxito
+function mostrarMensajeExito(mensaje) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        z-index: 9999;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-weight: bold;
+    `;
+    notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${mensaje}`;
+
+    document.body.appendChild(notification);
+
+    // Remover después de 3 segundos
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 3000);
+}
+
+// Función para limpiar formulario (opcional)
+function limpiarFormularioFirmas() {
+    document.getElementById('firma-vicerrector').value = '';
+    document.getElementById('firma_vicerrector_data').value = '';
+    document.getElementById('firma_coordinador_data').value = '';
+
+    // Resetear vista previa
+    const placeholder = document.getElementById('firma-vicerrector-placeholder');
+    const img = document.getElementById('img-firma-vicerrector');
+    const btnGenerar = document.getElementById('btn-generar-pdf');
+    const fileLabel = document.querySelector('label[for="firma-vicerrector"]');
+
+    placeholder.style.display = 'block';
+    img.style.display = 'none';
+    img.src = '';
+    btnGenerar.disabled = true;
+    fileLabel.textContent = 'Seleccionar archivo...';
+    fileLabel.style.color = '#0277bd';
+}
 
 /**
  * Sube solo el PDF de resolución al endpoint específico

@@ -4,7 +4,7 @@
     <div class="container mt-5 position-relative">
         @php
             // URL base para las rutas de la API
-            $baseUrl = 'http://127.0.0.1:8000/public/storage/';
+            $baseUrl = 'http://localhost/Backend-Laravel/public/storage/';
 
             // Obtener datos del estudiante del primer documento (ya no necesitamos buscar en ['datos'])
             $estudiante = null;
@@ -132,7 +132,7 @@
                                     {{-- Indicador de carga --}}
                                     <div id="loading-{{ $index }}"
                                         class="position-absolute w-100 h-100 d-flex flex-column justify-content-center align-items-center"
-                                        style="background: rgba(255,255,255,0.9); z-index: 10;">
+                                        style=" z-index: 10;">
                                         <div class="spinner-border text-primary mb-2" role="status">
                                             <span class="visually-hidden">Cargando...</span>
                                         </div>

@@ -29,7 +29,7 @@
     <div class="container">
         <div class="header">
             <div class="logo">
-               <img src="{{ asset('img/quimed.png') }}"  alt="Universidad Autónoma del Cauca">
+               <img src="{{ asset('img/ingeneriadesoftware.png') }}"  alt="Universidad Autónoma del Cauca">
             </div>
         </div>
 

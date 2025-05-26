@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
 
-
     <script>
         const baseRoute = '/homologaciones-frontend/public';
         const token = localStorage.getItem('auth_token');
@@ -33,8 +32,67 @@
         }
     </script>
 
-
     <link rel="stylesheet" href="{{ asset('css/dashboard_aspirante.css') }}">
+
+    <!-- Estilos adicionales para documentos -->
+    <style>
+        .list-group-item .btn-group {
+            gap: 0.25rem;
+        }
+
+        .alert.mt-3 {
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            border-left-color: #198754;
+        }
+
+        .alert-warning {
+            border-left-color: #ffc107;
+        }
+
+        .btn-sm {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .documento-resolution {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .documento-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .documento-actions {
+                flex-direction: column;
+            }
+
+            .documento-actions .btn {
+                width: 100%;
+            }
+        }
+
+        .text-file-pdf {
+            color: #dc3545;
+        }
+
+        .text-file-doc {
+            color: #0d6efd;
+        }
+
+        .text-file-general {
+            color: #6c757d;
+        }
+    </style>
 </head>
 
 <body>
@@ -166,7 +224,7 @@
         </div>
     </div>
 
-    <!-- Sidebar Menu (Ahora a la derecha) -->
+    <!-- Sidebar Menu -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="sidebarMenu">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title">
@@ -197,7 +255,8 @@
 
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
-    <!-- Carousel -->
+
+    <!-- Header -->
     <div class="uac-header">
         <div class="container text-center">
             <h2 class="display-4 fw-bold">Universidad Autónoma del Cauca</h2>
@@ -212,7 +271,7 @@
         </div>
     </div>
 
-    <!-- Carousel mejorado -->
+    <!-- Carousel -->
     <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
             <button type="button" data-bs-target="#carouselExample" data-bs-slide-to="0" class="active"></button>
@@ -267,6 +326,7 @@
         </button>
     </div>
 
+    <!-- Interactive Section -->
     <div class="container">
         <div class="interactive-section">
             <div class="row w-100">
@@ -333,18 +393,26 @@
                                     <h5 class="mb-0">Información general</h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="radicado-number" id="radicado-number">
+                                    <div class="radicado-number mb-3" id="radicado-number">
                                         <i class="bi bi-file-earmark-text me-2"></i>
                                         No. Radicado: Cargando...
                                     </div>
-                                    <p><strong>Estudiante:</strong> <span
-                                            id="homologacion-estudiante">Cargando...</span></p>
-                                    <p><strong>Programa:</strong> <span id="homologacion-programa">Cargando...</span>
-                                    </p>
-                                    <p><strong>Fecha de solicitud:</strong> <span
-                                            id="homologacion-fecha">Cargando...</span></p>
-                                    <p><strong>Última actualización:</strong> <span
-                                            id="homologacion-actualizacion">Cargando...</span></p>
+                                    <div class="info-item mb-2">
+                                        <strong>Estudiante:</strong>
+                                        <span id="homologacion-estudiante">Cargando...</span>
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <strong>Programa:</strong>
+                                        <span id="homologacion-programa">Cargando...</span>
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <strong>Fecha de solicitud:</strong>
+                                        <span id="homologacion-fecha">Cargando...</span>
+                                    </div>
+                                    <div class="info-item mb-2">
+                                        <strong>Última actualización:</strong>
+                                        <span id="homologacion-actualizacion">Cargando...</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -419,7 +487,6 @@
                         <div class="tab-pane fade show active" id="timeline" role="tabpanel"
                             aria-labelledby="timeline-tab">
                             <div class="timeline" id="proceso-timeline">
-                                <!-- Aquí se cargarán dinámicamente los eventos del timeline -->
                                 <div class="timeline-placeholder">
                                     <p class="text-center text-muted">Cargando historial del proceso...</p>
                                 </div>
@@ -432,7 +499,10 @@
                         </div>
                         <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
                             <div id="documentos-container">
-                                <p class="text-center text-muted">Cargando documentos...</p>
+                                <div class="text-center">
+                                    <i class="bi bi-hourglass-split me-2"></i>
+                                    <span class="text-muted">Cargando documentos...</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -521,7 +591,7 @@
                             </thead>
                             <tbody id="primera-homologacion-asignaturas">
                                 <tr>
-                                    <td colspan="7" class="text-center">Cargando asignaturas...</td>
+                                    <td colspan="8" class="text-center">Cargando asignaturas...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -572,11 +642,280 @@
         </div>
     </div>
 
-    <!-- Cargar los scripts PRIMERO -->
+    <!-- Modal para visualizar PDF -->
+    <div class="modal fade" id="pdfViewerModal" tabindex="-1" aria-labelledby="pdfViewerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfViewerModalLabel">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>
+                        Resolución de Homologación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 80vh;">
+                    <div id="pdfLoadingIndicator" class="d-flex justify-content-center align-items-center h-100">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando PDF...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Cargando documento...</p>
+                        </div>
+                    </div>
+                    <iframe id="pdfViewer" class="w-100 h-100 border-0" style="display: none;"
+                        title="Visualizador de PDF">
+                    </iframe>
+                    <div id="pdfError" class="alert alert-danger m-3" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        No se pudo cargar el documento.
+                        <a href="#" id="pdfDirectLink" target="_blank" class="alert-link">
+                            Hacer clic aquí para abrir en nueva ventana
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="downloadPdfBtn">
+                        <i class="bi bi-download me-2"></i>
+                        Descargar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cargar los scripts -->
     <script src="{{ asset('js/authService.js') }}"></script>
     <script src="{{ asset('js/authMiddleware.js') }}"></script>
     <script src="{{ asset('js/login-script.js') }}"></script>
     <script src="{{ asset('js/dashboard.js') }}"></script>
+
+    <!-- Scripts adicionales para manejo de PDFs -->
+    <script>
+        // Función para ver PDF en nueva ventana/pestaña
+        function verPDFEnNuevaVentana(urlPdf) {
+            if (!urlPdf) {
+                mostrarNotificacion('URL del documento no disponible', 'error');
+                return;
+            }
+
+            // Validar URL antes de abrir
+            if (!validarUrlPdf(urlPdf)) {
+                mostrarNotificacion('El enlace del documento no es válido', 'error');
+                return;
+            }
+
+            try {
+                // Mostrar notificación
+                mostrarNotificacion('Abriendo documento en nueva pestaña...', 'info');
+
+                // Abrir en nueva ventana/pestaña
+                const nuevaVentana = window.open(urlPdf, '_blank');
+
+                // Verificar si se bloqueó el popup
+                if (!nuevaVentana || nuevaVentana.closed || typeof nuevaVentana.closed == 'undefined') {
+                    mostrarNotificacion(
+                        'Se bloqueó la ventana emergente. Por favor, permita ventanas emergentes y vuelva a intentar.',
+                        'warning');
+
+                    // Como alternativa, intentar usar location.href
+                    setTimeout(() => {
+                        if (confirm('¿Desea abrir el documento en esta misma pestaña?')) {
+                            window.location.href = urlPdf;
+                        }
+                    }, 2000);
+                } else {
+                    // Éxito al abrir
+                    setTimeout(() => {
+                        mostrarNotificacion('Documento abierto exitosamente', 'success');
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error al abrir PDF:', error);
+                mostrarNotificacion('Error al abrir el documento. Intente descargar el archivo.', 'error');
+            }
+        }
+
+        // Función mejorada para descargar PDF
+        function descargarPDFResolucion(urlPdf, numeroRadicado) {
+            if (!urlPdf) {
+                mostrarNotificacion('URL del documento no disponible', 'error');
+                return;
+            }
+
+            // Mostrar notificación de inicio de descarga
+            mostrarNotificacion('Iniciando descarga del documento...', 'info');
+
+            try {
+                // Crear elemento link temporal para descarga
+                const link = document.createElement('a');
+                link.href = urlPdf;
+                link.download = `Resolucion_Homologacion_${numeroRadicado || 'documento'}.pdf`;
+                link.target = '_blank';
+
+                // Agregar atributos adicionales para mejor compatibilidad
+                link.rel = 'noopener noreferrer';
+
+                // Agregar al DOM, hacer click y remover
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Mostrar confirmación
+                setTimeout(() => {
+                    mostrarNotificacion('Descarga iniciada correctamente', 'success');
+                }, 1000);
+            } catch (error) {
+                console.error('Error en descarga:', error);
+                mostrarNotificacion('Error al iniciar la descarga. Abriendo en nueva ventana como alternativa...',
+                    'warning');
+
+                // Como fallback, abrir en nueva ventana
+                setTimeout(() => {
+                    window.open(urlPdf, '_blank');
+                }, 1000);
+            }
+        }
+
+        // Función para validar URLs de PDF (mantener esta función)
+        function validarUrlPdf(url) {
+            if (!url) return false;
+
+            // Verificar que la URL termine en .pdf o contenga parámetros de PDF
+            const esPdf = url.toLowerCase().includes('.pdf') ||
+                url.toLowerCase().includes('application/pdf') ||
+                url.toLowerCase().includes('pdf');
+
+            // Verificar que sea una URL válida
+            try {
+                new URL(url);
+                return esPdf;
+            } catch {
+                return false;
+            }
+        }
+
+        // Función mejorada para descargar PDF
+        function descargarPDFResolucion(urlPdf, numeroRadicado) {
+            if (!urlPdf) {
+                mostrarNotificacion('URL del documento no disponible', 'error');
+                return;
+            }
+
+            // Mostrar notificación de inicio de descarga
+            mostrarNotificacion('Iniciando descarga del documento...', 'info');
+
+            try {
+                // Crear elemento link temporal para descarga
+                const link = document.createElement('a');
+                link.href = urlPdf;
+                link.download = `Resolucion_Homologacion_${numeroRadicado || 'documento'}.pdf`;
+                link.target = '_blank';
+
+                // Agregar al DOM, hacer click y remover
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Mostrar confirmación
+                setTimeout(() => {
+                    mostrarNotificacion('Descarga iniciada correctamente', 'success');
+                }, 1000);
+            } catch (error) {
+                console.error('Error en descarga:', error);
+                mostrarNotificacion('Error al iniciar la descarga. Intente abrir el documento directamente.', 'error');
+
+                // Como fallback, abrir en nueva ventana
+                window.open(urlPdf, '_blank');
+            }
+        }
+
+        // Limpiar modal al cerrarlo
+        document.getElementById('pdfViewerModal').addEventListener('hidden.bs.modal', function() {
+            const pdfViewer = document.getElementById('pdfViewer');
+            pdfViewer.src = '';
+        });
+
+        // Función para validar URLs de PDF
+        function validarUrlPdf(url) {
+            if (!url) return false;
+
+            // Verificar que la URL termine en .pdf o contenga parámetros de PDF
+            const esPdf = url.toLowerCase().includes('.pdf') ||
+                url.toLowerCase().includes('application/pdf') ||
+                url.toLowerCase().includes('pdf');
+
+            // Verificar que sea una URL válida
+            try {
+                new URL(url);
+                return esPdf;
+            } catch {
+                return false;
+            }
+        }
+
+        // Función de utilidad para formatear nombres de archivos
+        function formatearNombreArchivo(numeroRadicado, tipoDocumento = 'resolucion') {
+            const fecha = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            const nombre = `${tipoDocumento}_homologacion_${numeroRadicado || 'sin_radicado'}_${fecha}.pdf`;
+            return nombre.replace(/[^a-zA-Z0-9.-]/g, '_'); // Limpiar caracteres especiales
+        }
+
+        // Función para manejar errores de carga de documentos
+        function manejarErrorDocumento(error, urlPdf) {
+            console.error('Error al cargar documento:', error);
+
+            // Intentar diferentes estrategias según el tipo de error
+            if (error.name === 'NetworkError' || error.message.includes('network')) {
+                mostrarNotificacion('Error de conexión. Verificando estado del servidor...', 'warning');
+
+                // Reintentar después de un momento
+                setTimeout(() => {
+                    window.open(urlPdf, '_blank');
+                }, 2000);
+            } else {
+                mostrarNotificacion('No se pudo cargar el documento en el visor interno. Abriendo en nueva ventana...',
+                    'info');
+                window.open(urlPdf, '_blank');
+            }
+        }
+
+        // Event listeners adicionales para mejorar la experiencia
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar tooltips para botones de documentos
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(
+                tooltipTriggerEl));
+
+            // Precargar el modal de PDF para mejor rendimiento
+            const pdfModal = document.getElementById('pdfViewerModal');
+            if (pdfModal) {
+                // Pre-inicializar el modal sin mostrarlo
+                new bootstrap.Modal(pdfModal, {
+                    show: false
+                });
+            }
+        });
+
+        // Función para verificar el estado del servidor de archivos
+        function verificarEstadoServidor() {
+            fetch('/storage/test.txt')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Servidor de archivos disponible');
+                    } else {
+                        console.warn('Posibles problemas con el servidor de archivos');
+                    }
+                })
+                .catch(error => {
+                    console.error('Servidor de archivos no disponible:', error);
+                });
+        }
+
+        // Verificar estado del servidor al cargar la página
+        setTimeout(verificarEstadoServidor, 2000);
+    </script>
 </body>
 
 </html>

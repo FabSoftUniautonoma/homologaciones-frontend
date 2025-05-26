@@ -377,6 +377,8 @@ function mostrarSolicitudesUsuario(solicitudes) {
     // Si hay asignaturas homologadas, cargarlas
     if (ultimaSolicitud.id_solicitud) {
         cargarAsignaturasHomologadas(ultimaSolicitud.id_solicitud);
+        // Cargar documentos de homologación
+        cargarDocumentosHomologacion(ultimaSolicitud.id_solicitud);
     }
 }
 
@@ -580,6 +582,188 @@ function generarTimeline(solicitud) {
         </div>
     `;
     timelineContainer.innerHTML += eventoHTML;
+}
+
+// Agregar después de la función generarTimeline()
+function cargarDocumentosHomologacion(solicitudId) {
+    const documentosContainer = document.getElementById('documentos-container');
+    if (!documentosContainer) {
+        console.warn('Contenedor de documentos no encontrado');
+        return;
+    }
+
+    // Mostrar estado de carga
+    documentosContainer.innerHTML = `
+        <div class="text-center">
+            <i class="bi bi-hourglass-split me-2"></i>
+            Cargando documentos de homologación...
+        </div>
+    `;
+
+    // Buscar homologación por solicitud_id
+    fetch(`${apiBaseUrl}/homologacion-asignaturas`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error al obtener homologaciones. Estado: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(homologaciones => {
+            console.log('Homologaciones recibidas:', homologaciones);
+
+            // Buscar la homologación que corresponde a esta solicitud
+            const homologacionCorrespondiente = homologaciones.find(h => h.solicitud_id == solicitudId);
+
+            if (homologacionCorrespondiente && homologacionCorrespondiente.url_pdf_resolucion) {
+                mostrarDocumentosConHomologacion(homologacionCorrespondiente);
+            } else {
+                mostrarDocumentosSinHomologacion();
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar documentos de homologación:', error);
+            mostrarDocumentosSinHomologacion();
+        });
+}
+
+function mostrarDocumentosConHomologacion(homologacion) {
+    const documentosContainer = document.getElementById('documentos-container');
+    if (!documentosContainer) return;
+
+    documentosContainer.innerHTML = `
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Los siguientes documentos están disponibles para esta solicitud:
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Documentos de solicitud</h6>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-file-earmark-pdf me-2 text-danger"></i>
+                            Certificado de notas
+                        </div>
+                        <span class="badge bg-success">Presentado</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                            Contenidos programáticos
+                        </div>
+                        <span class="badge bg-success">Presentado</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-file-earmark me-2 text-secondary"></i>
+                            Solicitud firmada
+                        </div>
+                        <span class="badge bg-success">Presentado</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Documentos de resolución</h6>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-file-earmark-pdf me-2 text-danger"></i>
+                                <strong>Resolución de homologación</strong>
+                                <br>
+                                <small class="text-muted">Documento oficial con el resultado de la homologación</small>
+                            </div>
+                            <div class="d-flex gap-2">
+    <span class="badge bg-success">Disponible</span>
+    <button class="btn btn-primary btn-sm" onclick="abrirPDFResolucion('${homologacion.url_pdf_resolucion}')">
+        <i class="bi bi-eye me-1"></i>
+        Ver PDF
+    </button>
+    <button class="btn btn-outline-primary btn-sm" onclick="descargarPDFResolucion('${homologacion.url_pdf_resolucion}', '${homologacion.numero_radicado}')">
+        <i class="bi bi-download me-1"></i>
+        Descargar
+    </button>
+</div>
+                        </div>
+                    </li>
+                </ul>
+                <div class="alert alert-success mt-3">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <strong>Proceso completado:</strong> Su homologación ha sido procesada y el documento oficial está disponible.
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function mostrarDocumentosSinHomologacion() {
+    const documentosContainer = document.getElementById('documentos-container');
+    if (!documentosContainer) return;
+
+    documentosContainer.innerHTML = `
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Los siguientes documentos fueron presentados para esta solicitud:
+        </div>
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-file-earmark-pdf me-2 text-danger"></i>
+                    Certificado de notas
+                </div>
+                <span class="badge bg-success">Presentado</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-file-earmark-text me-2 text-primary"></i>
+                    Contenidos programáticos
+                </div>
+                <span class="badge bg-success">Presentado</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="bi bi-file-earmark me-2 text-secondary"></i>
+                    Solicitud firmada
+                </div>
+                <span class="badge bg-success">Presentado</span>
+            </li>
+        </ul>
+        <div class="alert alert-warning mt-3">
+            <i class="bi bi-clock-history me-2"></i>
+            <strong>Documento de resolución:</strong> Estará disponible una vez que se complete el proceso de homologación.
+        </div>
+    `;
+}
+
+// Funciones para manejar el PDF
+function abrirPDFResolucion(urlPdf) {
+    if (!urlPdf) {
+        mostrarNotificacion('URL del documento no disponible', 'error');
+        return;
+    }
+
+    // Abrir en nueva ventana/pestaña
+    window.open(urlPdf, '_blank');
+}
+
+function descargarPDFResolucion(urlPdf, numeroRadicado) {
+    if (!urlPdf) {
+        mostrarNotificacion('URL del documento no disponible', 'error');
+        return;
+    }
+
+    // Crear elemento link temporal para descarga
+    const link = document.createElement('a');
+    link.href = urlPdf;
+    link.download = `Resolucion_Homologacion_${numeroRadicado || 'documento'}.pdf`;
+    link.target = '_blank';
+
+    // Agregar al DOM, hacer click y remover
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    mostrarNotificacion('Descarga iniciada', 'success');
 }
 
 function cargarPrimeraHomologacion(solicitudes) {
@@ -913,39 +1097,9 @@ function actualizarTablaEnOtrosContenedores(contenidoTabla, totalCreditos) {
         asignaturasContainer.appendChild(tablaAsignaturas);
     }
 
-    // Actualizar documentos asociados a la solicitud
-    const documentosContainer = document.getElementById('documentos-container');
-    if (documentosContainer) {
-        documentosContainer.innerHTML = `
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                Los siguientes documentos fueron presentados para esta solicitud:
-            </div>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="bi bi-file-earmark-pdf me-2"></i>
-                        Certificado de notas
-                    </div>
-                    <span class="badge bg-success">Aprobado</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="bi bi-file-earmark-text me-2"></i>
-                        Contenidos programáticos
-                    </div>
-                    <span class="badge bg-success">Aprobado</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="bi bi-file-earmark me-2"></i>
-                        Solicitud firmada
-                    </div>
-                    <span class="badge bg-success">Aprobado</span>
-                </li>
-            </ul>
-        `;
-    }
+    // Ya no actualizamos documentos aquí porque se maneja con cargarDocumentosHomologacion()
+    // La función cargarDocumentosHomologacion() se encarga de mostrar los documentos
+    // incluyendo el PDF de resolución si está disponible
 }
 
 function guardarCambiosPerfil() {
@@ -1059,148 +1213,148 @@ function guardarCambiosPerfil() {
             'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
         }
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Error al obtener perfil completo. Estado: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(userData => {
-        // Ahora tenemos los datos con los IDs correctos
-        console.log('Obtenidos datos completos con IDs:', userData);
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error al obtener perfil completo. Estado: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(userData => {
+            // Ahora tenemos los datos con los IDs correctos
+            console.log('Obtenidos datos completos con IDs:', userData);
 
-        // Verificar que los datos necesarios estén presentes
-        if (!userData || typeof userData !== 'object') {
-            throw new Error('Los datos del perfil no son válidos');
-        }
-
-        // Crear objeto con campos actualizables y preservando los IDs existentes
-        const datosActualizar = {
-            email: email,
-            numero_identificacion: identificacion,
-            telefono: telefono || null,  // Permitir null si está vacío
-            direccion: direccion || null, // Permitir null si está vacío
-            primer_nombre: primer_nombre,
-            segundo_nombre: segundo_nombre || null, // Permitir null si está vacío
-            primer_apellido: primer_apellido,
-            segundo_apellido: segundo_apellido || null, // Permitir null si está vacío
-            tipo_identificacion: userData.tipo_identificacion || 'Cédula de Ciudadanía',
-
-            // Usar los IDs correctos del perfil completo, con validación para casos undefined
-            institucion_origen_id: userData.institucion_origen_id || null,
-            departamento_id: userData.departamento_id || null,
-            municipio_id: userData.municipio_id || null,
-            pais_id: userData.pais_id || null,
-            facultad_id: userData.facultad_id || null,
-            rol_id: userData.rol_id || 1, // Valor predeterminado: Aspirante (1)
-            activo: userData.activo !== undefined ? userData.activo : true // Valor predeterminado: true
-        };
-
-        console.log('Datos a enviar (con IDs preservados):', datosActualizar);
-
-        // Obtener CSRF token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        const authToken = localStorage.getItem('auth_token') || '';
-
-        // Verificar que tenemos token de autenticación
-        if (!authToken) {
-            throw new Error('No se encontró el token de autenticación. Inicie sesión nuevamente.');
-        }
-
-        // Enviar datos a la API
-        return fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify(datosActualizar)
-        });
-    })
-    .then(response => {
-        console.log('Respuesta de actualización:', response.status);
-        if (!response.ok) {
-            return response.text().then(text => {
-                // Intentar parsear como JSON si es posible
-                try {
-                    const errorJson = JSON.parse(text);
-                    throw new Error(errorJson.mensaje || errorJson.error || `Error al actualizar el perfil. Estado: ${response.status}`);
-                } catch (e) {
-                    throw new Error(`Error al actualizar el perfil. Estado: ${response.status}. Detalle: ${text}`);
-                }
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Perfil actualizado:', data);
-
-        // Verificar que la respuesta contenga un mensaje de éxito
-        if (!data || !data.mensaje) {
-            throw new Error('Respuesta del servidor incompleta');
-        }
-
-        // Cerrar modal
-        const modalEl = document.getElementById('editProfileModal');
-        if (modalEl) {
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            if (modal) modal.hide();
-        }
-
-        // Actualizar datos localmente
-        if (usuarioActual && usuarioActual.id_usuario) {
-            // Actualizar también los datos en localStorage
-            const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
-
-            // Actualizar solo los campos modificados
-            if (primer_nombre) userData.primer_nombre = primer_nombre;
-            if (segundo_nombre !== undefined) userData.segundo_nombre = segundo_nombre;
-            if (primer_apellido) userData.primer_apellido = primer_apellido;
-            if (segundo_apellido !== undefined) userData.segundo_apellido = segundo_apellido;
-            if (email) userData.email = email;
-            if (identificacion) userData.numero_identificacion = identificacion;
-            if (telefono) userData.telefono = telefono;
-            if (direccion) userData.direccion = direccion;
-
-            localStorage.setItem('user_data', JSON.stringify(userData));
-
-            // Recargar datos del usuario
-            setTimeout(() => {
-                cargarDatosUsuario(usuarioActual.id_usuario);
-            }, 500);
-        }
-
-        // Mostrar notificación
-        mostrarNotificacion('Perfil actualizado correctamente', 'success');
-    })
-    .catch(error => {
-        console.error('Error detallado:', error);
-
-        // Mensaje de error más amigable
-        let mensajeError = 'Error al actualizar el perfil';
-
-        if (error.message) {
-            // Limpiar mensajes técnicos para mostrar solo la información relevante
-            let errorMsg = error.message;
-
-            // Si contiene errores técnicos de SQL, simplificar el mensaje
-            if (errorMsg.includes('SQLSTATE') || errorMsg.includes('Integrity constraint')) {
-                errorMsg = 'Error en la base de datos. El correo o número de identificación ya podría estar en uso.';
+            // Verificar que los datos necesarios estén presentes
+            if (!userData || typeof userData !== 'object') {
+                throw new Error('Los datos del perfil no son válidos');
             }
 
-            mensajeError = `${mensajeError}: ${errorMsg}`;
-        }
+            // Crear objeto con campos actualizables y preservando los IDs existentes
+            const datosActualizar = {
+                email: email,
+                numero_identificacion: identificacion,
+                telefono: telefono || null,  // Permitir null si está vacío
+                direccion: direccion || null, // Permitir null si está vacío
+                primer_nombre: primer_nombre,
+                segundo_nombre: segundo_nombre || null, // Permitir null si está vacío
+                primer_apellido: primer_apellido,
+                segundo_apellido: segundo_apellido || null, // Permitir null si está vacío
+                tipo_identificacion: userData.tipo_identificacion || 'Cédula de Ciudadanía',
 
-        mostrarNotificacion(mensajeError, 'error');
+                // Usar los IDs correctos del perfil completo, con validación para casos undefined
+                institucion_origen_id: userData.institucion_origen_id || null,
+                departamento_id: userData.departamento_id || null,
+                municipio_id: userData.municipio_id || null,
+                pais_id: userData.pais_id || null,
+                facultad_id: userData.facultad_id || null,
+                rol_id: userData.rol_id || 1, // Valor predeterminado: Aspirante (1)
+                activo: userData.activo !== undefined ? userData.activo : true // Valor predeterminado: true
+            };
 
-        // Si es un error de autenticación, redirigir al login
-        if (error.message && (error.message.includes('token') || error.message.includes('autenticación'))) {
-            setTimeout(() => {
-                window.location.href = `${baseRoute}/auth/login`;
-            }, 2000);
-        }
-    });
+            console.log('Datos a enviar (con IDs preservados):', datosActualizar);
+
+            // Obtener CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const authToken = localStorage.getItem('auth_token') || '';
+
+            // Verificar que tenemos token de autenticación
+            if (!authToken) {
+                throw new Error('No se encontró el token de autenticación. Inicie sesión nuevamente.');
+            }
+
+            // Enviar datos a la API
+            return fetch(`${apiBaseUrl}/usuarios/${usuarioActual.id_usuario}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(datosActualizar)
+            });
+        })
+        .then(response => {
+            console.log('Respuesta de actualización:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    // Intentar parsear como JSON si es posible
+                    try {
+                        const errorJson = JSON.parse(text);
+                        throw new Error(errorJson.mensaje || errorJson.error || `Error al actualizar el perfil. Estado: ${response.status}`);
+                    } catch (e) {
+                        throw new Error(`Error al actualizar el perfil. Estado: ${response.status}. Detalle: ${text}`);
+                    }
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Perfil actualizado:', data);
+
+            // Verificar que la respuesta contenga un mensaje de éxito
+            if (!data || !data.mensaje) {
+                throw new Error('Respuesta del servidor incompleta');
+            }
+
+            // Cerrar modal
+            const modalEl = document.getElementById('editProfileModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+
+            // Actualizar datos localmente
+            if (usuarioActual && usuarioActual.id_usuario) {
+                // Actualizar también los datos en localStorage
+                const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+
+                // Actualizar solo los campos modificados
+                if (primer_nombre) userData.primer_nombre = primer_nombre;
+                if (segundo_nombre !== undefined) userData.segundo_nombre = segundo_nombre;
+                if (primer_apellido) userData.primer_apellido = primer_apellido;
+                if (segundo_apellido !== undefined) userData.segundo_apellido = segundo_apellido;
+                if (email) userData.email = email;
+                if (identificacion) userData.numero_identificacion = identificacion;
+                if (telefono) userData.telefono = telefono;
+                if (direccion) userData.direccion = direccion;
+
+                localStorage.setItem('user_data', JSON.stringify(userData));
+
+                // Recargar datos del usuario
+                setTimeout(() => {
+                    cargarDatosUsuario(usuarioActual.id_usuario);
+                }, 500);
+            }
+
+            // Mostrar notificación
+            mostrarNotificacion('Perfil actualizado correctamente', 'success');
+        })
+        .catch(error => {
+            console.error('Error detallado:', error);
+
+            // Mensaje de error más amigable
+            let mensajeError = 'Error al actualizar el perfil';
+
+            if (error.message) {
+                // Limpiar mensajes técnicos para mostrar solo la información relevante
+                let errorMsg = error.message;
+
+                // Si contiene errores técnicos de SQL, simplificar el mensaje
+                if (errorMsg.includes('SQLSTATE') || errorMsg.includes('Integrity constraint')) {
+                    errorMsg = 'Error en la base de datos. El correo o número de identificación ya podría estar en uso.';
+                }
+
+                mensajeError = `${mensajeError}: ${errorMsg}`;
+            }
+
+            mostrarNotificacion(mensajeError, 'error');
+
+            // Si es un error de autenticación, redirigir al login
+            if (error.message && (error.message.includes('token') || error.message.includes('autenticación'))) {
+                setTimeout(() => {
+                    window.location.href = `${baseRoute}/auth/login`;
+                }, 2000);
+            }
+        });
 }
 
 function cerrarSesion() {
