@@ -124,13 +124,7 @@
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
 
-                                            {{-- Botón Descargar PDF (solo si aprobado, rechazado o cerrado) --}}
-                                            @if (in_array($estado, ['aprobado', 'rechazado', 'cerrado']))
-                                                <a href="{{ route('admin.homologacionescoordinador.descargar', $numero_radicado) }}"
-                                                    class="btn btn-sm btn-success" title="Descargar PDF">
-                                                    <i class="fas fa-file-download"></i>
-                                                </a>
-                                            @endif
+                                            
                                         </div>
                                     </td>
                                 </tr>
