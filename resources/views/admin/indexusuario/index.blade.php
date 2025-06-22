@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistema de Homologación - Autónoma del Cauca</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -299,7 +300,8 @@
                             <a href="https://x.com/uniautonomadc" class="social-icon" target="_blank">
                                 <i class="fab fa-twitter"></i>
                             </a>
-                            <a href="https://www.instagram.com/uniautonomadelcauca/?hl=es-la" class="social-icon" target="_blank">
+                            <a href="https://www.instagram.com/uniautonomadelcauca/?hl=es-la" class="social-icon"
+                                target="_blank">
                                 <i class="fab fa-instagram"></i>
                             </a>
                             <a href="https://www.youtube.com/@autonomadelcauca4125/videos" class="social-icon"
@@ -316,36 +318,49 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="nombre">Nombre Completo*</label>
-                                <input type="text" id="nombre" name="nombre" required>
+                                <input type="text" name="nombre" id="nombre" required>
                             </div>
                             <div class="form-group">
                                 <label for="email">Correo Electrónico*</label>
-                                <input type="email" id="email" name="email" required>
+                                <input type="email" name="email" id="email" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="telefono">Teléfono</label>
-                                <input type="tel" id="telefono" name="telefono">
+                                <input type="tel" name="telefono" id="telefono">
                             </div>
                             <div class="form-group">
                                 <label for="asunto">Asunto*</label>
-                                <input type="text" id="asunto" name="asunto" required>
+                                <input type="text" name="asunto" id="asunto" required>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="mensaje">Mensaje*</label>
-                            <textarea id="mensaje" name="mensaje" rows="5" required></textarea>
+                            <textarea name="mensaje" id="mensaje" rows="5" required></textarea>
                         </div>
 
+                        {{-- Campo honeypot oculto --}}
+                        <input type="text" name="empresa" id="empresa" style="display:none">
+
                         <div class="form-footer">
-                            <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                            <button type="submit" class="btn btn-primary" id="submit-btn">
+                                <span class="btn-text">Enviar Mensaje</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i> Enviando...
+                                </span>
+                            </button>
                         </div>
                     </form>
+
+                    <!-- Mensajes de respuesta -->
+                    <div id="form-messages" style="margin-top: 20px;"></div>
                 </div>
+
             </div>
+
 
             <div class="map-container" data-aos="zoom-in">
                 <iframe
@@ -365,154 +380,190 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar AOS (Animate on Scroll)
-            AOS.init({
-                duration: 800,
-                easing: 'ease-in-out',
-                once: true,
-                mirror: false
-            });
+       document.addEventListener('DOMContentLoaded', function() {
+   // Obtener token CSRF - definido al inicio para que esté disponible globalmente
+   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-            // Efecto al hacer scroll en el header
-            const header = document.querySelector('.header');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 100) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
-            });
+   // Inicializar AOS (Animate on Scroll)
+   AOS.init({
+       duration: 800,
+       easing: 'ease-in-out',
+       once: true,
+       mirror: false
+   });
 
-            // Menú móvil
-            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-            const navLinks = document.querySelector('.nav-links');
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', function() {
-                    navLinks.classList.toggle('active');
-                });
-            }
+   // Efecto al hacer scroll en el header
+   const header = document.querySelector('.header');
+   if (header) {
+       window.addEventListener('scroll', function() {
+           if (window.scrollY > 100) {
+               header.classList.add('scrolled');
+           } else {
+               header.classList.remove('scrolled');
+           }
+       });
+   }
 
-            // Desplazamiento suave para enlaces internos
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return;
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        if (navLinks.classList.contains('active')) {
-                            navLinks.classList.remove('active');
-                        }
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80, // Ajuste por el header fijo
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
+   // Menú móvil
+   const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+   const navLinks = document.querySelector('.nav-links');
+   if (mobileMenuBtn && navLinks) {
+       mobileMenuBtn.addEventListener('click', function() {
+           navLinks.classList.toggle('active');
+       });
+   }
 
-            // Acordeón de preguntas frecuentes (FAQ)
-            const accordionHeaders = document.querySelectorAll('.accordion-header');
-            accordionHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                    const content = this.nextElementSibling;
-                    if (this.classList.contains('active')) {
-                        content.classList.add('active');
-                        content.style.height = content.scrollHeight + 'px';
-                    } else {
-                        content.classList.remove('active');
-                        content.style.height = '0';
-                    }
+   // Desplazamiento suave para enlaces internos
+   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+       anchor.addEventListener('click', function(e) {
+           e.preventDefault();
+           const targetId = this.getAttribute('href');
+           if (targetId === '#') return;
+           const targetElement = document.querySelector(targetId);
+           if (targetElement) {
+               if (navLinks && navLinks.classList.contains('active')) {
+                   navLinks.classList.remove('active');
+               }
+               window.scrollTo({
+                   top: targetElement.offsetTop - 80,
+                   behavior: 'smooth'
+               });
+           }
+       });
+   });
 
-                    // Cerrar otros acordeones
-                    accordionHeaders.forEach(otherHeader => {
-                        if (otherHeader !== this) {
-                            otherHeader.classList.remove('active');
-                            otherHeader.nextElementSibling.classList.remove('active');
-                            otherHeader.nextElementSibling.style.height = '0';
-                        }
-                    });
-                });
-            });
+   // Acordeón de preguntas frecuentes (FAQ)
+   const accordionHeaders = document.querySelectorAll('.accordion-header');
+   accordionHeaders.forEach(header => {
+       header.addEventListener('click', function() {
+           this.classList.toggle('active');
+           const content = this.nextElementSibling;
+           if (this.classList.contains('active')) {
+               content.classList.add('active');
+               content.style.height = content.scrollHeight + 'px';
+           } else {
+               content.classList.remove('active');
+               content.style.height = '0';
+           }
 
-            // Carrusel de testimonios
-            const track = document.querySelector('.carousel-track');
-            const slides = Array.from(track.children);
-            const nextButton = document.querySelector('.carousel-btn.next');
-            const prevButton = document.querySelector('.carousel-btn.prev');
-            const indicators = document.querySelectorAll('.indicator');
-            let currentIndex = 0;
-            const slideWidth = slides[0].getBoundingClientRect().width;
+           // Cerrar otros acordeones
+           accordionHeaders.forEach(otherHeader => {
+               if (otherHeader !== this) {
+                   otherHeader.classList.remove('active');
+                   otherHeader.nextElementSibling.classList.remove('active');
+                   otherHeader.nextElementSibling.style.height = '0';
+               }
+           });
+       });
+   });
 
-            // Posicionar cada slide
-            slides.forEach((slide, index) => {
-                slide.style.left = slideWidth * index + 'px';
-            });
+   // Función para mostrar mensajes
+   function showMessage(type, message) {
+       const formMessages = document.getElementById('form-messages');
+       if (!formMessages) return;
 
-            // Actualizar indicadores
-            function actualizarIndicadores(index) {
-                indicators.forEach(indicator => indicator.classList.remove('active'));
-                indicators[index].classList.add('active');
-            }
+       const messageClass = type === 'success' ? 'alert-success' : 'alert-danger';
+       formMessages.innerHTML = `
+           <div class="alert ${messageClass}" style="
+               padding: 15px;
+               border-radius: 8px;
+               margin-top: 15px;
+               background-color: ${type === 'success' ? '#d4edda' : '#f8d7da'};
+               border: 1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'};
+               color: ${type === 'success' ? '#155724' : '#721c24'};
+               animation: fadeIn 0.3s ease-in;
+           ">
+               <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+               ${message}
+           </div>
+       `;
 
-            // Mover al slide específico
-            function moverASlide(index) {
-                track.style.transform = 'translateX(-' + slides[index].style.left + ')';
-                currentIndex = index;
-                actualizarIndicadores(index);
-            }
+       formMessages.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-            // Botón siguiente
-            if (nextButton) {
-                nextButton.addEventListener('click', () => {
-                    if (currentIndex === slides.length - 1) {
-                        moverASlide(0);
-                    } else {
-                        moverASlide(currentIndex + 1);
-                    }
-                });
-            }
+       if (type === 'success') {
+           setTimeout(() => {
+               if (formMessages) formMessages.innerHTML = '';
+           }, 5000);
+       }
+   }
 
-            // Botón anterior
-            if (prevButton) {
-                prevButton.addEventListener('click', () => {
-                    if (currentIndex === 0) {
-                        moverASlide(slides.length - 1);
-                    } else {
-                        moverASlide(currentIndex - 1);
-                    }
-                });
-            }
+   // Manejo del formulario de contacto con AJAX
+   const contactForm = document.getElementById('contact-form');
 
-            // Click en indicadores
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    moverASlide(index);
-                });
-            });
+   if (contactForm) {
+       contactForm.addEventListener('submit', async function(e) {
+           e.preventDefault();
 
-            // Carrusel automático
-            setInterval(() => {
-                if (currentIndex === slides.length - 1) {
-                    moverASlide(0);
-                } else {
-                    moverASlide(currentIndex + 1);
-                }
-            }, 4000); // Cada 4 segundos
+           const submitBtn = document.getElementById('submit-btn');
+           const btnText = document.querySelector('.btn-text');
+           const btnLoading = document.querySelector('.btn-loading');
+           const formMessages = document.getElementById('form-messages');
 
-            // Validación de formulario de contacto
-            const contactForm = document.getElementById('contact-form');
-            if (contactForm) {
-                contactForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert(
-                        '¡Mensaje enviado con éxito! Nos pondremos en contacto con usted lo antes posible.');
-                    this.reset();
-                });
-            }
-        });
+           // Mostrar estado de carga
+           if (submitBtn) {
+               submitBtn.disabled = true;
+               if (btnText) btnText.style.display = 'none';
+               if (btnLoading) btnLoading.style.display = 'inline-block';
+           }
+           if (formMessages) formMessages.innerHTML = '';
+
+           // Recopilar datos del formulario
+           const formData = new FormData();
+
+           const nombre = document.getElementById('nombre');
+           const email = document.getElementById('email');
+           const telefono = document.getElementById('telefono');
+           const asunto = document.getElementById('asunto');
+           const mensaje = document.getElementById('mensaje');
+           const empresa = document.getElementById('empresa');
+
+           if (nombre) formData.append('nombre', nombre.value);
+           if (email) formData.append('email', email.value);
+           if (telefono) formData.append('telefono', telefono.value);
+           if (asunto) formData.append('asunto', asunto.value);
+           if (mensaje) formData.append('mensaje', mensaje.value);
+           if (empresa) formData.append('empresa', empresa.value);
+
+           try {
+               const response = await fetch('http://127.0.0.1:8000/api/contacto', {
+                   method: 'POST',
+                   body: formData,
+                   headers: {
+                       'X-Requested-With': 'XMLHttpRequest',
+                       ...(csrfToken && { 'X-CSRF-TOKEN': csrfToken })
+                   }
+               });
+
+               const data = await response.json();
+
+               if (response.ok) {
+                   showMessage('success', data.message || '¡Mensaje enviado con éxito! Nos pondremos en contacto con usted lo antes posible.');
+                   contactForm.reset();
+               } else {
+                   if (data.errors) {
+                       let errorMessages = '';
+                       for (const field in data.errors) {
+                           errorMessages += `<li>${data.errors[field][0]}</li>`;
+                       }
+                       showMessage('error', `<ul style="margin: 0; padding-left: 20px;">${errorMessages}</ul>`);
+                   } else {
+                       showMessage('error', data.error || 'Ha ocurrido un error. Por favor, inténtelo de nuevo.');
+                   }
+               }
+           } catch (error) {
+               console.error('Error completo:', error);
+               showMessage('error', 'Error de conexión. Por favor, verifique su conexión a internet e inténtelo de nuevo.');
+           } finally {
+               // Restaurar estado del botón
+               if (submitBtn) {
+                   submitBtn.disabled = false;
+                   if (btnText) btnText.style.display = 'inline-block';
+                   if (btnLoading) btnLoading.style.display = 'none';
+               }
+           }
+       });
+   }
+});
     </script>
 
 </body>
