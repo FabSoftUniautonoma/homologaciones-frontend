@@ -3571,7 +3571,7 @@ function guardarEstadoHomologacion(estado, comentarios) {
         const backendUrl = `http://127.0.0.1:8000/api/solicitudes/${idHomologacion}/estado`;
 
         fetch(backendUrl, {
-                method: 'PATCH',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
